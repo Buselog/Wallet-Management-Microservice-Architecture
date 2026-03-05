@@ -1,0 +1,6 @@
+@WM.Gateway_HostAddress = http://localhost:5281
+
+GET {{WM.Gateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
