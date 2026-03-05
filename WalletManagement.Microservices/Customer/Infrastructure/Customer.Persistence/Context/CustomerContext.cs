@@ -40,7 +40,7 @@ namespace Customer.Persistence.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(CustomerContext).Assembly);
+            modelBuilder.ApplyConfiguration(new Configurations.CustomerConfiguration());
             base.OnModelCreating(modelBuilder);
         }
     }

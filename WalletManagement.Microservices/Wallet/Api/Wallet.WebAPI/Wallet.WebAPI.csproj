@@ -16,4 +16,8 @@
     <ProjectReference Include="..\..\Infrastructure\Wallet.Persistence\Wallet.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>
