@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wallet.Domain.Entities.Abstract;
+using Wallet.Domain.Entities.Enums;
 
 namespace Wallet.Domain.Entities.Concretes
 {
@@ -14,6 +15,7 @@ namespace Wallet.Domain.Entities.Concretes
         public string IBAN { get; set; } = string.Empty; 
         public decimal Balance { get; set; }
         public string Currency { get; set; } = "TRY";
+        public WalletType Type { get; set; } = WalletType.Checking;
         public bool IsActive { get; set; } = true; 
 
         [Timestamp]
