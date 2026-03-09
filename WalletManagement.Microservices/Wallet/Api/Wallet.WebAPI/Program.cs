@@ -1,5 +1,7 @@
 using Wallet.Application.DependencyResolvers;
 using Wallet.Persistence.DependencyResolvers;
+using Wallet.InnerInfrastructure.DependencyResolvers;
+using Wallet.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +14,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextService(builder.Configuration);
 builder.Services.AddMapperService();
 builder.Services.AddRepositoryServices();
+builder.Services.AddManagerServices();
+builder.Services.AddExceptionHandler<ExceptionMiddleware>();
 
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
