@@ -11,6 +11,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
@@ -18,10 +19,6 @@
     <ProjectReference Include="..\..\Core\Wallet.Application\Wallet.Application.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Wallet.InnerInfrastructure\Wallet.InnerInfrastructure.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Wallet.Persistence\Wallet.Persistence.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

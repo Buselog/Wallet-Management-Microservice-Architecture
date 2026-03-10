@@ -6,6 +6,7 @@ using Wallet.Application.Managers;
 using Wallet.Contract.Repositories;
 using Wallet.Domain.Entities.Enums;
 using Wallet.Domain.Exceptions;
+using Wallet.InnerInfrastructure.Services;
 using WalletEntity = Wallet.Domain.Entities.Concretes.Wallet;
 
 namespace Wallet.InnerInfrastructure.Managers
@@ -15,11 +16,13 @@ namespace Wallet.InnerInfrastructure.Managers
         private readonly IWalletRepository _walletRepository;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IWalletFactory _factory;
-        public WalletManager(IWalletRepository walletRepository, ITransactionRepository transactionRepository, IMapper mapper, IWalletFactory factory) : base(walletRepository, mapper)
+        private readonly CustomerService _customerService;
+        public WalletManager(IWalletRepository walletRepository, ITransactionRepository transactionRepository, IMapper mapper, IWalletFactory factory, CustomerService customerService) : base(walletRepository, mapper)
         {
             _factory = factory;
             _walletRepository = walletRepository;
             _transactionRepository = transactionRepository;
+            _customerService = customerService;
         }
 
         public async Task<decimal> GetBalanceAsync(int walletId, string customerNo)
@@ -35,7 +38,7 @@ namespace Wallet.InnerInfrastructure.Managers
             {
                 throw new UnauthorizedAccessException("Bu cüzdan bilgisine erişim yetkiniz yok.");
             }
-               
+
             return wallet.Balance;
         }
 
@@ -64,22 +67,13 @@ namespace Wallet.InnerInfrastructure.Managers
             var exists = await _transactionRepository.ReferenceIdExistsAsync(transactionDto.ReferenceId);
             if (exists) throw new ReferenceAlreadyExistsException();
 
-            if (transactionDto.TargetAddress.StartsWith("TR"))
+            if (type == "Transfer")
             {
-                if (!IbanHelper.Validate(transactionDto.TargetAddress))
-                    throw new InvalidIbanException();
+                transactionDto.TargetAddress = await ResolveTargetAddress(transactionDto.TargetAddress);
             }
             else
             {
-                if (transactionDto.TargetAddress.Length < 10)
-                    throw new BaseBusinessException("Telefon numarası formatı hatalı.");
-
-                string targetCustomerNo = await GetCustomerNoByPhoneFromApi(transactionDto.TargetAddress);
-
-                if (string.IsNullOrEmpty(targetCustomerNo))
-                    throw new CustomerNotFoundException();
-
-                transactionDto.TargetAddress = targetCustomerNo;
+                transactionDto.TargetAddress = string.Empty;
             }
 
             var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(
@@ -87,9 +81,14 @@ namespace Wallet.InnerInfrastructure.Managers
                 transactionDto.Amount,
                 type,
                 transactionDto.TargetAddress,
-                Guid.NewGuid().ToString() 
+                transactionDto.ReferenceId
             );
 
+            return HandleSPResult(result); 
+        }
+
+        private string HandleSPResult(int result)
+        {
             return result switch
             {
                 1 => "İşlem başarıyla tamamlandı.",
@@ -99,9 +98,34 @@ namespace Wallet.InnerInfrastructure.Managers
             };
         }
 
+        private async Task<string> ResolveTargetAddress(string address)
+        {
+            if (address.StartsWith("TR"))
+            {
+                if (!IbanHelper.Validate(address))
+                {
+                    throw new InvalidIbanException();
+                }
+                return address;
+            }
+
+            if(string.IsNullOrWhiteSpace(address) || address.Length < 10)
+            {
+                throw new BaseBusinessException("Telefon numarası formatı hatalı.");
+            }
+            var customerNo = await GetCustomerNoByPhoneFromApi(address);
+            if (string.IsNullOrEmpty(customerNo))
+            {
+                throw new CustomerNotFoundException();
+            }
+
+            return customerNo;
+        }
+
         private async Task<string> GetCustomerNoByPhoneFromApi(string phoneNumber)
         {
-            return "CUST12345";
+            var customerNo = await _customerService.GetCustomerNoByPhoneAsync(phoneNumber);
+            return customerNo;
         }
     }
 }
