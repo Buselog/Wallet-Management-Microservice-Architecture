@@ -25,5 +25,12 @@ namespace Customer.Persistence.Repositories
         {
             return await _context.Customers.FirstOrDefaultAsync(x => x.PhoneNumber == phone);
         }
+
+        public async Task<string> GetCustomerNoByPhoneAsync(string phone)
+        {
+            var customer = await _context.Customers.FirstOrDefaultAsync(x => x.PhoneNumber == phone);
+
+            return customer.CustomerNo;
+        }
     }
 }

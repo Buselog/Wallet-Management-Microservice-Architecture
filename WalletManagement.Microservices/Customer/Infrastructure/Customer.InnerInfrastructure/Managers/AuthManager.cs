@@ -1,6 +1,7 @@
 ﻿using Customer.Application.Dtos;
 using Customer.Application.Managers;
 using Customer.Contract.Repositories;
+using Customer.Domain.Exceptions;
 using Customer.InnerInfrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -25,7 +26,7 @@ namespace Customer.InnerInfrastructure.Managers
         public async Task<string> RegisterAsync(CustomerRegisterDto registerDto)
         {
             var isExist = await _customerRepository.GetByEmailAsync(registerDto.Email);
-            if (isExist != null) return "Bu email adresi zaten kayıtlı.";
+            if (isExist != null) throw new EmailAlreadyExistsException();
 
             var passwordHash = PasswordHasher.HashPassword(registerDto.Password);
 
@@ -51,7 +52,7 @@ namespace Customer.InnerInfrastructure.Managers
 
             if (customer == null || !PasswordHasher.VerifyPassword(loginDto.Password, customer.Password))
             {
-                throw new UnauthorizedAccessException("Email veya şifre hatalı.");
+                throw new InvalidCredentialsException();
             }
 
             var token = GenerateJwtToken(customer);
