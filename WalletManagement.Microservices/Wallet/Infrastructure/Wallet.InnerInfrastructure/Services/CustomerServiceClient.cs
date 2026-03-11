@@ -1,18 +1,18 @@
 ﻿
 namespace Wallet.InnerInfrastructure.Services
 {
-    public class CustomerService
+    public class CustomerServiceClient
     {
         private readonly HttpClient _httpClient;
 
-        public CustomerService(HttpClient httpClient)
+        public CustomerServiceClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
         public async Task<string?> GetCustomerNoByPhoneAsync(string phoneNumber)
         {
-            var response = await _httpClient.GetAsync($"api/customers/getCustomerNo-byPhone/{phoneNumber}");
+            var response = await _httpClient.GetAsync($"api/Customer/getCustomerNo-byPhone/{phoneNumber}");
 
             if (response.IsSuccessStatusCode)
             {

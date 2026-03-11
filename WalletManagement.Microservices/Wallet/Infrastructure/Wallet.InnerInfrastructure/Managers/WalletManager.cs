@@ -16,8 +16,8 @@ namespace Wallet.InnerInfrastructure.Managers
         private readonly IWalletRepository _walletRepository;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IWalletFactory _factory;
-        private readonly CustomerService _customerService;
-        public WalletManager(IWalletRepository walletRepository, ITransactionRepository transactionRepository, IMapper mapper, IWalletFactory factory, CustomerService customerService) : base(walletRepository, mapper)
+        private readonly CustomerServiceClient _customerService;
+        public WalletManager(IWalletRepository walletRepository, ITransactionRepository transactionRepository, IMapper mapper, IWalletFactory factory, CustomerServiceClient customerService) : base(walletRepository, mapper)
         {
             _factory = factory;
             _walletRepository = walletRepository;
