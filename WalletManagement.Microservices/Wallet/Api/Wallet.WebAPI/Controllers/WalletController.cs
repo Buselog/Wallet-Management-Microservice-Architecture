@@ -16,19 +16,21 @@ namespace Wallet.WebAPI.Controllers
             _walletManager = walletManager;
         }
 
+        private string currentCustomerNo => User.FindFirst("CustomerNo")?.Value!;
+
         [Authorize]
         [HttpGet("{id}/balance")]
-        public async Task<IActionResult> GetBalance(int id, [FromQuery] string customerNo)
+        public async Task<IActionResult> GetBalance(int id)
         {
-            var balance = await _walletManager.GetBalanceAsync(id, customerNo);
+            var balance = await _walletManager.GetBalanceAsync(id, currentCustomerNo);
             return Ok(new { WalletId = id, Balance = balance });
         }
 
         [Authorize]
         [HttpGet("customer/{customerNo}")]
-        public async Task<IActionResult> GetCustomerWallets(string customerNo)
+        public async Task<IActionResult> GetCustomerWallets()
         {
-            var wallets = await _walletManager.GetWalletsByCustomerNoAsync(customerNo);
+            var wallets = await _walletManager.GetWalletsByCustomerNoAsync(currentCustomerNo);
             return Ok(wallets);
         }
 
@@ -41,25 +43,25 @@ namespace Wallet.WebAPI.Controllers
 
         [Authorize]
         [HttpPost("deposit")]
-        public async Task<IActionResult> Deposit([FromBody] CreateTransactionDto transactionDto)
+        public async Task<IActionResult> Deposit([FromBody] DepositRequestDto dto)
         {
-            var message = await _walletManager.ProcessTransactionAsync(transactionDto, "Deposit");
+            var message = await _walletManager.DepositAsync(dto, currentCustomerNo);
             return Ok(new { Message = message });
         }
 
         [Authorize]
         [HttpPost("withdraw")]
-        public async Task<IActionResult> Withdraw([FromBody] CreateTransactionDto transactionDto)
+        public async Task<IActionResult> Withdraw([FromBody] WithdrawRequestDto dto)
         {
-            var message = await _walletManager.ProcessTransactionAsync(transactionDto, "Withdraw");
+            var message = await _walletManager.WithdrawAsync(dto, currentCustomerNo);
             return Ok(new { Message = message });
         }
 
         [Authorize]
         [HttpPost("transfer")]
-        public async Task<IActionResult> TransferMoney([FromBody] CreateTransactionDto transactionDto)
+        public async Task<IActionResult> Transfer([FromBody] TransferRequestDto dto)
         {
-            var message = await _walletManager.ProcessTransactionAsync(transactionDto, "Transfer");
+            var message = await _walletManager.TransferAsync(dto, currentCustomerNo);
             return Ok(new { Message = message });
         }
     }

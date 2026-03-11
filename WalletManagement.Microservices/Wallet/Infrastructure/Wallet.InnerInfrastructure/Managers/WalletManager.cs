@@ -27,19 +27,10 @@ namespace Wallet.InnerInfrastructure.Managers
 
         public async Task<decimal> GetBalanceAsync(int walletId, string customerNo)
         {
+            await ValidateWalletOwnershipAsync(walletId, customerNo);
             var wallet = await _walletRepository.GetByIdAsync(walletId);
 
-            if (wallet == null || !wallet.IsActive)
-            {
-                throw new KeyNotFoundException("Aktif cüzdan bulunamadı.");
-            }
-
-            if (wallet.CustomerNo != customerNo)
-            {
-                throw new UnauthorizedAccessException("Bu cüzdan bilgisine erişim yetkiniz yok.");
-            }
-
-            return wallet.Balance;
+            return wallet!.Balance;
         }
 
         public async Task<List<WalletDto>> GetWalletsByCustomerNoAsync(string customerNo)
@@ -60,31 +51,47 @@ namespace Wallet.InnerInfrastructure.Managers
             await _walletRepository.SaveChangesAsync();
 
             return _mapper.Map<WalletDto>(newWallet);
+
         }
 
-        public async Task<string> ProcessTransactionAsync(CreateTransactionDto transactionDto, string type)
+        public async Task<string> DepositAsync(DepositRequestDto dto, string customerNo)
         {
-            var exists = await _transactionRepository.ReferenceIdExistsAsync(transactionDto.ReferenceId);
+            await ValidateWalletOwnershipAsync(dto.WalletId, customerNo);
+            return await ProcessTransactionAsync(dto.WalletId, dto.Amount, "Deposit", string.Empty, dto.ReferenceId);
+        }
+
+        public async Task<string> WithdrawAsync(WithdrawRequestDto dto, string customerNo)
+        {
+            await ValidateWalletOwnershipAsync(dto.WalletId, customerNo);
+            return await  ProcessTransactionAsync(dto.WalletId, dto.Amount, "Withdraw", string.Empty, dto.ReferenceId);
+        }
+
+        public async Task<string> TransferAsync(TransferRequestDto dto, string customerNo)
+        {
+            await ValidateWalletOwnershipAsync(dto.FromWalletId, customerNo);
+            var resolvedTarget = await ResolveTargetAddress(dto.Target);
+            return await  ProcessTransactionAsync(dto.FromWalletId, dto.Amount, "Transfer", resolvedTarget, dto.ReferenceId);
+        }
+
+        private async Task ValidateWalletOwnershipAsync(int walletId, string customerNo)
+        {
+            var wallet = await _walletRepository.GetByIdAsync(walletId);
+            if (wallet == null || !wallet.IsActive)
+                throw new KeyNotFoundException("İşlem yapılmak istenen aktif cüzdan bulunamadı.");
+
+            if (wallet.CustomerNo != customerNo)
+                throw new UnauthorizedAccessException("Bu cüzdan üzerinde işlem yapma yetkiniz bulunmamaktadır!");
+        }
+
+
+        private async Task<string>  ProcessTransactionAsync(int walletId, decimal amount, string type, string target, string referenceId)
+        {
+            var exists = await _transactionRepository.ReferenceIdExistsAsync(referenceId);
             if (exists) throw new ReferenceAlreadyExistsException();
 
-            if (type == "Transfer")
-            {
-                transactionDto.TargetAddress = await ResolveTargetAddress(transactionDto.TargetAddress);
-            }
-            else
-            {
-                transactionDto.TargetAddress = string.Empty;
-            }
+            var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(walletId, amount, type, target, referenceId);
 
-            var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(
-                transactionDto.WalletId,
-                transactionDto.Amount,
-                type,
-                transactionDto.TargetAddress,
-                transactionDto.ReferenceId
-            );
-
-            return HandleSPResult(result); 
+            return HandleSPResult(result);
         }
 
         private string HandleSPResult(int result)
@@ -94,7 +101,7 @@ namespace Wallet.InnerInfrastructure.Managers
                 1 => "İşlem başarıyla tamamlandı.",
                 0 => throw new InsufficientBalanceException(),
                 -1 => throw new CustomerNotFoundException(),
-                _ => throw new Exception("İşlem sırasında sistemsel bir hata oluştu.")
+                _ => throw new Exception("İşlem sırasında sistemsel bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
             };
         }
 
@@ -125,7 +132,7 @@ namespace Wallet.InnerInfrastructure.Managers
         private async Task<string> GetCustomerNoByPhoneFromApi(string phoneNumber)
         {
             var customerNo = await _customerService.GetCustomerNoByPhoneAsync(phoneNumber);
-            return customerNo;
+            return customerNo!;
         }
     }
 }
