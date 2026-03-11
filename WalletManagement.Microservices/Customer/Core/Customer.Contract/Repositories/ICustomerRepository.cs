@@ -7,6 +7,7 @@ namespace Customer.Contract.Repositories
     {
         Task<CustomerEntity> GetByCustomerNoAsync(string customerNo); 
         Task<CustomerEntity> GetByEmailAsync(string email);
-        Task<CustomerEntity> GetByPhoneAsync(string phone); 
+        Task<CustomerEntity> GetByPhoneAsync(string phone);
+        Task<string?> GetCustomerNoByPhoneAsync(string phone);
     }
 }

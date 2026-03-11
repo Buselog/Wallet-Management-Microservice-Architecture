@@ -1,19 +1,35 @@
 using Customer.Application.DependencyResolvers;
+using Customer.Application.Managers;
 using Customer.InnerInfrastructure.DependencyResolvers;
+using Customer.InnerInfrastructure.Services;
 using Customer.Persistence.DependencyResolvers;
+using Customer.WebAPI.Middlewares;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Host.UseSerilog();
+builder.Services.AddLoggerService(builder.Configuration);
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContextService(builder.Configuration);
 builder.Services.AddAuthenticationService(builder.Configuration);
 builder.Services.AddMapperService();
 builder.Services.AddPersistenceServices();
 builder.Services.AddManagerServices();
+
+builder.Services.AddHttpClient<IWalletServiceClient, WalletServiceClient>(options =>
+{
+    var baseUrl = builder.Configuration.GetSection("WalletApiSwaggerAddress:BaseUrl").Value;
+    options.BaseAddress = new Uri(baseUrl ?? "https://localhost:7012/");
+});
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -50,6 +66,8 @@ builder.Services.AddSwaggerGen(c =>
 
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

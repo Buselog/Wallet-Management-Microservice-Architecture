@@ -1,9 +1,11 @@
 ﻿using Customer.Application.Dtos;
 using Customer.Application.Managers;
 using Customer.Contract.Repositories;
+using Customer.Domain.Exceptions;
 using Customer.InnerInfrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -15,17 +17,19 @@ namespace Customer.InnerInfrastructure.Managers
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly IConfiguration _configuration;
+        private readonly IWalletServiceClient _walletClient;
 
-        public AuthManager(ICustomerRepository customerRepository, IConfiguration configuration)
+        public AuthManager(ICustomerRepository customerRepository, IConfiguration configuration, IWalletServiceClient walletClient)
         {
             _customerRepository = customerRepository;
             _configuration = configuration;
+            _walletClient = walletClient;
         }
 
         public async Task<string> RegisterAsync(CustomerRegisterDto registerDto)
         {
             var isExist = await _customerRepository.GetByEmailAsync(registerDto.Email);
-            if (isExist != null) return "Bu email adresi zaten kayıtlı.";
+            if (isExist != null) throw new EmailAlreadyExistsException();
 
             var passwordHash = PasswordHasher.HashPassword(registerDto.Password);
 
@@ -42,6 +46,15 @@ namespace Customer.InnerInfrastructure.Managers
             await _customerRepository.AddAsync(newCustomer);
             await _customerRepository.SaveChangesAsync();
 
+            try
+            {
+                await _walletClient.CreateDefaultWalletAsync(newCustomer.CustomerNo);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Kayıt sonrası otomatik cüzdan oluşturulamadı. Müşteri No: {CustomerNo}", newCustomer.CustomerNo);
+            }
+
             return "Kayıt işlemi başarıyla tamamlandı.";
         }
 
@@ -51,7 +64,7 @@ namespace Customer.InnerInfrastructure.Managers
 
             if (customer == null || !PasswordHasher.VerifyPassword(loginDto.Password, customer.Password))
             {
-                throw new UnauthorizedAccessException("Email veya şifre hatalı.");
+                throw new InvalidCredentialsException();
             }
 
             var token = GenerateJwtToken(customer);
