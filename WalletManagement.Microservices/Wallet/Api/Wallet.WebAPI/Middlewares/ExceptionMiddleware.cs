@@ -61,7 +61,8 @@ namespace Wallet.WebAPI.Middlewares
             {
                 Status = context.Response.StatusCode, 
                 Message = message,                   
-                Detail = exception.GetType().Name     
+                Detail = exception.GetType().Name,
+                Timestamp = DateTime.UtcNow
             };
 
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
