@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Wallet.Application.Dtos;
 using Wallet.Application.Managers;
 
@@ -15,6 +16,7 @@ namespace Wallet.WebAPI.Controllers
             _walletManager = walletManager;
         }
 
+        [Authorize]
         [HttpGet("{id}/balance")]
         public async Task<IActionResult> GetBalance(int id, [FromQuery] string customerNo)
         {
@@ -22,6 +24,7 @@ namespace Wallet.WebAPI.Controllers
             return Ok(new { WalletId = id, Balance = balance });
         }
 
+        [Authorize]
         [HttpGet("customer/{customerNo}")]
         public async Task<IActionResult> GetCustomerWallets(string customerNo)
         {
@@ -36,6 +39,7 @@ namespace Wallet.WebAPI.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPost("deposit")]
         public async Task<IActionResult> Deposit([FromBody] CreateTransactionDto transactionDto)
         {
@@ -43,6 +47,7 @@ namespace Wallet.WebAPI.Controllers
             return Ok(new { Message = message });
         }
 
+        [Authorize]
         [HttpPost("withdraw")]
         public async Task<IActionResult> Withdraw([FromBody] CreateTransactionDto transactionDto)
         {
@@ -50,6 +55,7 @@ namespace Wallet.WebAPI.Controllers
             return Ok(new { Message = message });
         }
 
+        [Authorize]
         [HttpPost("transfer")]
         public async Task<IActionResult> TransferMoney([FromBody] CreateTransactionDto transactionDto)
         {

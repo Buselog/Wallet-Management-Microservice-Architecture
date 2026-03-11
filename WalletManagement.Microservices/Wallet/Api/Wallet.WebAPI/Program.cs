@@ -23,7 +23,7 @@ builder.Services.AddRepositoryServices();
 builder.Services.AddManagerServices();
 
 
-builder.Services.AddHttpClient<CustomerService>(options =>
+builder.Services.AddHttpClient<CustomerServiceClient>(options =>
 {
     var baseUrl = builder.Configuration.GetSection("CustomerApiSwaggerAddress:BaseUrl").Value;
     options.BaseAddress = new Uri(baseUrl ?? "https://localhost:7145/");
