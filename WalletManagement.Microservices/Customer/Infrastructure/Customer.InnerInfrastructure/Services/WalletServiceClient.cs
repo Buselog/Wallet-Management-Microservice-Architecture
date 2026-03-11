@@ -23,7 +23,7 @@ namespace Customer.InnerInfrastructure.Services
                 Type = 1 
             };
 
-            var response = await _httpClient.PostAsJsonAsync("api/wallets/create", request);
+            var response = await _httpClient.PostAsJsonAsync("api/Wallet/create", request);
 
             if (!response.IsSuccessStatusCode)
             {
