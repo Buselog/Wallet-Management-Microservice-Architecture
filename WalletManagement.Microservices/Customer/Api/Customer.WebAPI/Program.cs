@@ -1,7 +1,10 @@
 using Customer.Application.DependencyResolvers;
+using Customer.Application.Managers;
 using Customer.InnerInfrastructure.DependencyResolvers;
+using Customer.InnerInfrastructure.Services;
 using Customer.Persistence.DependencyResolvers;
 using Customer.WebAPI.Middlewares;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -21,6 +24,12 @@ builder.Services.AddAuthenticationService(builder.Configuration);
 builder.Services.AddMapperService();
 builder.Services.AddPersistenceServices();
 builder.Services.AddManagerServices();
+
+builder.Services.AddHttpClient<IWalletServiceClient, WalletServiceClient>(options =>
+{
+    var baseUrl = builder.Configuration.GetSection("WalletApiSwaggerAddress:BaseUrl").Value;
+    options.BaseAddress = new Uri(baseUrl ?? "https://localhost:7012/");
+});
 
 builder.Services.AddSwaggerGen(c =>
 {

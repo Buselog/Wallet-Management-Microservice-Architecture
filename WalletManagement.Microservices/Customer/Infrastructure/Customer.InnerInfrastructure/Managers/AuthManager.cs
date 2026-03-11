@@ -5,6 +5,7 @@ using Customer.Domain.Exceptions;
 using Customer.InnerInfrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,11 +17,13 @@ namespace Customer.InnerInfrastructure.Managers
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly IConfiguration _configuration;
+        private readonly IWalletServiceClient _walletClient;
 
-        public AuthManager(ICustomerRepository customerRepository, IConfiguration configuration)
+        public AuthManager(ICustomerRepository customerRepository, IConfiguration configuration, IWalletServiceClient walletClient)
         {
             _customerRepository = customerRepository;
             _configuration = configuration;
+            _walletClient = walletClient;
         }
 
         public async Task<string> RegisterAsync(CustomerRegisterDto registerDto)
@@ -42,6 +45,15 @@ namespace Customer.InnerInfrastructure.Managers
 
             await _customerRepository.AddAsync(newCustomer);
             await _customerRepository.SaveChangesAsync();
+
+            try
+            {
+                await _walletClient.CreateDefaultWalletAsync(newCustomer.CustomerNo);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Kayıt sonrası otomatik cüzdan oluşturulamadı. Müşteri No: {CustomerNo}", newCustomer.CustomerNo);
+            }
 
             return "Kayıt işlemi başarıyla tamamlandı.";
         }
