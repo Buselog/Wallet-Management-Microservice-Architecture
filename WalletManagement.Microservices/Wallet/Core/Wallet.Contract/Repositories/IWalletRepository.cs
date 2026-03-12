@@ -10,6 +10,7 @@ namespace Wallet.Contract.Repositories
         Task<bool> SoftDeleteWalletWithSPAsync(int walletId, string userCode);
         Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, 
             string type, string targetAddress, string referenceId);
+        void DetachEntity(WalletEntity entity);
     }
 }
 

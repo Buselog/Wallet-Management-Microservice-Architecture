@@ -52,6 +52,13 @@ namespace Wallet.Persistence.Repositories
 
             return result.FirstOrDefault();
         }
+
+        public void DetachEntity(WalletEntity entity)
+        {
+            _context.Entry(entity).State = EntityState.Detached;
+        }
+
+ 
     }
 }
 
