@@ -51,13 +51,13 @@ namespace Wallet.Persistence.Repositories
             };
 
             await _context.Database.ExecuteSqlRawAsync(
-                "EXEC @returnVal = WalletTransactionSP @WalletId, @Amount, @Type, @Target, @ReferenceId",
+                "EXEC {0} = WalletTransactionSP @WalletId={1}, @Amount={2}, @Type={3}, @Target={4}, @ReferenceId={5}",
                 returnParam,
-                new SqlParameter("@WalletId", walletId),
-                new SqlParameter("@Amount", amount),
-                new SqlParameter("@Type", type ?? (object)DBNull.Value),
-                new SqlParameter("@Target", target ?? (object)DBNull.Value),
-                new SqlParameter("@ReferenceId", referenceId ?? (object)DBNull.Value)
+                walletId,
+                amount,
+                type,
+                target ?? (object)DBNull.Value,
+                referenceId
             );
 
             return (int)returnParam.Value;
