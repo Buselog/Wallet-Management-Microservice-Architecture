@@ -42,17 +42,17 @@ namespace Wallet.Persistence.Repositories
             return result != 0;
         }
 
-        public async Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, string type, string targetAddress, string referenceId)
+        public async Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, string type, string target, string referenceId)
         {
             var WalletId = new SqlParameter("@WalletId", walletId);
             var Amount = new SqlParameter("@Amount", amount);
             var Type = new SqlParameter("@Type", type);
-            var TargetAddress = new SqlParameter("@TargetAddress", targetAddress);
+            var Target = new SqlParameter("@Target", target);
             var ReferenceId = new SqlParameter("@ReferenceId", referenceId);
 
             var result = await _context.Database.ExecuteSqlRawAsync(
-                "EXEC WalletTransactionSP @WalletId, @Amount, @Type, @TargetAddress, @ReferenceId",
-                WalletId, Amount, Type, TargetAddress, ReferenceId);
+                "EXEC WalletTransactionSP @WalletId, @Amount, @Type, @Target, @ReferenceId",
+                WalletId, Amount, Type, Target, ReferenceId);
 
             return result;
         }
