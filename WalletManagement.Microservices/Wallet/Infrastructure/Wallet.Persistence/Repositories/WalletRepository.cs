@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Wallet.Contract.Repositories;
+using Wallet.Domain.Entities.Concretes;
 using Wallet.Persistence.Context;
 using WalletEntity = Wallet.Domain.Entities.Concretes.Wallet;
 
@@ -47,14 +48,21 @@ namespace Wallet.Persistence.Repositories
             var WalletId = new SqlParameter("@WalletId", walletId);
             var Amount = new SqlParameter("@Amount", amount);
             var Type = new SqlParameter("@Type", type);
-            var Target = new SqlParameter("@Target", target);
+            var Target = new SqlParameter("@Target", target ?? (object)DBNull.Value);
             var ReferenceId = new SqlParameter("@ReferenceId", referenceId);
 
-            var result = await _context.Database.ExecuteSqlRawAsync(
-                "EXEC WalletTransactionSP @WalletId, @Amount, @Type, @Target, @ReferenceId",
-                WalletId, Amount, Type, Target, ReferenceId);
+            var returnParam = new SqlParameter
+            {
+                ParameterName = "@returnVal",
+                SqlDbType = System.Data.SqlDbType.Int,
+                Direction = System.Data.ParameterDirection.ReturnValue
+            };
 
-            return result;
+            var result = await _context.Database.ExecuteSqlRawAsync(
+                "EXEC @returnVal = WalletTransactionSP @WalletId, @Amount, @Type, @Target, @ReferenceId",
+                returnParam, WalletId, Amount, Type, Target, ReferenceId);
+
+            return (int)returnParam.Value;
         }
     }
 }
