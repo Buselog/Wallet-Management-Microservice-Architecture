@@ -45,22 +45,20 @@ namespace Wallet.Persistence.Repositories
 
         public async Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, string type, string target, string referenceId)
         {
-            var WalletId = new SqlParameter("@WalletId", walletId);
-            var Amount = new SqlParameter("@Amount", amount);
-            var Type = new SqlParameter("@Type", type);
-            var Target = new SqlParameter("@Target", target ?? (object)DBNull.Value);
-            var ReferenceId = new SqlParameter("@ReferenceId", referenceId);
-
-            var returnParam = new SqlParameter
+            var returnParam = new SqlParameter("@returnVal", System.Data.SqlDbType.Int)
             {
-                ParameterName = "@returnVal",
-                SqlDbType = System.Data.SqlDbType.Int,
                 Direction = System.Data.ParameterDirection.ReturnValue
             };
 
-            var result = await _context.Database.ExecuteSqlRawAsync(
+            await _context.Database.ExecuteSqlRawAsync(
                 "EXEC @returnVal = WalletTransactionSP @WalletId, @Amount, @Type, @Target, @ReferenceId",
-                returnParam, WalletId, Amount, Type, Target, ReferenceId);
+                returnParam,
+                new SqlParameter("@WalletId", walletId),
+                new SqlParameter("@Amount", amount),
+                new SqlParameter("@Type", type ?? (object)DBNull.Value),
+                new SqlParameter("@Target", target ?? (object)DBNull.Value),
+                new SqlParameter("@ReferenceId", referenceId ?? (object)DBNull.Value)
+            );
 
             return (int)returnParam.Value;
         }
