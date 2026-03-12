@@ -13,7 +13,11 @@ namespace Wallet.Application.Mappings
 
             CreateMap<WalletTransaction, WalletTransactionDto>().ReverseMap();
 
-            CreateMap<CreateTransactionDto, WalletTransaction>();
+            CreateMap<DepositRequestDto, WalletTransaction>();
+
+            CreateMap<WithdrawRequestDto, WalletTransaction>();
+
+            CreateMap<TransferRequestDto, WalletTransaction>();
         }
     }
 }
