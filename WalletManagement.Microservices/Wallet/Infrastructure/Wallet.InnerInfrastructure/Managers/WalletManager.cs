@@ -88,13 +88,13 @@ namespace Wallet.InnerInfrastructure.Managers
             var exists = await _transactionRepository.ReferenceIdExistsAsync(referenceId);
             if (exists) throw new ReferenceAlreadyExistsException();
 
-            var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(walletId, amount, type, target, referenceId);
-
-            var walletInCache = await _walletRepository.GetByIdAsync(walletId);
-            if (walletInCache != null)
+            var trackedWallet = await _walletRepository.GetByIdAsync(walletId);
+            if (trackedWallet != null)
             {
-                _walletRepository.DetachEntity(walletInCache);
+                _walletRepository.DetachEntity(trackedWallet);
             }
+
+            var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(walletId, amount, type, target, referenceId);
 
             return HandleSPResult(result);
         }
@@ -110,9 +110,6 @@ namespace Wallet.InnerInfrastructure.Managers
                 -1 => throw new CustomerNotFoundException(),
                 -2 => throw new Exception("Veritabanı seviyesinde bir hata oluştu (Rollback). Lütfen verileri kontrol edin."),
                 -3 => throw new Exception("İşlem yapılmak istenen cüzdan bulunamadı veya pasif durumda."),
-                -301 => throw new Exception("Cüzdan Id veritabanında hiç yok. Bağlantı dizesini kontrol edin."),
-                -302 => throw new Exception("Cüzdan var ama IsActive değeri 0."),
-                -303 => throw new Exception("Update komutu çalıştı ama hiçbir satırı etkilemedi."),
                 _ => throw new Exception($"İşlem sırasında sistemsel bir hata oluştu: {result}. Lütfen daha sonra tekrar deneyin.")
 
             };
