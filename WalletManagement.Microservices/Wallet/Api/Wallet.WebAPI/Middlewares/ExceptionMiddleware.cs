@@ -42,9 +42,9 @@ namespace Wallet.WebAPI.Middlewares
 
                 ConcurrencyException => (HttpStatusCode.Conflict, exception.Message),
 
-                BaseBusinessException => (HttpStatusCode.BadRequest, exception.Message),
-
                 UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Bu işlem için yetkiniz bulunmamaktadır."),
+
+                BaseBusinessException => (HttpStatusCode.BadRequest, exception.Message),
 
                 _ => (HttpStatusCode.InternalServerError, "Sunucu taraflı beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
             };
@@ -62,7 +62,7 @@ namespace Wallet.WebAPI.Middlewares
                 Status = context.Response.StatusCode, 
                 Message = message,                   
                 Detail = exception.GetType().Name,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
