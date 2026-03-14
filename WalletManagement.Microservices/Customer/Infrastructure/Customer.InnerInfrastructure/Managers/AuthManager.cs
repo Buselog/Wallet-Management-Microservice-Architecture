@@ -40,7 +40,7 @@ namespace Customer.InnerInfrastructure.Managers
                 Email = registerDto.Email,
                 PhoneNumber = registerDto.PhoneNumber,
                 Password = passwordHash,
-                CustomerNo = Guid.NewGuid().ToString().Substring(0, 8).ToUpper() // numara üretimi
+                CustomerNo = DateTime.Now.Ticks.ToString().Substring(10, 8)
             };
 
             await _customerRepository.AddAsync(newCustomer);
