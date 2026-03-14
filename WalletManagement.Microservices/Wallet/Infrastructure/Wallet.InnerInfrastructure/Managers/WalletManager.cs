@@ -51,31 +51,30 @@ namespace Wallet.InnerInfrastructure.Managers
             await _walletRepository.SaveChangesAsync();
 
             return _mapper.Map<WalletDto>(newWallet);
-
         }
 
         public async Task<string> DepositAsync(DepositRequestDto dto, string customerNo)
         {
             await ValidateWalletOwnershipAsync(dto.WalletId, customerNo);
-            return await ProcessTransactionAsync(dto.WalletId, dto.Amount, "Deposit", string.Empty, dto.ReferenceId);
+            return await ProcessTransactionAsync(dto.WalletId, dto.Amount, "Deposit", string.Empty, "Money Deposit to Wallet", dto.ReferenceId);
         }
 
         public async Task<string> WithdrawAsync(WithdrawRequestDto dto, string customerNo)
         {
             await ValidateWalletOwnershipAsync(dto.WalletId, customerNo);
-            return await  ProcessTransactionAsync(dto.WalletId, dto.Amount, "Withdraw", string.Empty, dto.ReferenceId);
+            return await  ProcessTransactionAsync(dto.WalletId, dto.Amount, "Withdraw", string.Empty, "Money Withdraw from Wallet", dto.ReferenceId);
         }
 
         public async Task<string> TransferAsync(TransferRequestDto dto, string customerNo)
         {
             await ValidateWalletOwnershipAsync(dto.FromWalletId, customerNo);
             var resolvedTarget = await ResolveTargetAddress(dto.Target);
-            return await  ProcessTransactionAsync(dto.FromWalletId, dto.Amount, "Transfer", resolvedTarget, dto.ReferenceId);
+            return await  ProcessTransactionAsync(dto.FromWalletId, dto.Amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
         }
 
         private async Task ValidateWalletOwnershipAsync(int walletId, string customerNo)
         {
-            var wallet = await _walletRepository.GetByIdAsync(walletId);
+            var wallet = await _walletRepository.GetByIdNoTrackingAsync(walletId);
             if (wallet == null || !wallet.IsActive)
                 throw new KeyNotFoundException("İşlem yapılmak istenen aktif cüzdan bulunamadı.");
 
@@ -83,18 +82,13 @@ namespace Wallet.InnerInfrastructure.Managers
                 throw new UnauthorizedAccessException("Bu cüzdan üzerinde işlem yapma yetkiniz bulunmamaktadır!");
         }
 
-        private async Task<string> ProcessTransactionAsync(int walletId, decimal amount, string type, string target, string referenceId)
+        private async Task<string> ProcessTransactionAsync(int walletId, decimal amount, string type, string target, string description, string referenceId)
         {
             var exists = await _transactionRepository.ReferenceIdExistsAsync(referenceId);
             if (exists) throw new ReferenceAlreadyExistsException();
 
-            var trackedWallet = await _walletRepository.GetByIdAsync(walletId);
-            if (trackedWallet != null)
-            {
-                _walletRepository.DetachEntity(trackedWallet);
-            }
 
-            var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(walletId, amount, type, target, referenceId);
+            var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(walletId, amount, type, target, description, referenceId);
 
             return HandleSPResult(result);
         }
