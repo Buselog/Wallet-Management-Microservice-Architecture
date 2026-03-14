@@ -102,8 +102,8 @@ namespace Wallet.InnerInfrastructure.Managers
                 
                 0 => throw new InsufficientBalanceException(),
                 -1 => throw new CustomerNotFoundException(),
-                -2 => throw new Exception("Veritabanı seviyesinde bir hata oluştu (Rollback). Lütfen verileri kontrol edin."),
-                -3 => throw new Exception("İşlem yapılmak istenen cüzdan bulunamadı veya pasif durumda."),
+                -2 => throw new BaseBusinessException("Veritabanı seviyesinde bir hata oluştu (Rollback). Lütfen verileri kontrol edin."),
+                -3 => throw new BaseBusinessException("İşlem yapılmak istenen cüzdan bulunamadı veya pasif durumda."),
                 _ => throw new Exception($"İşlem sırasında sistemsel bir hata oluştu: {result}. Lütfen daha sonra tekrar deneyin.")
 
             };
