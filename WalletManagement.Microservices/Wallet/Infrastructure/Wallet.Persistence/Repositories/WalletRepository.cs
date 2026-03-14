@@ -43,25 +43,23 @@ namespace Wallet.Persistence.Repositories
             return result != 0;
         }
 
-        public async Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, string type, string target, string referenceId)
+        public async Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, string type, string target, string description ,string referenceId)
         {
-            _context.ChangeTracker.Clear();
+            var WalletId = new SqlParameter("@WalletId", walletId);
+            var Amount = new SqlParameter("@Amount", amount);
+            var Type = new SqlParameter("@Type", type);
+            var Target = new SqlParameter("@Target", target ?? (object)DBNull.Value);
+            var Description = new SqlParameter("@Description", description);
+            var ReferenceId = new SqlParameter("@ReferenceId", referenceId);
 
             var result = await _context.Database
                 .SqlQueryRaw<int>(
-                    "EXEC WalletTransactionSP @WalletId={0}, @Amount={1}, @Type={2}, @Target={3}, @ReferenceId={4}",
-                    walletId, amount, type, target ?? (object)DBNull.Value, referenceId)
+                    "EXEC WalletTransactionSP @WalletId, @Amount, @Type, @Target, @Description, @ReferenceId",
+                    WalletId, Amount, Type, Target, Description, ReferenceId)
                 .ToListAsync();
 
             return result.FirstOrDefault();
         }
-
-        public void DetachEntity(WalletEntity entity)
-        {
-            _context.Entry(entity).State = EntityState.Detached;
-        }
-
- 
     }
 }
 

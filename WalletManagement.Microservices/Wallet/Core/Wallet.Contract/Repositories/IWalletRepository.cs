@@ -9,8 +9,7 @@ namespace Wallet.Contract.Repositories
         Task<List<WalletEntity>> GetWalletsByCustomerNoAsync(string customerNo);
         Task<bool> SoftDeleteWalletWithSPAsync(int walletId, string userCode);
         Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, 
-            string type, string targetAddress, string referenceId);
-        void DetachEntity(WalletEntity entity);
+            string type, string targetAddress, string description, string referenceId);
     }
 }
 

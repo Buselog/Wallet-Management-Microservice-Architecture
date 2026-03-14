@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using Wallet.Contract.Repositories;
 using Wallet.Domain.Entities.Abstract;
 using Wallet.Persistence.Context;
 
 namespace Wallet.Persistence.Repositories
 {
-    public class BaseRepository<T> where T: class, IEntity
+    public class BaseRepository<T> : IBaseRepository<T> where T: class, IEntity
     {
         protected readonly WalletContext _context;
         private readonly DbSet<T> _dbSet;
@@ -24,6 +25,11 @@ namespace Wallet.Persistence.Repositories
         public async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
+        }
+
+        public async Task<T?> GetByIdNoTrackingAsync(int id)
+        {
+            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
