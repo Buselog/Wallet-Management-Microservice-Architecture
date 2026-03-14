@@ -16,7 +16,8 @@ namespace Wallet.Domain.Entities.Concretes
         public decimal Balance { get; set; }
         public string Currency { get; set; } = "TRY";
         public WalletType Type { get; set; } = WalletType.Checking;
-        public bool IsActive { get; set; } = true; 
+        public bool IsActive { get; set; } = true;
+        public int Suffix { get; set; }
 
         [Timestamp]
         public byte[] RowVersion { get; set; }
