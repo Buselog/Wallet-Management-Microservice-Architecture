@@ -12,8 +12,8 @@ using Wallet.Persistence.Context;
 namespace Wallet.Persistence.Migrations
 {
     [DbContext(typeof(WalletContext))]
-    [Migration("20260308103722_InitialWalletDb")]
-    partial class InitialWalletDb
+    [Migration("20260314204324_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,9 @@ namespace Wallet.Persistence.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
+
+                    b.Property<int>("Suffix")
+                        .HasColumnType("int");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");

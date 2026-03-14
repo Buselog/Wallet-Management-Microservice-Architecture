@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Wallet.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialWalletDb : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,6 +19,7 @@ namespace Wallet.Persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CustomerNo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     IBAN = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Suffix = table.Column<int>(type: "int", nullable: false),
                     Balance = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),

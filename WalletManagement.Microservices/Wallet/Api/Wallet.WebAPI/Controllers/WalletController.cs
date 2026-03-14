@@ -27,7 +27,7 @@ namespace Wallet.WebAPI.Controllers
         }
 
         [Authorize]
-        [HttpGet("customer/{customerNo}")]
+        [HttpGet("wallets/{customerNo}")]
         public async Task<IActionResult> GetCustomerWallets()
         {
             var wallets = await _walletManager.GetWalletsByCustomerNoAsync(currentCustomerNo);
@@ -62,6 +62,15 @@ namespace Wallet.WebAPI.Controllers
         public async Task<IActionResult> Transfer([FromBody] TransferRequestDto dto)
         {
             var message = await _walletManager.TransferAsync(dto, currentCustomerNo);
+            return Ok(new { Message = message });
+        }
+
+
+        [Authorize]
+        [HttpDelete("{id}/delete")]
+        public async Task<IActionResult> DeleteWallet(int id)
+        {
+            var message = await _walletManager.SoftDeleteWalletAsync(id, currentCustomerNo);
             return Ok(new { Message = message });
         }
     }

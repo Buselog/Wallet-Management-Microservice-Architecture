@@ -12,11 +12,12 @@ namespace Wallet.Domain.Entities.Concretes
     public class Wallet : BaseEntity
     {
         public string CustomerNo { get; set; } = string.Empty;
-        public string IBAN { get; set; } = string.Empty; 
+        public string IBAN { get; set; } = string.Empty;
+        public int Suffix { get; set; }
         public decimal Balance { get; set; }
         public string Currency { get; set; } = "TRY";
         public WalletType Type { get; set; } = WalletType.Checking;
-        public bool IsActive { get; set; } = true; 
+        public bool IsActive { get; set; } = true;
 
         [Timestamp]
         public byte[] RowVersion { get; set; }
