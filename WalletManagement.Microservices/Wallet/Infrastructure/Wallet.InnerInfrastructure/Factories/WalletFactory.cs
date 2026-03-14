@@ -8,15 +8,20 @@ namespace Wallet.InnerInfrastructure.Factories
     {
         private const string BankCode = "9999"; 
         private const string ReserveDigit = "0";
-        public WalletEntity CreateWallet(string customerNo, string currency, WalletType type)
+        public WalletEntity CreateWallet(string customerNo, string currency, WalletType type, int suffix)
         {
-            string bban = BankCode + ReserveDigit + customerNo.PadLeft(17, '0');
+            string customerPart = customerNo.PadLeft(10, '0'); 
+
+            string suffixPart = suffix.ToString().PadLeft(7, '0'); 
+
+            string bban = BankCode + ReserveDigit + customerPart + suffixPart; 
 
             string checkDigits = IbanHelper.CalculateCheckDigits(bban);
 
             return new WalletEntity
             {
                 CustomerNo = customerNo,
+                Suffix = suffix,
                 Currency = currency,
                 Type = type,
                 IBAN = $"TR{checkDigits}{bban}",

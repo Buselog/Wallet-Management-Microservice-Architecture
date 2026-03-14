@@ -45,7 +45,9 @@ namespace Wallet.InnerInfrastructure.Managers
             if (existing.Any(x => x.Currency == currency && x.Type == type && x.IsActive))
                 throw new BaseBusinessException($"{currency} - {type} tipinde aktif bir cüzdan zaten mevcut.");
 
-            var newWallet = _factory.CreateWallet(customerNo, currency, type);
+            int nextSuffix = existing.Count + 1;
+
+            var newWallet = _factory.CreateWallet(customerNo, currency, type, nextSuffix);
 
             await _walletRepository.AddAsync(newWallet);
             await _walletRepository.SaveChangesAsync();
@@ -70,6 +72,15 @@ namespace Wallet.InnerInfrastructure.Managers
             await ValidateWalletOwnershipAsync(dto.FromWalletId, customerNo);
             var resolvedTarget = await ResolveTargetAddress(dto.Target);
             return await  ProcessTransactionAsync(dto.FromWalletId, dto.Amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
+        }
+
+        public async Task<string> SoftDeleteWalletAsync(int walletId, string customerNo)
+        {
+            await ValidateWalletOwnershipAsync(walletId, customerNo);
+
+            var isDeleted = await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_"+customerNo);
+
+            return "Cüzdan başarıyla kapatıldı.";
         }
 
         private async Task ValidateWalletOwnershipAsync(int walletId, string customerNo)
@@ -124,7 +135,9 @@ namespace Wallet.InnerInfrastructure.Managers
             {
                 throw new BaseBusinessException("Telefon numarası formatı hatalı.");
             }
+
             var customerNo = await GetCustomerNoByPhoneFromApi(address);
+
             if (string.IsNullOrEmpty(customerNo))
             {
                 throw new CustomerNotFoundException();

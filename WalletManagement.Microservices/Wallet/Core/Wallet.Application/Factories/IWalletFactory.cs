@@ -5,6 +5,6 @@ namespace Wallet.Application.Factories
 {
     public interface IWalletFactory
     {
-        WalletEntity CreateWallet(string customerNo, string currency, WalletType type);
+        WalletEntity CreateWallet(string customerNo, string currency, WalletType type, int suffix);
     }
 }
