@@ -10,7 +10,7 @@ namespace Wallet.InnerInfrastructure.Factories
         private const string ReserveDigit = "0";
         public WalletEntity CreateWallet(string customerNo, string currency, WalletType type)
         {
-            string bban = BankCode + ReserveDigit + customerNo.PadLeft(16, '0');
+            string bban = BankCode + ReserveDigit + customerNo.PadLeft(17, '0');
 
             string checkDigits = IbanHelper.CalculateCheckDigits(bban);
 
