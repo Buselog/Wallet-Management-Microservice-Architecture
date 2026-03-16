@@ -1,7 +1,7 @@
 ﻿{
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/Wallet/{everything}",
+      "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -19,7 +19,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/Customer/{everything}",
+      "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
