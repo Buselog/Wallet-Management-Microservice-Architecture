@@ -27,10 +27,7 @@
       ],
       "UpstreamPathTemplate": "/api/Auth/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "SwaggerKey": "customer",
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer"
-      }
+      "SwaggerKey": "customer"
     },
     {
       "DownstreamPathTemplate": "/api/Wallet/{everything}",
