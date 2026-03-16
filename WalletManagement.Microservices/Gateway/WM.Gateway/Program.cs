@@ -22,9 +22,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+builder.Services.AddSwaggerForOcelot(builder.Configuration);
 builder.Services.AddOcelot();
 
 var app = builder.Build();
+
+app.UseSwaggerForOcelotUI(opt =>
+{
+    opt.PathToSwaggerGenerator = "/swagger/v1/swagger.json";
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
