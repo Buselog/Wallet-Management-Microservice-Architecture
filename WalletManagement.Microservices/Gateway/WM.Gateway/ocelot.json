@@ -66,7 +66,7 @@
     }
   ],
 
-  "SwaggerEndPoints": [ 
+  "SwaggerEndPoints": [
     {
       "Key": "wallet",
       "Config": [
@@ -75,7 +75,8 @@
           "Version": "v1",
           "Url": "https://localhost:7012/swagger/v1/swagger.json"
         }
-      ]
+      ],
+      "TransformBy": "wallet"
     },
     {
       "Key": "customer",
@@ -85,7 +86,8 @@
           "Version": "v1",
           "Url": "https://localhost:7145/swagger/v1/swagger.json"
         }
-      ]
+      ],
+      "TransformBy": "customer"
     }
   ],
 
