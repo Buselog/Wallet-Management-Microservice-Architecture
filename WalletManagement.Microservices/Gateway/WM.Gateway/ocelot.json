@@ -76,7 +76,7 @@
           "Url": "https://localhost:7012/swagger/v1/swagger.json"
         }
       ],
-      "TransformBy": "wallet"
+      "VirtualPath": "/wallet"
     },
     {
       "Key": "customer",
@@ -87,7 +87,7 @@
           "Url": "https://localhost:7145/swagger/v1/swagger.json"
         }
       ],
-      "TransformBy": "customer"
+      "VirtualPath": "/customer"
     }
   ],
 
