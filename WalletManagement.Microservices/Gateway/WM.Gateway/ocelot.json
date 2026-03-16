@@ -6,15 +6,16 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 7012 
+          "Port": 7012
         }
       ],
 
       "UpstreamPathTemplate": "/wallet/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "SwaggerKey": "wallet",
 
       "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer", 
+        "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
       }
     },
@@ -24,18 +25,44 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 7145 
+          "Port": 7145
         }
       ],
+
       "UpstreamPathTemplate": "/customer/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "SwaggerKey": "customer",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
       }
     }
   ],
+
+  "SwaggerEndPoints": [ 
+    {
+      "Key": "wallet",
+      "Config": [
+        {
+          "Name": "Wallet API",
+          "Version": "v1",
+          "Url": "https://localhost:7012/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "customer",
+      "Config": [
+        {
+          "Name": "Customer API",
+          "Version": "v1",
+          "Url": "https://localhost:7145/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
+
   "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:5000" 
+    "BaseUrl": "https://localhost:5000"
   }
 }
