@@ -98,8 +98,15 @@ namespace Wallet.InnerInfrastructure.Managers
             var exists = await _transactionRepository.ReferenceIdExistsAsync(referenceId);
             if (exists) throw new ReferenceAlreadyExistsException();
 
+            string? senderName = null;
 
-            var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(walletId, amount, type, target, description, referenceId);
+            if (type.Contains("Transfer", StringComparison.OrdinalIgnoreCase))
+            {
+                var wallet = await _walletRepository.GetByIdAsync(walletId);
+                senderName = await _customerService.GetCustomerNameByCustomerNoAsync(wallet!.CustomerNo);
+            }
+
+            var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(walletId, amount, type, target, description, referenceId, senderName);
 
             return HandleSPResult(result);
         }

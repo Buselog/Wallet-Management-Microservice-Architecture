@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wallet.Application.Managers;
+using Wallet.Contract.Repositories;
 
 namespace Wallet.WebAPI.Controllers
 {
@@ -11,6 +12,8 @@ namespace Wallet.WebAPI.Controllers
     {
         private readonly ITransactionManager _transactionManager;
 
+        private string currentCustomerNo => User.FindFirst("CustomerNo")?.Value!;
+
         public WalletTransactionController(ITransactionManager transactionManager)
         {
             _transactionManager = transactionManager;
@@ -20,7 +23,7 @@ namespace Wallet.WebAPI.Controllers
         public async Task<IActionResult> GetHistory(int walletId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var (items, totalCount) = await _transactionManager.GetHistoryAsync(
-                walletId, startDate, endDate, pageNumber, pageSize);
+                walletId, currentCustomerNo, startDate, endDate, pageNumber, pageSize);
 
             return Ok(new { Items = items, TotalCount = totalCount });
         }

@@ -33,6 +33,26 @@ namespace Wallet.InnerInfrastructure.Services
 
             return null;
         }
+
+        public async Task<string?> GetCustomerNameByCustomerNoAsync(string customerNo)
+        {
+            var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                _httpClient.DefaultRequestHeaders.Add("Authorization", token);
+            }
+
+            var response = await _httpClient.GetAsync($"api/Customer/getCustomerName-byCustomerNo/{customerNo}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+            return null;
+        }
+
     }
 }
 
