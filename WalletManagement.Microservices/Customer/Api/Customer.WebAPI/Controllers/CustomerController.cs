@@ -24,5 +24,16 @@ namespace Customer.WebAPI.Controllers
 
             return Ok(customerNo); 
         }
+
+
+        [HttpGet("getCustomerName-byCustomerNo/{customerNo}")]
+        public async Task<IActionResult> GetCustomerName(string customerNo)
+        {
+            var customer = await _customerManager.GetByCustomerNoAsync(customerNo);
+
+            return Ok($"{customer.FirstName} {customer.LastName}");
+        }
+
     }
 }
+
