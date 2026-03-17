@@ -87,7 +87,7 @@ namespace Wallet.InnerInfrastructure.Managers
         {
             var wallet = await _walletRepository.GetByIdNoTrackingAsync(walletId);
             if (wallet == null || !wallet.IsActive)
-                throw new KeyNotFoundException("İşlem yapılmak istenen aktif cüzdan bulunamadı.");
+                throw new BaseBusinessException("İşlem yapılmak istenen aktif cüzdan bulunamadı.");
 
             if (wallet.CustomerNo != customerNo)
                 throw new UnauthorizedAccessException("Bu cüzdan üzerinde işlem yapma yetkiniz bulunmamaktadır!");
