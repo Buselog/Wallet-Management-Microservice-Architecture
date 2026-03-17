@@ -42,7 +42,7 @@ namespace Wallet.WebAPI.Middlewares
 
                 ConcurrencyException => (HttpStatusCode.Conflict, exception.Message),
 
-                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Bu işlem için yetkiniz bulunmamaktadır."),
+                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
 
                 BaseBusinessException => (HttpStatusCode.BadRequest, exception.Message),
 
