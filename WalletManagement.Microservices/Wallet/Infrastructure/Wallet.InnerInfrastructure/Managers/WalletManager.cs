@@ -58,13 +58,13 @@ namespace Wallet.InnerInfrastructure.Managers
         public async Task<string> DepositAsync(DepositRequestDto dto, string customerNo)
         {
             await ValidateWalletOwnershipAsync(dto.WalletId, customerNo);
-            return await ProcessTransactionAsync(dto.WalletId, dto.Amount, "Deposit", string.Empty, "Money Deposit to Wallet", dto.ReferenceId);
+            return await ProcessTransactionAsync(dto.WalletId, dto.Amount, "Deposit", string.Empty, string.Empty, dto.ReferenceId);
         }
 
         public async Task<string> WithdrawAsync(WithdrawRequestDto dto, string customerNo)
         {
             await ValidateWalletOwnershipAsync(dto.WalletId, customerNo);
-            return await  ProcessTransactionAsync(dto.WalletId, dto.Amount, "Withdraw", string.Empty, "Money Withdraw from Wallet", dto.ReferenceId);
+            return await  ProcessTransactionAsync(dto.WalletId, dto.Amount, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
         }
 
         public async Task<string> TransferAsync(TransferRequestDto dto, string customerNo)
