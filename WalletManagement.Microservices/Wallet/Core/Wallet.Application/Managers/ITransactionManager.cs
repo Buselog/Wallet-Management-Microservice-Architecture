@@ -7,6 +7,7 @@ namespace Wallet.Application.Managers
     {
         Task<(List<WalletTransactionDto> Items, int TotalCount)> GetHistoryAsync(
             int walletId,
+            string customerNo,
             DateTime? startDate,
             DateTime? endDate,
             int pageNumber,

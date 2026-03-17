@@ -43,7 +43,7 @@ namespace Wallet.Persistence.Repositories
             return result != 0;
         }
 
-        public async Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, string type, string target, string description ,string referenceId)
+        public async Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, string type, string target, string description ,string referenceId, string senderInfo)
         {
             var WalletId = new SqlParameter("@WalletId", walletId);
             var Amount = new SqlParameter("@Amount", amount);
@@ -51,11 +51,12 @@ namespace Wallet.Persistence.Repositories
             var Target = new SqlParameter("@Target", target ?? (object)DBNull.Value);
             var Description = new SqlParameter("@Description", description);
             var ReferenceId = new SqlParameter("@ReferenceId", referenceId);
+            var SenderInfo = new SqlParameter("@SenderInfo", senderInfo ?? (object)DBNull.Value);
 
             var result = await _context.Database
                 .SqlQueryRaw<int>(
-                    "EXEC WalletTransactionSP @WalletId, @Amount, @Type, @Target, @Description, @ReferenceId",
-                    WalletId, Amount, Type, Target, Description, ReferenceId)
+                    "EXEC WalletTransactionSP @WalletId, @Amount, @Type, @Target, @Description, @ReferenceId, @SenderInfo",
+                    WalletId, Amount, Type, Target, Description, ReferenceId, SenderInfo)
                 .ToListAsync();
 
             return result.FirstOrDefault();
