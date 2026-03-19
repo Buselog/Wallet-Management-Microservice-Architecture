@@ -1,3 +1,4 @@
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -22,6 +23,8 @@ builder.Services.AddDbContextService(builder.Configuration);
 builder.Services.AddMapperService();
 builder.Services.AddRepositoryServices();
 builder.Services.AddManagerServices();
+builder.Services.AddValidatorServices();
+builder.Services.AddFluentValidationAutoValidation();
 
 
 builder.Services.AddHttpClient<CustomerServiceClient>(options =>
