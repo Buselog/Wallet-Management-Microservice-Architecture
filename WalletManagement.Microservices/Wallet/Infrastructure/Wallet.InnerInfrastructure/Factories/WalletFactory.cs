@@ -18,17 +18,11 @@ namespace Wallet.InnerInfrastructure.Factories
 
             string checkDigits = IbanHelper.CalculateCheckDigits(bban);
 
-            return new WalletEntity
-            {
-                CustomerNo = customerNo,
-                Suffix = suffix,
-                Currency = currency,
-                Type = type,
-                IBAN = $"TR{checkDigits}{bban}",
-                Balance = 0,
-                IsActive = true,
-            };
+            string fullIban = $"TR{checkDigits}{bban}";
 
+            var newWallet = new WalletEntity(customerNo, fullIban, currency, type, suffix);
+
+            return newWallet;
         }
 
     }
