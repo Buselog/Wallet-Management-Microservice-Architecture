@@ -20,7 +20,7 @@ namespace Wallet.Application.Validators
 
             RuleFor(x => x.Type)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty()
+                .NotNull()
                 .WithMessage("Cüzdan tipi seçimi boş bırakılamaz.")
                 .IsInEnum()
                 .WithMessage("Geçersiz cüzdan tipi.");
