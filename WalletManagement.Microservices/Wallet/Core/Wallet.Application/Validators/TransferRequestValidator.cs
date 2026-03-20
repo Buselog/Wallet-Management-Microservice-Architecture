@@ -8,17 +8,14 @@ namespace Wallet.Application.Validators
         public TransferRequestValidator()
         {
             RuleFor(x => x.FromWalletId)
-                .NotNull()
-                .WithMessage("Gönderen cüzdan seçilmelidir.");
+                .GreaterThan(0)
+                .WithMessage("Geçerli bir gönderici cüzdan seçilmelidir.");
 
             RuleFor(x => x.Target)
                 .NotEmpty()
                 .WithMessage("Alıcı (IBAN veya Müşteri No) boş bırakılamaz.");
 
             RuleFor(x => x.Amount)
-                .Cascade(CascadeMode.Stop)
-                .NotNull()
-                .WithMessage("Tutar alanı boş olamaz.")
                 .GreaterThan(0)
                 .WithMessage("Transfer tutarı 0'dan büyük olmalıdır.");
 
