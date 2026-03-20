@@ -32,6 +32,12 @@ namespace Customer.WebAPI.Middlewares
 
             var (statusCode, message) = exception switch
             {
+                FluentValidation.ValidationException valEx =>
+                 (HttpStatusCode.BadRequest, string.Join(" | ", valEx.Errors.Select(e => e.ErrorMessage))),
+
+                ArgumentNullException or ArgumentException or ArgumentOutOfRangeException =>
+                 (HttpStatusCode.BadRequest, exception.Message),
+
                 CustomerNotFoundException => (HttpStatusCode.NotFound, exception.Message),
 
                 EmailAlreadyExistsException => (HttpStatusCode.Conflict, exception.Message),
@@ -57,7 +63,7 @@ namespace Customer.WebAPI.Middlewares
                 Status = context.Response.StatusCode,
                 Message = message,
                 Detail = exception.GetType().Name,
-                Timestamp = DateTime.UtcNow 
+                Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
