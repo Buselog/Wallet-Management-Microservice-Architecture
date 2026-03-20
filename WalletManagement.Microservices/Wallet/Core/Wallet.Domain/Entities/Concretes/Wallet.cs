@@ -24,7 +24,7 @@ namespace Wallet.Domain.Entities.Concretes
 
         }
 
-        public Wallet(string customerNo, string iban, string currency, WalletType type)
+        public Wallet(string customerNo, string iban, string currency, WalletType type, int suffix)
         {
             Guard.Against.NullOrWhiteSpace(customerNo, nameof(customerNo));
 
@@ -38,6 +38,7 @@ namespace Wallet.Domain.Entities.Concretes
             IBAN = iban;
             Currency = currency;
             Type = type;
+            Suffix = suffix;
             Balance = 0; 
             IsActive = true;
         }
