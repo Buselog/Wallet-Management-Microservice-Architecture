@@ -62,21 +62,21 @@ namespace Wallet.InnerInfrastructure.Managers
 
         public async Task<string> DepositAsync(DepositRequestDto dto, string customerNo)
         {
-            await ValidateWalletOwnershipAsync(dto.WalletId, customerNo);
-            return await ProcessTransactionAsync(dto.WalletId, dto.Amount, "Deposit", string.Empty, string.Empty, dto.ReferenceId);
+            await ValidateWalletOwnershipAsync(dto.WalletId.Value, customerNo);
+            return await ProcessTransactionAsync(dto.WalletId.Value, dto.Amount.Value, "Deposit", string.Empty, string.Empty, dto.ReferenceId);
         }
 
         public async Task<string> WithdrawAsync(WithdrawRequestDto dto, string customerNo)
         {
-            await ValidateWalletOwnershipAsync(dto.WalletId, customerNo);
-            return await  ProcessTransactionAsync(dto.WalletId, dto.Amount, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
+            await ValidateWalletOwnershipAsync(dto.WalletId.Value, customerNo);
+            return await  ProcessTransactionAsync(dto.WalletId.Value, dto.Amount.Value, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
         }
 
         public async Task<string> TransferAsync(TransferRequestDto dto, string customerNo)
         {
-            await ValidateWalletOwnershipAsync(dto.FromWalletId, customerNo);
+            await ValidateWalletOwnershipAsync(dto.FromWalletId.Value, customerNo);
             var resolvedTarget = await ResolveTargetAddress(dto.Target);
-            return await  ProcessTransactionAsync(dto.FromWalletId, dto.Amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
+            return await  ProcessTransactionAsync(dto.FromWalletId.Value, dto.Amount.Value, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
         }
 
         public async Task<string> SoftDeleteWalletAsync(int walletId, string customerNo)
