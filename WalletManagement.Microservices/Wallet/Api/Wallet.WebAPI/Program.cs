@@ -15,10 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Host.UseSerilog();
 builder.Services.AddLoggerService(builder.Configuration);
-builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
-{
-    options.SuppressModelStateInvalidFilter = true;
-});
+builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
