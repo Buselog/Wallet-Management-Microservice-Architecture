@@ -39,20 +39,22 @@ namespace Wallet.InnerInfrastructure.Managers
             return _mapper.Map<List<WalletDto>>(wallets);
         }
 
-        public async Task<WalletDto> CreateNewWalletAsync(string currentCustomerNo, string customerNo, string currency, WalletType type)
+        public async Task<WalletDto> CreateNewWalletAsync(string currentCustomerNo, string customerNo, string currency, WalletType? type)
         {
-            if(currentCustomerNo!= customerNo)
+            var walletType = type ?? 0;
+
+            if (currentCustomerNo!= customerNo)
             {
                 throw new UnauthorizedAccessException("Bu cüzdan üzerinde işlem yapma yetkiniz bulunmamaktadır!");
             }
 
             var existing = await _walletRepository.GetWalletsByCustomerNoAsync(customerNo);
-            if (existing.Any(x => x.Currency == currency && x.Type == type && x.IsActive))
-                throw new BaseBusinessException($"{currency} - {type} tipinde aktif bir cüzdan zaten mevcut.");
+            if (existing.Any(x => x.Currency == currency && x.Type == walletType && x.IsActive))
+                throw new BaseBusinessException($"{currency} - {walletType} tipinde aktif bir cüzdan zaten mevcut.");
 
             int nextSuffix = existing.Count + 1;
 
-            var newWallet = _factory.CreateWallet(customerNo, currency, type, nextSuffix);
+            var newWallet = _factory.CreateWallet(customerNo, currency, walletType, nextSuffix);
 
             await _walletRepository.AddAsync(newWallet);
             await _walletRepository.SaveChangesAsync();
@@ -62,21 +64,30 @@ namespace Wallet.InnerInfrastructure.Managers
 
         public async Task<string> DepositAsync(DepositRequestDto dto, string customerNo)
         {
-            await ValidateWalletOwnershipAsync(dto.WalletId.Value, customerNo);
-            return await ProcessTransactionAsync(dto.WalletId.Value, dto.Amount.Value, "Deposit", string.Empty, string.Empty, dto.ReferenceId);
+            var walletId = dto.WalletId ?? 0;
+            var amount = dto.Amount ?? 0;
+
+            await ValidateWalletOwnershipAsync(walletId, customerNo);
+            return await ProcessTransactionAsync(walletId, amount, "Deposit", string.Empty, string.Empty, dto.ReferenceId);
         }
 
         public async Task<string> WithdrawAsync(WithdrawRequestDto dto, string customerNo)
         {
-            await ValidateWalletOwnershipAsync(dto.WalletId.Value, customerNo);
-            return await  ProcessTransactionAsync(dto.WalletId.Value, dto.Amount.Value, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
+            var walletId = dto.WalletId ?? 0;
+            var amount = dto.Amount ?? 0;
+
+            await ValidateWalletOwnershipAsync(walletId, customerNo);
+            return await  ProcessTransactionAsync(walletId, amount, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
         }
 
         public async Task<string> TransferAsync(TransferRequestDto dto, string customerNo)
         {
-            await ValidateWalletOwnershipAsync(dto.FromWalletId.Value, customerNo);
+            var fromWalletId = dto.FromWalletId ?? 0;
+            var amount = dto.Amount ?? 0;
+
+            await ValidateWalletOwnershipAsync(fromWalletId, customerNo);
             var resolvedTarget = await ResolveTargetAddress(dto.Target);
-            return await  ProcessTransactionAsync(dto.FromWalletId.Value, dto.Amount.Value, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
+            return await  ProcessTransactionAsync(fromWalletId, amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
         }
 
         public async Task<string> SoftDeleteWalletAsync(int walletId, string customerNo)
