@@ -8,13 +8,10 @@ namespace Wallet.Application.Validators
         public DepositRequestValidator()
         {
             RuleFor(x => x.WalletId)
-                .NotNull()
-                .WithMessage("Cüzdan ID zorunludur.");
+                .GreaterThan(0)
+                .WithMessage("Lütfen geçerli bir cüzdan seçiniz.");
 
             RuleFor(x => x.Amount)
-                .Cascade(CascadeMode.Stop)
-                .NotNull()
-                .WithMessage("Miktar alanı boş olamaz.")
                 .GreaterThan(0)
                 .WithMessage("Yatırılacak tutar 0'dan büyük olmalıdır.");
 
