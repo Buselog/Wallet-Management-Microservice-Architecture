@@ -28,21 +28,23 @@ namespace Customer.InnerInfrastructure.Managers
 
         public async Task<string> RegisterAsync(CustomerRegisterDto registerDto)
         {
-            var isExist = await _customerRepository.GetByEmailAsync(registerDto.Email);
-            if (isExist != null) throw new EmailAlreadyExistsException();
+
+            var cleanedPhone = new string(registerDto.PhoneNumber.Where(char.IsDigit).ToArray());
+            if (cleanedPhone.StartsWith("0"))
+            {
+                cleanedPhone = cleanedPhone.Substring(1);
+            }
+
+            var isEmailExist = await _customerRepository.GetByEmailAsync(registerDto.Email);
+            if (isEmailExist != null) throw new EmailAlreadyExistsException();
+
+            var isPhoneExist = await _customerRepository.GetByPhoneAsync(cleanedPhone);
+            if (isPhoneExist != null) throw new PhoneNumberAlreadyExistException();
 
             var passwordHash = PasswordHasher.HashPassword(registerDto.Password);
 
-            var newCustomer = new CustomerEntity
-            {
-                FirstName = registerDto.FirstName,
-                LastName = registerDto.LastName,
-                Email = registerDto.Email,
-                PhoneNumber = registerDto.PhoneNumber,
-                Password = passwordHash,
-                CustomerNo = DateTime.Now.Ticks.ToString().Substring(10, 8)
-            };
-
+            var newCustomer = new CustomerEntity(registerDto.FirstName, registerDto.LastName, cleanedPhone, registerDto.Email, passwordHash, DateTime.Now.Ticks.ToString().Substring(10, 8));
+          
             await _customerRepository.AddAsync(newCustomer);
             await _customerRepository.SaveChangesAsync();
 

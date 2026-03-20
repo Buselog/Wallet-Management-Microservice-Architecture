@@ -4,7 +4,7 @@ using Customer.InnerInfrastructure.DependencyResolvers;
 using Customer.InnerInfrastructure.Services;
 using Customer.Persistence.DependencyResolvers;
 using Customer.WebAPI.Middlewares;
-using Microsoft.Extensions.Options;
+using FluentValidation.AspNetCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -24,6 +24,8 @@ builder.Services.AddAuthenticationService(builder.Configuration);
 builder.Services.AddMapperService();
 builder.Services.AddPersistenceServices();
 builder.Services.AddManagerServices();
+builder.Services.AddValidatorServices();
+builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddHttpClient<IWalletServiceClient, WalletServiceClient>(options =>
 {
@@ -78,6 +80,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
