@@ -12,6 +12,7 @@ namespace Wallet.Application.Validators
                 .WithMessage("Müşteri numarası boş olamaz.");
 
             RuleFor(x => x.Currency)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage("Para birimi alanı boş bırakılamaz.")
                 .Length(3)
