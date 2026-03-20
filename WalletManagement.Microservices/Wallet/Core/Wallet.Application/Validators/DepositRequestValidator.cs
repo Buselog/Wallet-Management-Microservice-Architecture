@@ -12,6 +12,7 @@ namespace Wallet.Application.Validators
                 .WithMessage("Cüzdan ID zorunludur.");
 
             RuleFor(x => x.Amount)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage("Miktar alanı boş olamaz.")
                 .GreaterThan(0)

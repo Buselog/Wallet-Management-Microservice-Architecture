@@ -16,6 +16,7 @@ namespace Wallet.Application.Validators
                 .WithMessage("Alıcı (IBAN veya Müşteri No) boş bırakılamaz.");
 
             RuleFor(x => x.Amount)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage("Tutar alanı boş olamaz.")
                 .GreaterThan(0)
