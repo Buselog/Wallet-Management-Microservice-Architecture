@@ -8,7 +8,7 @@ namespace Wallet.Application.Validators
         public TransferRequestValidator()
         {
             RuleFor(x => x.FromWalletId)
-                .NotEmpty()
+                .NotNull()
                 .WithMessage("Gönderen cüzdan seçilmelidir.");
 
             RuleFor(x => x.Target)
@@ -17,7 +17,7 @@ namespace Wallet.Application.Validators
 
             RuleFor(x => x.Amount)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty()
+                .NotNull()
                 .WithMessage("Tutar alanı boş olamaz.")
                 .GreaterThan(0)
                 .WithMessage("Transfer tutarı 0'dan büyük olmalıdır.");
