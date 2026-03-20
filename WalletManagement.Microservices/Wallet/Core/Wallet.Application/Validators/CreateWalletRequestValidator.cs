@@ -19,6 +19,9 @@ namespace Wallet.Application.Validators
                 .WithMessage("Para birimi 3 karakter olmalıdır (örn: TRY).");
 
             RuleFor(x => x.Type)
+                .Cascade(CascadeMode.Stop)
+                .NotEmpty()
+                .WithMessage("Cüzdan tipi seçimi boş bırakılamaz.")
                 .IsInEnum()
                 .WithMessage("Geçersiz cüzdan tipi.");
         }
