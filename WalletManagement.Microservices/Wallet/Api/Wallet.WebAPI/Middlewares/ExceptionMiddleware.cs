@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using Serilog;
+﻿using Serilog;
 using System.Net;
 using System.Text.Json;
 using Wallet.Domain.Exceptions;
@@ -33,7 +32,7 @@ namespace Wallet.WebAPI.Middlewares
 
             var (statusCode, message) = exception switch
             {
-                ValidationException valEx =>
+                FluentValidation.ValidationException valEx =>
                   (HttpStatusCode.BadRequest, string.Join(" | ", valEx.Errors.Select(e => e.ErrorMessage))),
 
                 ArgumentException or ArgumentNullException or ArgumentOutOfRangeException =>
