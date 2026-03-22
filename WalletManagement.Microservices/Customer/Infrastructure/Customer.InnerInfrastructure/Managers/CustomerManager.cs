@@ -56,7 +56,10 @@ namespace Customer.InnerInfrastructure.Managers
 
         public async Task<string> GetCustomerNoByPhoneAsync(string phone)
         {
-            var customerNo = await _customerRepository.GetCustomerNoByPhoneAsync(phone);
+            var cleanedPhone = new string(phone.Where(char.IsDigit).ToArray());
+            if (cleanedPhone.StartsWith("0")) cleanedPhone = cleanedPhone.Substring(1);
+
+            var customerNo = await _customerRepository.GetCustomerNoByPhoneAsync(cleanedPhone);
 
             if (string.IsNullOrEmpty(customerNo))
             {
