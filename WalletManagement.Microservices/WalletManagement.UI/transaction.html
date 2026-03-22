@@ -201,9 +201,15 @@
                 const response = await axios.get(`${API_BASE_URL}/api/Wallet/wallets/`);
                 userWallets = response.data;
                 const select = document.getElementById('fromWallet');
+
+                const preSelectedId = localStorage.getItem('selected_wallet_id');
+
                 userWallets.forEach(w => {
-                    select.innerHTML += `<option value="${w.id}">${w.currency} Cüzdanı (ID: ${w.id})</option>`;
+                    const isSelected = (preSelectedId && preSelectedId == w.Id) ? "selected" : "";
+                    select.innerHTML += `<option value="${w.Id}" ${isSelected}>${w.Currency} Cüzdanı (ID: ${w.Id})</option>`;
                 });
+
+                if (preSelectedId) updateWalletDisplay();
             } catch (error) {
                 console.error("Cüzdanlar yüklenemedi:", error);
             }
@@ -213,9 +219,11 @@
             const walletId = document.getElementById('fromWallet').value;
             const infoBox = document.getElementById('selectedWalletInfo');
             if (walletId) {
-                const wallet = userWallets.find(x => x.id == walletId);
-                document.getElementById('currentBalance').innerText = `₺${wallet.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
-                infoBox.classList.remove('d-none');
+                const wallet = userWallets.find(x => x.Id == walletId);
+                if (wallet) {
+                    document.getElementById('currentBalance').innerText = `₺${wallet.Balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
+                    infoBox.classList.remove('d-none');
+                }
             } else {
                 infoBox.classList.add('d-none');
             }
@@ -245,32 +253,35 @@
 
             if (type === 'transfer') {
                 payload = {
-                    fromWalletId: parseInt(walletId),
-                    target: document.getElementById('target').value,
-                    amount: parseFloat(amount),
-                    description: document.getElementById('description').value,
-                    referenceId: referenceId
+                    FromWalletId: parseInt(walletId),
+                    Target: document.getElementById('target').value,
+                    Amount: parseFloat(amount),
+                    Description: document.getElementById('description').value,
+                    ReferenceId: referenceId
                 };
             } else {
                 payload = {
-                    walletId: parseInt(walletId),
-                    amount: parseFloat(amount),
-                    referenceId: referenceId
+                    WalletId: parseInt(walletId),
+                    Amount: parseFloat(amount),
+                    ReferenceId: referenceId
                 };
             }
 
             try {
                 const response = await axios.post(endpoint, payload);
-                alert(response.data.message || "İşlem başarıyla tamamlandı.");
+                alert(response.data.Message || "İşlem başarıyla tamamlandı.");
+
+                localStorage.removeItem('selected_wallet_id');
                 window.location.href = "dashboard.html";
             } catch (error) {
-                const backendError = error.response?.data?.Message || "Sistemsel bir hata oluştu.";
+                const errorData = error.response?.data;
+                const backendError = errorData?.Message || "Sistemsel bir hata oluştu.";
                 alert("Hata: " + backendError);
             }
         }
 
         function logout() {
-            localStorage.removeItem('wallet_token');
+            localStorage.clear();
             window.location.href = "login.html";
         }
 

@@ -214,41 +214,42 @@
                     }
                 });
 
-                const { items, totalCount } = response.data;
+                const { Items, TotalCount } = response.data;
                 tbody.innerHTML = "";
 
-                if (!items || items.length === 0) {
+                if (!Items || Items.length === 0) {
                     tbody.innerHTML = "<tr><td colspan='4' class='text-center text-secondary py-4'>İşlem kaydı bulunamadı.</td></tr>";
                     document.getElementById('recordCount').innerText = `TOPLAM 0 KAYIT`;
                     document.getElementById('pagination').innerHTML = "";
                     return;
                 }
 
-                items.forEach(item => {
-                    const typeLower = item.type.toLowerCase();
-                    const isDeposit = typeLower.includes('deposit') || typeLower.includes('yatırma');
-                    const date = new Date(item.transactionDate).toLocaleString('tr-TR');
+                Items.forEach(item => {
+                    const transactionType = item.TransactionType || "İşlem";
+                    const typeLower = transactionType.toLowerCase();
+                    const isDeposit = typeLower.includes('deposit') || typeLower.includes('yatırma') || item.Amount > 0;
+
+                    const date = new Date(item.CreatedDate).toLocaleString('tr-TR');
 
                     tbody.innerHTML += `
                     <tr>
                         <td class="text-secondary">${date}</td>
                         <td>
                             <span class="status-dot ${isDeposit ? 'status-deposit' : 'status-withdraw'}"></span>
-                            <span class="fw-bold">${item.type.toUpperCase()}</span>
+                            <span class="fw-bold">${transactionType.toUpperCase()}</span>
                         </td>
                         <td class="${isDeposit ? 'amount-pos' : 'amount-neg'}">
-                            ${isDeposit ? '+' : '-'} ₺${Math.abs(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                            ${isDeposit ? '+' : '-'} ₺${Math.abs(item.Amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </td>
-                        <td class="text-secondary small font-monospace">${item.referenceId}</td>
+                        <td class="text-secondary small font-monospace">${item.ReferenceId || '-'}</td>
                     </tr>`;
                 });
 
-                document.getElementById('recordCount').innerText = `TOPLAM ${totalCount} KAYIT`;
-                setupPagination(totalCount, page);
+                document.getElementById('recordCount').innerText = `TOPLAM ${TotalCount} KAYIT`;
+                setupPagination(TotalCount, page);
 
             } catch (error) {
                 console.error("Geçmiş yüklenemedi:", error);
-                const tbody = document.getElementById('historyBody');
                 tbody.innerHTML = "<tr><td colspan='4' class='text-center text-danger py-4'>Veriler yüklenirken bir hata oluştu.</td></tr>";
             }
         }
@@ -293,7 +294,7 @@
                     selectedWalletId = wallets[0].id;
                     loadHistory(1);
                 } else {
-                    document.getElementById('historyBody').innerHTML = "<tr><td colspan='4' class='text-center py-4'>Aktif cüzdanınız bulunmamaktadır.</td></tr>";
+                    document.getElementById('historyBody').innerHTML = "<tr><td colspan='4' class='text-center py-4 text-secondary'>Aktif bir cüzdanınız bulunmamaktadır.</td></tr>";
                 }
             } catch (error) {
                 console.error("Cüzdanlar yüklenemedi:", error);
@@ -302,6 +303,7 @@
 
         function logout() {
             localStorage.removeItem('wallet_token');
+            localStorage.removeItem('user_fullname');
             window.location.href = "login.html";
         }
 
