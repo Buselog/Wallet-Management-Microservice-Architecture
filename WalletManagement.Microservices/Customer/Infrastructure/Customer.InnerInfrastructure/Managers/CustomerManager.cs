@@ -56,8 +56,18 @@ namespace Customer.InnerInfrastructure.Managers
 
         public async Task<string> GetCustomerNoByPhoneAsync(string phone)
         {
+            if (phone.Any(c => !char.IsDigit(c) && !" ()-+".Contains(c)))
+            {
+                throw new BaseBusinessException("Telefon numarası geçersiz karakterler içeriyor.");
+            }
+
             var cleanedPhone = new string(phone.Where(char.IsDigit).ToArray());
             if (cleanedPhone.StartsWith("0")) cleanedPhone = cleanedPhone.Substring(1);
+
+            if (cleanedPhone.Length != 10)
+            {
+                throw new BaseBusinessException("Telefon numarası tam 10 hane (5xx...) olmalıdır.");
+            }
 
             var customerNo = await _customerRepository.GetCustomerNoByPhoneAsync(cleanedPhone);
 
