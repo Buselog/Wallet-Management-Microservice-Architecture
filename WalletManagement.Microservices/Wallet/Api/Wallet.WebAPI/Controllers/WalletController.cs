@@ -38,7 +38,7 @@ namespace Wallet.WebAPI.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateWallet([FromBody] CreateWalletRequestDto request)
         {
-            var result = await _walletManager.CreateNewWalletAsync(currentCustomerNo, request.CustomerNo, request.Currency, request.Type);
+            var result = await _walletManager.CreateNewWalletAsync(currentCustomerNo, request.Currency, request.Type);
             return Ok(result);
         }
 
