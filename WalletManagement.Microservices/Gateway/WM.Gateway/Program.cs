@@ -25,12 +25,24 @@ builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
 builder.Services.AddOcelot();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()   
+               .AllowAnyMethod()   
+               .AllowAnyHeader();  
+    });
+});
+
 var app = builder.Build();
 
 app.UseSwaggerForOcelotUI(opt =>
 {
     opt.PathToSwaggerGenerator = "/swagger/v1/swagger.json";
 });
+
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
