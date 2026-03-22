@@ -171,7 +171,10 @@ namespace Wallet.InnerInfrastructure.Managers
 
         private async Task<string> GetCustomerNoByPhoneFromApi(string phoneNumber)
         {
-            var customerNo = await _customerService.GetCustomerNoByPhoneAsync(phoneNumber);
+            var cleanedPhone = new string(phoneNumber.Where(char.IsDigit).ToArray());
+            if (cleanedPhone.StartsWith("0")) cleanedPhone = cleanedPhone.Substring(1);
+
+            var customerNo = await _customerService.GetCustomerNoByPhoneAsync(cleanedPhone);
             return customerNo!;
         }
     }
