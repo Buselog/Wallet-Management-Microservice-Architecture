@@ -145,21 +145,26 @@ namespace Wallet.InnerInfrastructure.Managers
 
         private async Task<string> ResolveTargetAddress(string address)
         {
-            if (address.StartsWith("TR"))
+            if (address.Trim().StartsWith("TR", StringComparison.OrdinalIgnoreCase))
             {
-                if (!IbanHelper.Validate(address))
+                var cleanIban = address.Replace(" ", "").ToUpper();
+                if (!IbanHelper.Validate(cleanIban))
                 {
                     throw new InvalidIbanException();
                 }
-                return address;
+                return cleanIban;
             }
 
-            if(string.IsNullOrWhiteSpace(address) || address.Length < 10)
+            var cleanedPhone = new string(address.Where(char.IsDigit).ToArray());
+
+            if (cleanedPhone.StartsWith("0")) cleanedPhone = cleanedPhone.Substring(1);
+
+            if (cleanedPhone.Length != 10)
             {
                 throw new BaseBusinessException("Telefon numarası formatı hatalı.");
             }
 
-            var customerNo = await GetCustomerNoByPhoneFromApi(address);
+            var customerNo = await GetCustomerNoByPhoneFromApi(cleanedPhone);
 
             if (string.IsNullOrEmpty(customerNo))
             {
@@ -171,10 +176,7 @@ namespace Wallet.InnerInfrastructure.Managers
 
         private async Task<string> GetCustomerNoByPhoneFromApi(string phoneNumber)
         {
-            var cleanedPhone = new string(phoneNumber.Where(char.IsDigit).ToArray());
-            if (cleanedPhone.StartsWith("0")) cleanedPhone = cleanedPhone.Substring(1);
-
-            var customerNo = await _customerService.GetCustomerNoByPhoneAsync(cleanedPhone);
+            var customerNo = await _customerService.GetCustomerNoByPhoneAsync(phoneNumber);
             return customerNo!;
         }
     }

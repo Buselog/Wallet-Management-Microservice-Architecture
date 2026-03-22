@@ -15,12 +15,15 @@ namespace Wallet.Application.Validators
                 .WithMessage("Geçerli bir gönderici cüzdan seçilmelidir.");
 
             RuleFor(x => x.Target)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage("Alıcı (IBAN veya Telefon No) boş bırakılamaz.")
+                .Matches(@"^(TR[A-Z0-9]{24}|[0-9\s\(\)\-]+)$")
+                .WithMessage("Alıcı bilgisi ya geçerli bir IBAN ya da geçerli bir telefon numarası olmalıdır.")
                 .Must(y =>
                 {
                     if (y.StartsWith("TR", StringComparison.OrdinalIgnoreCase))
-                        return y.Length >= 15;
+                        return y.Length == 26;
 
                     var digitsOnly = new string(y.Where(char.IsDigit).ToArray());
 
