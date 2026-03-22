@@ -39,22 +39,17 @@ namespace Wallet.InnerInfrastructure.Managers
             return _mapper.Map<List<WalletDto>>(wallets);
         }
 
-        public async Task<WalletDto> CreateNewWalletAsync(string currentCustomerNo, string customerNo, string currency, WalletType? type)
+        public async Task<WalletDto> CreateNewWalletAsync(string currentCustomerNo, string currency, WalletType? type)
         {
             var walletType = type ?? 0;
 
-            if (currentCustomerNo!= customerNo)
-            {
-                throw new UnauthorizedAccessException("Bu cüzdan üzerinde işlem yapma yetkiniz bulunmamaktadır!");
-            }
-
-            var existing = await _walletRepository.GetWalletsByCustomerNoAsync(customerNo);
+            var existing = await _walletRepository.GetWalletsByCustomerNoAsync(currentCustomerNo);
             if (existing.Any(x => x.Currency == currency && x.Type == walletType && x.IsActive))
                 throw new BaseBusinessException($"{currency} - {walletType} tipinde aktif bir cüzdan zaten mevcut.");
 
             int nextSuffix = existing.Count + 1;
 
-            var newWallet = _factory.CreateWallet(customerNo, currency, walletType, nextSuffix);
+            var newWallet = _factory.CreateWallet(currentCustomerNo, currency, walletType, nextSuffix);
 
             await _walletRepository.AddAsync(newWallet);
             await _walletRepository.SaveChangesAsync();
