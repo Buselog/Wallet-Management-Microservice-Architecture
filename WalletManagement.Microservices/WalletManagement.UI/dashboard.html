@@ -41,14 +41,20 @@
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border-radius: 16px;
             padding: 20px;
-            border: 1px solid #334155;
+            border: 2px solid #334155;
             position: relative;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .wallet-card:hover {
             transform: translateY(-5px);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .wallet-card.selected {
             border-color: #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
         }
 
         .delete-btn {
@@ -57,6 +63,7 @@
             right: 15px;
             color: #94a3b8;
             cursor: pointer;
+            z-index: 10;
         }
 
         .delete-btn:hover {
@@ -82,13 +89,6 @@
             border: 1px solid #334155;
             color: white;
         }
-
-        .form-control:focus {
-            background-color: #0f172a;
-            color: white;
-            border-color: #ef4444;
-            box-shadow: none;
-        }
     </style>
 </head>
 
@@ -112,7 +112,7 @@
             <div class="col-md-10 p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h2>Ana Sayfa</h2>
+                        <h2 id="welcomeText">Hoş Geldiniz</h2>
                         <p class="text-secondary">Varlıklarınızın güncel dağılımı</p>
                     </div>
                     <button class="btn btn-danger px-4 py-2" data-bs-toggle="modal" data-bs-target="#newWalletModal">
@@ -123,13 +123,14 @@
                 <div class="row g-4 mb-5">
                     <div class="col-md-4">
                         <div class="stat-card">
-                            <small class="text-secondary">TOPLAM BAKİYE</small>
+                            <small class="text-secondary">TOPLAM BAKİYE (TRY Eşdeğeri)</small>
                             <h2 id="totalBalance" class="mt-2">₺0</h2>
                         </div>
                     </div>
                 </div>
 
-                <h4 class="mb-4">Cüzdanlarım</h4>
+                <h4 class="mb-4">Cüzdanlarım <small class="text-muted" style="font-size: 0.9rem;">(Seçmek için
+                        tıklayın)</small></h4>
                 <div class="row g-4" id="walletContainer">
                 </div>
             </div>
@@ -172,8 +173,10 @@
     <script>
         const API_BASE_URL = "https://localhost:5000";
         const token = localStorage.getItem('wallet_token');
+        const fullName = localStorage.getItem('user_fullname');
 
         if (!token) window.location.href = "login.html";
+        if (fullName) document.getElementById('welcomeText').innerText = `Hoş Geldiniz, ${fullName}`;
 
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
@@ -186,30 +189,37 @@
 
                 container.innerHTML = "";
                 wallets.forEach(w => {
-                    total += w.balance;
+                    total += w.Balance;
+
                     container.innerHTML += `
-                    <div class="col-md-4">
-                        <div class="wallet-card">
-                            <i class="bi bi-trash delete-btn" onclick="deleteWallet(${w.id})"></i>
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <small class="text-secondary d-block">BİREYSEL CÜZDAN</small>
-                                    <span class="currency-badge mt-1">${w.currency}</span>
-                                </div>
-                                <small class="text-secondary">ID: #${w.id}</small>
+                <div class="col-md-4">
+                    <div class="wallet-card" id="card-${w.Id}" onclick="selectWallet(${w.Id})">
+                        <i class="bi bi-trash delete-btn" onclick="event.stopPropagation(); deleteWallet(${w.Id})"></i>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <small class="text-secondary d-block">BİREYSEL CÜZDAN</small>
+                                <span class="currency-badge mt-1">${w.Currency}</span>
                             </div>
-                            <h3 class="mb-0">₺${w.balance.toLocaleString('tr-TR')}</h3>
-                            <small class="text-muted mt-2 d-block">${getWalletTypeName(w.type)}</small>
+                            <small class="text-secondary">ID: #${w.Id}</small>
                         </div>
-                    </div>`;
+                        <h3 class="mb-0">₺${w.Balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</h3>
+                        <small class="text-muted mt-2 d-block">${getWalletTypeName(w.Type)}</small>
+                    </div>
+                </div>`;
                 });
 
-                document.getElementById('totalBalance').innerText = `₺${total.toLocaleString('tr-TR')}`;
+                document.getElementById('totalBalance').innerText = `₺${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
 
             } catch (error) {
                 console.error("Cüzdanlar yüklenemedi", error);
                 if (error.response?.status === 401) logout();
             }
+        }
+
+        function selectWallet(walletId) {
+            document.querySelectorAll('.wallet-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById(`card-${walletId}`).classList.add('selected');
+            localStorage.setItem('selected_wallet_id', walletId);
         }
 
         function getWalletTypeName(type) {
@@ -223,10 +233,9 @@
 
             try {
                 await axios.post(`${API_BASE_URL}/api/Wallet/create`, {
-                    currency: currency,
-                    type: parseInt(type)
+                    Currency: currency,
+                    Type: parseInt(type)
                 });
-
                 location.reload();
             } catch (error) {
                 alert(error.response?.data?.Message || "Cüzdan oluşturulamadı.");
@@ -235,7 +244,6 @@
 
         async function deleteWallet(id) {
             if (!confirm("Bu cüzdanı kapatmak istediğinize emin misiniz?")) return;
-
             try {
                 await axios.delete(`${API_BASE_URL}/api/Wallet/${id}/delete`);
                 loadWallets();
@@ -245,7 +253,7 @@
         }
 
         function logout() {
-            localStorage.removeItem('wallet_token');
+            localStorage.clear();
             window.location.href = "login.html";
         }
 

@@ -11,22 +11,36 @@
             height: 100vh;
             display: flex;
             align-items: center;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .register-card {
             width: 100%;
             max-width: 500px;
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 12px;
             background: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
         }
 
         .error-msg {
             color: #dc3545;
-            font-size: 0.85rem;
-            margin-top: 4px;
+            font-size: 0.82rem;
+            margin-top: 5px;
+            font-weight: 500;
             display: none;
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            border: none;
+            padding: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
         }
     </style>
 </head>
@@ -34,42 +48,45 @@
 <body>
 
     <div class="container d-flex justify-content-center">
-        <div class="register-card">
-            <h3 class="text-center mb-4">Yeni Hesap Oluştur</h3>
-            <div id="alertBox" class="alert d-none"></div>
+        <div class="register-card shadow">
+            <h3 class="text-center mb-4 fw-bold">Yeni Hesap Oluştur</h3>
+            <div id="alertBox" class="alert d-none py-2 text-center" style="font-size: 0.9rem;"></div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Ad</label>
+                    <label class="form-label text-secondary small fw-bold">Ad</label>
                     <input type="text" id="firstName" class="form-control" placeholder="Ahmet">
                     <div id="error_firstname" class="error-msg"></div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Soyad</label>
+                    <label class="form-label text-secondary small fw-bold">Soyad</label>
                     <input type="text" id="lastName" class="form-control" placeholder="Yılmaz">
                     <div id="error_lastname" class="error-msg"></div>
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label fw-bold">Email</label>
+                <label class="form-label text-secondary small fw-bold">Email</label>
                 <input type="email" id="email" class="form-control" placeholder="ahmet@mail.com">
                 <div id="error_email" class="error-msg"></div>
             </div>
             <div class="mb-3">
-                <label class="form-label fw-bold">Telefon (5xx...)</label>
+                <label class="form-label text-secondary small fw-bold">Telefon (5xx...)</label>
                 <input type="text" id="phone" class="form-control" placeholder="555 444 33 22">
                 <div id="error_phonenumber" class="error-msg"></div>
             </div>
             <div class="mb-3">
-                <label class="form-label fw-bold">Şifre</label>
+                <label class="form-label text-secondary small fw-bold">Şifre</label>
                 <input type="password" id="password" class="form-control" placeholder="******">
                 <div id="error_password" class="error-msg"></div>
             </div>
 
-            <button onclick="handleRegister()" class="btn btn-success w-100 mb-3 fw-bold">Kayıt Ol ve Cüzdan
-                Oluştur</button>
-            <p class="text-center mb-0 text-secondary">Zaten hesabın var mı? <a href="login.html"
-                    class="text-decoration-none">Giriş Yap</a></p>
+            <button onclick="handleRegister()" id="regBtn" class="btn btn-success w-100 mb-3 fw-bold shadow-sm">
+                Kayıt Ol ve Cüzdan Oluştur
+            </button>
+            <p class="text-center mb-0 text-muted small">
+                Zaten hesabın var mı? <a href="login.html" class="text-primary text-decoration-none fw-bold">Giriş
+                    Yap</a>
+            </p>
         </div>
     </div>
 
@@ -79,13 +96,14 @@
 
         async function handleRegister() {
             const alertBox = document.getElementById('alertBox');
+            const regBtn = document.getElementById('regBtn');
 
-            const data = {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                email: document.getElementById('email').value,
-                phoneNumber: document.getElementById('phone').value,
-                password: document.getElementById('password').value
+            const payload = {
+                FirstName: document.getElementById('firstName').value.trim(),
+                LastName: document.getElementById('lastName').value.trim(),
+                Email: document.getElementById('email').value.trim(),
+                PhoneNumber: document.getElementById('phone').value.trim(),
+                Password: document.getElementById('password').value
             };
 
             alertBox.classList.add('d-none');
@@ -94,36 +112,59 @@
                 el.style.display = 'none';
             });
 
+            regBtn.disabled = true;
+            regBtn.innerText = "İşlem Yapılıyor...";
+
             try {
-                const response = await axios.post(`${API_BASE_URL}/api/Auth/register`, data);
+                const response = await axios.post(`${API_BASE_URL}/api/Auth/register`, payload);
 
                 alertBox.className = "alert alert-success";
-                alertBox.innerText = (response.data.message || response.data) + " Giriş sayfasına yönlendiriliyorsunuz...";
+                alertBox.innerText = (response.data.Message || "Kayıt başarılı!") + " Giriş sayfasına yönlendiriliyorsunuz...";
                 alertBox.classList.remove('d-none');
 
                 setTimeout(() => { window.location.href = "login.html"; }, 2000);
 
             } catch (error) {
                 const errorData = error.response?.data;
+                const fullMessage = errorData?.Message || "Kayıt işlemi başarısız!";
 
-                if (errorData && errorData.ValidationErrors) {
-                    for (const [key, messages] of Object.entries(errorData.ValidationErrors)) {
-                        const errorDiv = document.getElementById(`error_${key.toLowerCase()}`);
-                        if (errorDiv) {
-                            errorDiv.innerText = messages[0];
-                            errorDiv.style.display = 'block';
+                if (fullMessage.includes("|")) {
+                    const errorArray = fullMessage.split("|");
+
+                    errorArray.forEach(err => {
+                        const message = err.trim().toLowerCase();
+
+                        if (message.includes("ad") && !message.includes("soyad")) {
+                            showError("error_firstname", err.trim());
+                        } else if (message.includes("soyad")) {
+                            showError("error_lastname", err.trim());
+                        } else if (message.includes("email")) {
+                            showError("error_email", err.trim());
+                        } else if (message.includes("telefon") || message.includes("phone")) {
+                            showError("error_phonenumber", err.trim());
+                        } else if (message.includes("şifre") || message.includes("password")) {
+                            showError("error_password", err.trim());
                         }
-                    }
-                }
-                else {
+                    });
+                } else {
                     alertBox.className = "alert alert-danger";
-                    alertBox.innerText = errorData?.Message || "Kayıt işlemi başarısız!";
+                    alertBox.innerText = fullMessage;
                     alertBox.classList.remove('d-none');
                 }
+            } finally {
+                regBtn.disabled = false;
+                regBtn.innerText = "Kayıt Ol ve Cüzdan Oluştur";
+            }
+        }
+
+        function showError(id, msg) {
+            const div = document.getElementById(id);
+            if (div) {
+                div.innerText = msg;
+                div.style.display = 'block';
             }
         }
     </script>
-
 </body>
 
 </html>

@@ -12,22 +12,42 @@
             height: 100vh;
             display: flex;
             align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .login-card {
             width: 100%;
             max-width: 400px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             background: white;
+            border: 1px solid #e2e8f0;
         }
 
         .error-msg {
             color: #dc3545;
-            font-size: 0.85rem;
-            margin-top: 4px;
+            font-size: 0.82rem;
+            margin-top: 5px;
+            font-weight: 500;
             display: none;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
     </style>
 </head>
@@ -36,25 +56,29 @@
 
     <div class="container d-flex justify-content-center">
         <div class="login-card">
-            <h3 class="text-center mb-4">Cüzdan Sistemi</h3>
+            <h3 class="text-center mb-4 fw-bold text-dark">Cüzdan Sistemi</h3>
 
-            <div id="alertBox" class="alert d-none"></div>
+            <div id="alertBox" class="alert d-none py-2 text-center" style="font-size: 0.9rem;"></div>
 
             <div class="mb-3">
-                <label class="form-label fw-bold">Email Adresi</label>
+                <label class="form-label text-secondary small fw-bold">Email Adresi</label>
                 <input type="email" id="email" class="form-control" placeholder="example@mail.com">
                 <div id="error_email" class="error-msg"></div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Şifre</label>
+            <div class="mb-4">
+                <label class="form-label text-secondary small fw-bold">Şifre</label>
                 <input type="password" id="password" class="form-control" placeholder="******">
                 <div id="error_password" class="error-msg"></div>
             </div>
 
-            <button onclick="handleLogin()" class="btn btn-primary w-100 mb-3">Giriş Yap</button>
-            <p class="text-center mb-0 text-secondary">Hesabın yok mu? <a href="register.html"
-                    class="text-decoration-none">Kayıt Ol</a></p>
+            <button onclick="handleLogin()" id="loginBtn" class="btn btn-primary w-100 mb-3 shadow-sm">
+                Giriş Yap
+            </button>
+
+            <p class="text-center mb-0 text-muted small">
+                Hesabın yok mu? <a href="register.html" class="text-primary text-decoration-none fw-bold">Kayıt Ol</a>
+            </p>
         </div>
     </div>
 
@@ -64,9 +88,10 @@
         const API_BASE_URL = "https://localhost:5000";
 
         async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const emailInput = document.getElementById('email').value.trim();
+            const passwordInput = document.getElementById('password').value;
             const alertBox = document.getElementById('alertBox');
+            const loginBtn = document.getElementById('loginBtn');
 
             alertBox.classList.add('d-none');
             document.querySelectorAll('.error-msg').forEach(el => {
@@ -74,39 +99,53 @@
                 el.style.display = 'none';
             });
 
+            loginBtn.disabled = true;
+            loginBtn.innerText = "Giriş Yapılıyor...";
+
             try {
                 const response = await axios.post(`${API_BASE_URL}/api/Auth/login`, {
-                    email: email,
-                    password: password
+                    Email: emailInput,
+                    Password: passwordInput
                 });
 
-                const token = response.data.token;
-                localStorage.setItem('wallet_token', token);
+                const data = response.data;
+                localStorage.setItem('wallet_token', data.Token);
+                localStorage.setItem('user_fullname', data.FullName);
 
                 alertBox.className = "alert alert-success";
-                alertBox.innerText = "Giriş başarılı! Yönlendiriliyorsunuz...";
+                alertBox.innerText = `Hoş geldiniz, ${data.FullName}!`;
                 alertBox.classList.remove('d-none');
 
-                setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
+                setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
 
             } catch (error) {
                 const errorData = error.response?.data;
+                const fullMessage = errorData?.Message || "Giriş yapılırken bir hata oluştu.";
 
-                if (errorData && errorData.ValidationErrors) {
-                    for (const [key, messages] of Object.entries(errorData.ValidationErrors)) {
-                        const fieldName = key.toLowerCase();
-                        const errorDiv = document.getElementById(`error_${fieldName}`);
-                        if (errorDiv) {
-                            errorDiv.innerText = messages[0];
-                            errorDiv.style.display = 'block';
+                if (fullMessage.includes("|")) {
+                    const errorArray = fullMessage.split("|");
+
+                    errorArray.forEach(err => {
+                        const message = err.trim();
+                        if (message.toLowerCase().includes("email")) {
+                            const div = document.getElementById('error_email');
+                            div.innerText = message;
+                            div.style.display = 'block';
                         }
-                    }
-                }
-                else {
+                        if (message.toLowerCase().includes("şifre") || message.toLowerCase().includes("password")) {
+                            const div = document.getElementById('error_password');
+                            div.innerText = message;
+                            div.style.display = 'block';
+                        }
+                    });
+                } else {
                     alertBox.className = "alert alert-danger";
-                    alertBox.innerText = errorData?.Message || "Giriş işlemi sırasında bir hata oluştu!";
+                    alertBox.innerText = fullMessage;
                     alertBox.classList.remove('d-none');
                 }
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Giriş Yap";
             }
         }
     </script>
