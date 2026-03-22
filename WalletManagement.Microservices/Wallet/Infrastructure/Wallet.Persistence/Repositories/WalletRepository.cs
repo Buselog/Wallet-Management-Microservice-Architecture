@@ -28,7 +28,10 @@ namespace Wallet.Persistence.Repositories
 
         public async Task<List<WalletEntity>> GetWalletsByCustomerNoAsync(string customerNo)
         {
-            var wallets = await _context.Wallets.Where(w => w.CustomerNo == customerNo).ToListAsync();
+            var wallets = await _context.Wallets
+                .Where(w => w.CustomerNo == customerNo && w.IsActive== true)
+                .ToListAsync();
+
             return wallets;
         }
 
