@@ -113,7 +113,7 @@
         }
 
         .helper-text {
-            color: #94a3b8;
+            color: #cbd5e1;
             font-size: 0.85rem;
             font-style: italic;
         }
@@ -152,7 +152,7 @@
                 <div class="row g-4 mb-5">
                     <div class="col-md-4">
                         <div class="stat-card shadow-sm">
-                            <small class="text-secondary fw-bold">TOPLAM BAKİYE</small>
+                            <small id="totalBalanceLabel" class="text-secondary fw-bold">TOPLAM BAKİYE</small>
                             <h2 id="totalBalance" class="mt-2 text-white">₺0,00</h2>
                         </div>
                     </div>
@@ -178,15 +178,15 @@
                         <label class="form-label text-secondary small fw-bold">Cüzdan Tipi</label>
                         <select id="walletType" class="form-select">
                             <option value="">Seçiniz...</option>
-                            <option value="2">Vadesiz Hesap</option>
-                            <option value="1">Vadeli Hesap</option>
-                            <option value="3">Yatırım Hesabı</option>
+                            <option value="1">Vadesiz Hesap (Checking)</option>
+                            <option value="2">Vadeli Hesap (Saving)</option>
+                            <option value="3">Yatırım Hesabı (Investment)</option>
                         </select>
                         <div id="error_type" class="error-msg"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">Para Birimi</label>
-                        <input type="text" id="currency" class="form-control" placeholder="Örn: TRY, USD, EUR">
+                        <input type="text" id="currency" class="form-control" placeholder="Örn: TRY, USD">
                         <div id="error_currency" class="error-msg"></div>
                     </div>
                 </div>
@@ -228,7 +228,7 @@
                 const wallets = response.data;
                 const container = document.getElementById('walletContainer');
                 let total = 0;
-                let displayCurrency = "₺";
+                let lastCurrency = "TRY";
 
                 container.innerHTML = "";
                 wallets.forEach(w => {
@@ -238,7 +238,8 @@
                     const wTypeName = w.typeName || w.TypeName || "Cüzdan";
 
                     total += wBalance;
-                    displayCurrency = (wCurrency === 'TRY') ? "₺" : wCurrency;
+                    lastCurrency = wCurrency;
+                    const symbol = (wCurrency === 'TRY') ? "₺" : wCurrency;
 
                     container.innerHTML += `
                 <div class="col-md-4">
@@ -253,23 +254,22 @@
                                 <i class="bi bi-trash delete-btn" onclick="event.stopPropagation(); deleteWallet(${wId})"></i>
                             </div>
                         </div>
-                        <h3 class="mb-0">${displayCurrency} ${wBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</h3>
+                        <h3 class="mb-0">${symbol} ${wBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</h3>
                     </div>
                 </div>`;
                 });
 
-                document.getElementById('totalBalance').innerText = `${displayCurrency} ${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
+                const totalSymbol = (lastCurrency === 'TRY') ? "₺" : lastCurrency;
+                document.getElementById('totalBalanceLabel').innerText = `TOPLAM BAKİYE (${lastCurrency} Eşdeğeri)`;
+                document.getElementById('totalBalance').innerText = `${totalSymbol} ${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
 
-            } catch (error) {
-                console.error("Yükleme hatası:", error);
-            }
+            } catch (error) { console.error(error); }
         }
 
         async function createNewWallet() {
             const typeSelect = document.getElementById('walletType');
             const currencyInput = document.getElementById('currency');
             const alertBox = document.getElementById('modalAlert');
-            const btn = document.getElementById('createBtn');
 
             alertBox.classList.add('d-none');
             document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
@@ -280,31 +280,21 @@
                 type: typeSelect.value ? parseInt(typeSelect.value) : null
             };
 
-            btn.disabled = true;
-
             try {
                 await axios.post(`${API_BASE_URL}/api/Wallet/create`, payload);
                 location.reload();
             } catch (error) {
                 const errorData = error.response?.data;
-
                 if (errorData?.errors) {
                     for (const [key, messages] of Object.entries(errorData.errors)) {
-                        const field = key.toLowerCase();
-                        const div = document.getElementById(`error_${field}`);
-                        if (div) {
-                            div.innerText = messages[0];
-                            div.style.display = 'block';
-                        }
+                        const div = document.getElementById(`error_${key.toLowerCase()}`);
+                        if (div) { div.innerText = messages[0]; div.style.display = 'block'; }
                     }
-                }
-                else {
+                } else {
                     const msg = errorData?.Message || errorData?.message || "Cüzdan oluşturulamadı.";
                     alertBox.innerText = msg;
                     alertBox.classList.remove('d-none');
                 }
-            } finally {
-                btn.disabled = false;
             }
         }
 
@@ -321,13 +311,11 @@
                 await axios.delete(`${API_BASE_URL}/api/Wallet/${id}/delete`);
                 loadWallets();
             } catch (error) {
-                const msg = error.response?.data?.message || error.response?.data?.Message || "Silme başarısız.";
-                alert(msg);
+                alert(error.response?.data?.message || "Silme başarısız.");
             }
         }
 
         function logout() { localStorage.clear(); window.location.href = "login.html"; }
-
         window.onload = loadWallets;
     </script>
 </body>
