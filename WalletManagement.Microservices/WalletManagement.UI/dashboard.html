@@ -17,12 +17,14 @@
             background-color: #1e293b;
             min-height: 100vh;
             padding: 20px;
+            border-right: 1px solid #334155;
         }
 
         .nav-link {
             color: #94a3b8;
             margin-bottom: 10px;
             border-radius: 8px;
+            transition: 0.3s;
         }
 
         .nav-link.active {
@@ -33,7 +35,7 @@
         .stat-card {
             background-color: #1e293b;
             border-radius: 16px;
-            padding: 20px;
+            padding: 25px;
             border: 1px solid #334155;
         }
 
@@ -57,13 +59,24 @@
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
         }
 
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .wallet-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .delete-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
             color: #94a3b8;
             cursor: pointer;
-            z-index: 10;
+            font-size: 1.2rem;
+            transition: 0.2s;
         }
 
         .delete-btn:hover {
@@ -75,6 +88,7 @@
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
+            font-weight: bold;
         }
 
         .modal-content {
@@ -88,6 +102,20 @@
             background-color: #0f172a;
             border: 1px solid #334155;
             color: white;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .helper-text {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            font-style: italic;
         }
     </style>
 </head>
@@ -115,21 +143,22 @@
                         <h2 id="welcomeText">Hoş Geldiniz</h2>
                         <p class="text-secondary">Varlıklarınızın güncel dağılımı</p>
                     </div>
-                    <button class="btn btn-danger px-4 py-2" data-bs-toggle="modal" data-bs-target="#newWalletModal">
+                    <button class="btn btn-danger px-4 py-2 shadow" data-bs-toggle="modal"
+                        data-bs-target="#newWalletModal">
                         <i class="bi bi-plus-lg me-2"></i> Yeni Cüzdan
                     </button>
                 </div>
 
                 <div class="row g-4 mb-5">
                     <div class="col-md-4">
-                        <div class="stat-card">
-                            <small class="text-secondary">TOPLAM BAKİYE (TRY Eşdeğeri)</small>
-                            <h2 id="totalBalance" class="mt-2">₺0</h2>
+                        <div class="stat-card shadow-sm">
+                            <small class="text-secondary fw-bold">TOPLAM BAKİYE</small>
+                            <h2 id="totalBalance" class="mt-2 text-white">₺0,00</h2>
                         </div>
                     </div>
                 </div>
 
-                <h4 class="mb-4">Cüzdanlarım <small class="text-muted" style="font-size: 0.9rem;">(Seçmek için
+                <h4 class="mb-4">Cüzdanlarım <small class="helper-text ml-2">(Seçmek için kartın üzerine
                         tıklayın)</small></h4>
                 <div class="row g-4" id="walletContainer"></div>
             </div>
@@ -138,29 +167,33 @@
 
     <div class="modal fade" id="newWalletModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content p-3">
+            <div class="modal-content p-3 shadow-lg">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title">Yeni Cüzdan Oluştur</h5>
+                    <h5 class="modal-title fw-bold">Yeni Cüzdan Oluştur</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div id="modalAlert" class="alert alert-danger d-none" style="font-size: 0.9rem;"></div>
                     <div class="mb-3">
-                        <label class="form-label text-secondary">Cüzdan Tipi</label>
+                        <label class="form-label text-secondary small fw-bold">Cüzdan Tipi</label>
                         <select id="walletType" class="form-select">
-                            <option value="1">Vadesiz (Checking)</option>
-                            <option value="2">Vadeli (Saving)</option>
-                            <option value="3">Yatırım (Investment)</option>
+                            <option value="">Seçiniz...</option>
+                            <option value="2">Vadesiz Hesap</option>
+                            <option value="1">Vadeli Hesap</option>
+                            <option value="3">Yatırım Hesabı</option>
                         </select>
+                        <div id="error_type" class="error-msg"></div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label text-secondary">Para Birimi</label>
-                        <input type="text" id="currency" class="form-control" placeholder="Örn: TRY, USD, EUR"
-                            maxlength="3">
+                        <label class="form-label text-secondary small fw-bold">Para Birimi</label>
+                        <input type="text" id="currency" class="form-control" placeholder="Örn: TRY, USD, EUR">
+                        <div id="error_currency" class="error-msg"></div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="button" class="btn btn-danger px-4" onclick="createNewWallet()">Oluştur</button>
+                    <button type="button" id="createBtn" class="btn btn-danger px-4 fw-bold"
+                        onclick="createNewWallet()">Oluştur</button>
                 </div>
             </div>
         </div>
@@ -174,14 +207,20 @@
         const token = localStorage.getItem('wallet_token');
         const fullName = localStorage.getItem('user_fullname');
 
-        if (!token || token === "undefined") {
-            console.warn("Token bulunamadı!");
-            window.location.replace("login.html");
-        }
-
+        if (!token) window.location.href = "login.html";
         if (fullName) document.getElementById('welcomeText').innerText = `Hoş Geldiniz, ${fullName}`;
 
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        function getCustomerNoFromToken(t) {
+            try {
+                const base64Url = t.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                const decoded = JSON.parse(jsonPayload);
+                return decoded.CustomerNo || decoded.customerno;
+            } catch (e) { return null; }
+        }
 
         async function loadWallets() {
             try {
@@ -189,67 +228,91 @@
                 const wallets = response.data;
                 const container = document.getElementById('walletContainer');
                 let total = 0;
+                let displayCurrency = "₺";
 
                 container.innerHTML = "";
                 wallets.forEach(w => {
                     const wId = w.id || w.Id;
                     const wBalance = w.balance ?? w.Balance ?? 0;
                     const wCurrency = w.currency || w.Currency || "TRY";
-                    const wType = w.type ?? w.Type ?? 1;
+                    const wTypeName = w.typeName || w.TypeName || "Cüzdan";
 
                     total += wBalance;
+                    displayCurrency = (wCurrency === 'TRY') ? "₺" : wCurrency;
 
                     container.innerHTML += `
-                    <div class="col-md-4">
-                        <div class="wallet-card" id="card-${wId}" onclick="selectWallet(${wId})">
-                            <i class="bi bi-trash delete-btn" onclick="event.stopPropagation(); deleteWallet(${wId})"></i>
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <small class="text-secondary d-block">BİREYSEL CÜZDAN</small>
-                                    <span class="currency-badge mt-1">${wCurrency}</span>
-                                </div>
-                                <small class="text-secondary">ID: #${wId}</small>
+                <div class="col-md-4">
+                    <div class="wallet-card" id="card-${wId}" onclick="selectWallet(${wId})">
+                        <div class="wallet-header">
+                            <div>
+                                <small class="text-secondary d-block fw-bold">${wTypeName.toUpperCase()}</small>
+                                <span class="currency-badge mt-1">${wCurrency}</span>
                             </div>
-                            <h3 class="mb-0">₺${wBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</h3>
-                            <small class="text-muted mt-2 d-block">${getWalletTypeName(wType)}</small>
+                            <div class="wallet-controls">
+                                <small class="text-secondary fw-bold">#${wId}</small>
+                                <i class="bi bi-trash delete-btn" onclick="event.stopPropagation(); deleteWallet(${wId})"></i>
+                            </div>
                         </div>
-                    </div>`;
+                        <h3 class="mb-0">${displayCurrency} ${wBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</h3>
+                    </div>
+                </div>`;
                 });
 
-                document.getElementById('totalBalance').innerText = `₺${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
+                document.getElementById('totalBalance').innerText = `${displayCurrency} ${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
 
             } catch (error) {
-                console.error("Cüzdanlar yüklenemedi", error);
-                if (error.response?.status === 401) logout();
+                console.error("Yükleme hatası:", error);
+            }
+        }
+
+        async function createNewWallet() {
+            const typeSelect = document.getElementById('walletType');
+            const currencyInput = document.getElementById('currency');
+            const alertBox = document.getElementById('modalAlert');
+            const btn = document.getElementById('createBtn');
+
+            alertBox.classList.add('d-none');
+            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
+
+            const payload = {
+                customerNo: getCustomerNoFromToken(token),
+                currency: currencyInput.value.trim(),
+                type: typeSelect.value ? parseInt(typeSelect.value) : null
+            };
+
+            btn.disabled = true;
+
+            try {
+                await axios.post(`${API_BASE_URL}/api/Wallet/create`, payload);
+                location.reload();
+            } catch (error) {
+                const errorData = error.response?.data;
+
+                if (errorData?.errors) {
+                    for (const [key, messages] of Object.entries(errorData.errors)) {
+                        const field = key.toLowerCase();
+                        const div = document.getElementById(`error_${field}`);
+                        if (div) {
+                            div.innerText = messages[0];
+                            div.style.display = 'block';
+                        }
+                    }
+                }
+                else {
+                    const msg = errorData?.Message || errorData?.message || "Cüzdan oluşturulamadı.";
+                    alertBox.innerText = msg;
+                    alertBox.classList.remove('d-none');
+                }
+            } finally {
+                btn.disabled = false;
             }
         }
 
         function selectWallet(walletId) {
             document.querySelectorAll('.wallet-card').forEach(card => card.classList.remove('selected'));
-            const card = document.getElementById(`card-${walletId}`);
-            if (card) card.classList.add('selected');
+            const target = document.getElementById(`card-${walletId}`);
+            if (target) target.classList.add('selected');
             localStorage.setItem('selected_wallet_id', walletId);
-        }
-
-        function getWalletTypeName(type) {
-            const types = { 1: 'Vadesiz', 2: 'Vadeli', 3: 'Yatırım' };
-            return types[type] || 'Bilinmiyor';
-        }
-
-        async function createNewWallet() {
-            const type = document.getElementById('walletType').value;
-            const currency = document.getElementById('currency').value.toUpperCase();
-
-            try {
-                await axios.post(`${API_BASE_URL}/api/Wallet/create`, {
-                    currency: currency,
-                    type: parseInt(type)
-                });
-                location.reload();
-            } catch (error) {
-                const msg = error.response?.data?.message || error.response?.data?.Message || "Cüzdan oluşturulamadı.";
-                alert(msg);
-            }
         }
 
         async function deleteWallet(id) {
@@ -258,15 +321,12 @@
                 await axios.delete(`${API_BASE_URL}/api/Wallet/${id}/delete`);
                 loadWallets();
             } catch (error) {
-                const msg = error.response?.data?.message || error.response?.data?.Message || "Silme işlemi başarısız.";
+                const msg = error.response?.data?.message || error.response?.data?.Message || "Silme başarısız.";
                 alert(msg);
             }
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.replace("login.html");
-        }
+        function logout() { localStorage.clear(); window.location.href = "login.html"; }
 
         window.onload = loadWallets;
     </script>
