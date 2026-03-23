@@ -28,11 +28,6 @@
             transition: 0.3s;
         }
 
-        .nav-link:hover {
-            background-color: #334155;
-            color: white;
-        }
-
         .nav-link.active {
             background-color: #ef4444;
             color: white;
@@ -54,19 +49,38 @@
             padding: 12px;
         }
 
-        .form-control:focus,
-        .form-select:focus {
+        .form-control::placeholder {
+            color: #64748b !important;
+            opacity: 1;
+        }
+
+        .form-control:focus {
             background-color: #0f172a;
             color: white;
             border-color: #ef4444;
             box-shadow: none;
         }
 
+        .btn-check:checked+.btn-outline-success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-check:checked+.btn-outline-warning {
+            background-color: #f59e0b;
+            color: white;
+            border-color: #f59e0b;
+        }
+
+        .btn-check:checked+.btn-outline-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+
         .btn-action {
             padding: 15px;
             font-weight: 600;
             border-radius: 12px;
-            transition: 0.3s;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -76,13 +90,14 @@
             padding: 15px;
             border-radius: 12px;
             border-left: 4px solid #ef4444;
-            transition: 0.3s;
         }
 
-        .input-group-text {
-            background-color: #334155;
-            border: 1px solid #334155;
-            color: white;
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.82rem;
+            margin-top: 5px;
+            display: none;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -105,29 +120,32 @@
             </div>
 
             <div class="col-md-10 p-4">
-                <div class="max-width-container mx-auto" style="max-width: 800px;">
+                <div class="mx-auto" style="max-width: 800px;">
                     <h2 class="mb-2">İşlem Merkezi</h2>
                     <p class="text-secondary mb-4">Güvenli ve hızlı varlık yönetimi</p>
 
                     <div class="action-card">
                         <div class="mb-4">
-                            <label class="form-label text-secondary fw-bold">1. Kaynak Cüzdan Seçimi</label>
+                            <label class="form-label text-secondary fw-bold small">1. KAYNAK CÜZDAN</label>
                             <select id="fromWallet" class="form-select form-select-lg" onchange="updateWalletDisplay()">
                                 <option value="">İşlem yapılacak cüzdanı seçin...</option>
                             </select>
+                            <div id="error_walletid" class="error-msg"></div>
+                            <div id="error_fromwalletid" class="error-msg"></div>
+
                             <div id="selectedWalletInfo" class="wallet-info-box mt-3 d-none">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <small class="text-secondary d-block">SEÇİLİ CÜZDAN BAKİYESİ</small>
-                                        <h3 id="currentBalance" class="mb-0 text-white">₺0.00</h3>
+                                        <small class="text-secondary d-block">GÜNCEL BAKİYE</small>
+                                        <h3 id="currentBalance" class="mb-0 text-white">₺0,00</h3>
                                     </div>
                                     <i class="bi bi-shield-check text-success fs-2"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-4 text-center">
-                            <label class="form-label text-secondary fw-bold d-block text-start">2. İşlem Türü</label>
+                        <div class="mb-4">
+                            <label class="form-label text-secondary fw-bold small">2. İŞLEM TÜRÜ</label>
                             <div class="btn-group w-100" role="group">
                                 <input type="radio" class="btn-check" name="actionType" id="typeDeposit" value="deposit"
                                     checked onclick="toggleFields()">
@@ -148,31 +166,31 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label text-secondary fw-bold">Tutar</label>
+                                <label class="form-label text-secondary fw-bold small">TUTAR</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₺</span>
                                     <input type="number" id="amount" class="form-control form-control-lg"
                                         placeholder="0.00">
                                 </div>
+                                <div id="error_amount" class="error-msg"></div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label text-secondary fw-bold">Referans No</label>
+                                <label class="form-label text-secondary fw-bold small">REFERANS NO</label>
                                 <input type="text" id="referenceId" class="form-control form-control-lg"
-                                    placeholder="REF-001">
+                                    placeholder="Örn: REF123">
+                                <div id="error_referenceid" class="error-msg"></div>
                             </div>
                         </div>
 
                         <div id="transferFields" class="d-none mt-3 p-3 border border-secondary rounded-3">
                             <div class="mb-3">
-                                <label class="form-label text-secondary fw-bold">Alıcı (IBAN veya Telefon No)</label>
-                                <input type="text" id="target" class="form-control" placeholder="TR... veya 05xx...">
-                                <small class="text-muted"><i class="bi bi-info-circle me-1"></i>IBAN veya Telefon
-                                    numarasını dilediğiniz formatta yazabilirsiniz.</small>
+                                <label class="form-label text-secondary fw-bold small">ALICI (IBAN VEYA TELEFON)</label>
+                                <input type="text" id="target" class="form-control" placeholder="TR... veya 5xx...">
+                                <div id="error_target" class="error-msg"></div>
                             </div>
                             <div class="mb-0">
-                                <label class="form-label text-secondary fw-bold">İşlem Açıklaması</label>
-                                <input type="text" id="description" class="form-control"
-                                    placeholder="Örn: Kira Ödemesi">
+                                <label class="form-label text-secondary fw-bold small">AÇIKLAMA</label>
+                                <input type="text" id="description" class="form-control" placeholder="İşlem notu...">
                             </div>
                         </div>
 
@@ -187,7 +205,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
     <script>
         const API_BASE_URL = "https://localhost:5000";
         const token = localStorage.getItem('wallet_token');
@@ -201,22 +218,17 @@
                 const response = await axios.get(`${API_BASE_URL}/api/Wallet/wallets/`);
                 userWallets = response.data;
                 const select = document.getElementById('fromWallet');
-
                 const preSelectedId = localStorage.getItem('selected_wallet_id');
 
                 userWallets.forEach(w => {
-
                     const wId = w.id || w.Id;
                     const wCurr = w.currency || w.Currency;
-
                     const isSelected = (preSelectedId && preSelectedId == wId) ? "selected" : "";
                     select.innerHTML += `<option value="${wId}" ${isSelected}>${wCurr} Cüzdanı (ID: ${wId})</option>`;
                 });
 
                 if (preSelectedId) updateWalletDisplay();
-            } catch (error) {
-                console.error("Cüzdanlar yüklenemedi:", error);
-            }
+            } catch (error) { console.error(error); }
         }
 
         function updateWalletDisplay() {
@@ -229,15 +241,12 @@
                     document.getElementById('currentBalance').innerText = `₺${balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
                     infoBox.classList.remove('d-none');
                 }
-            } else {
-                infoBox.classList.add('d-none');
-            }
+            } else { infoBox.classList.add('d-none'); }
         }
 
         function toggleFields() {
             const type = document.querySelector('input[name="actionType"]:checked').value;
-            const transferFields = document.getElementById('transferFields');
-            transferFields.className = (type === 'transfer') ? "mt-3 p-3 border border-secondary rounded-3" : "d-none";
+            document.getElementById('transferFields').className = (type === 'transfer') ? "mt-3 p-3 border border-secondary rounded-3" : "d-none";
         }
 
         async function processAction() {
@@ -245,54 +254,53 @@
             const walletId = document.getElementById('fromWallet').value;
             const amount = document.getElementById('amount').value;
             const referenceId = document.getElementById('referenceId').value;
+            const btn = document.getElementById('btnAction');
 
-            if (!walletId || !amount || !referenceId) {
-                alert("Lütfen zorunlu alanları doldurunuz.");
-                return;
-            }
+            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
 
-            if (!confirm("Bu işlemi onaylıyor musunuz?")) return;
-
-            let endpoint = `${API_BASE_URL}/api/Wallet/${type}`;
             let payload = {};
-
             if (type === 'transfer') {
                 payload = {
-                    FromWalletId: parseInt(walletId),
-                    Target: document.getElementById('target').value,
-                    Amount: parseFloat(amount),
-                    Description: document.getElementById('description').value,
-                    ReferenceId: referenceId
+                    fromWalletId: walletId ? parseInt(walletId) : null,
+                    target: document.getElementById('target').value,
+                    amount: amount ? parseFloat(amount) : null,
+                    description: document.getElementById('description').value,
+                    referenceId: referenceId
                 };
             } else {
                 payload = {
-                    WalletId: parseInt(walletId),
-                    Amount: parseFloat(amount),
-                    ReferenceId: referenceId
+                    walletId: walletId ? parseInt(walletId) : null,
+                    amount: amount ? parseFloat(amount) : null,
+                    referenceId: referenceId
                 };
             }
 
+            btn.disabled = true;
             try {
-                const response = await axios.post(endpoint, payload);
-                alert(response.data.message || response.data.Message || "İşlem başarıyla tamamlandı.");
-
+                const response = await axios.post(`${API_BASE_URL}/api/Wallet/${type}`, payload);
+                alert(response.data.message || response.data.Message || "İşlem başarılı!");
                 localStorage.removeItem('selected_wallet_id');
                 window.location.href = "dashboard.html";
             } catch (error) {
                 const errorData = error.response?.data;
-                const backendError = errorData?.message || errorData?.Message || "Sistemsel bir hata oluştu.";
-                alert("Hata: " + backendError);
-            }
+
+                if (errorData?.errors) {
+                    for (const [key, messages] of Object.entries(errorData.errors)) {
+                        const field = key.toLowerCase();
+                        const div = document.getElementById(`error_${field}`);
+                        if (div) {
+                            div.innerText = messages[0];
+                            div.style.display = 'block';
+                        }
+                    }
+                } else {
+                    alert("Hata: " + (errorData?.Message || errorData?.message || "İşlem başarısız."));
+                }
+            } finally { btn.disabled = false; }
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = "login.html";
-        }
-
-        fetchWallets();
+        window.onload = fetchWallets;
     </script>
-
 </body>
 
 </html>
