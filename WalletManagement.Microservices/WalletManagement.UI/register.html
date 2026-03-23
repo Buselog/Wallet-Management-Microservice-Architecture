@@ -99,11 +99,11 @@
             const regBtn = document.getElementById('regBtn');
 
             const payload = {
-                FirstName: document.getElementById('firstName').value.trim(),
-                LastName: document.getElementById('lastName').value.trim(),
-                Email: document.getElementById('email').value.trim(),
-                PhoneNumber: document.getElementById('phone').value.trim(),
-                Password: document.getElementById('password').value
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phoneNumber: document.getElementById('phone').value.trim(),
+                password: document.getElementById('password').value
             };
 
             alertBox.classList.add('d-none');
@@ -119,14 +119,14 @@
                 const response = await axios.post(`${API_BASE_URL}/api/Auth/register`, payload);
 
                 alertBox.className = "alert alert-success";
-                alertBox.innerText = (response.data.Message || "Kayıt başarılı!") + " Giriş sayfasına yönlendiriliyorsunuz...";
+                alertBox.innerText = (response.data.Message || response.data.message || "Kayıt başarılı!") + " Giriş sayfasına yönlendiriliyorsunuz...";
                 alertBox.classList.remove('d-none');
 
                 setTimeout(() => { window.location.href = "login.html"; }, 2000);
 
             } catch (error) {
                 const errorData = error.response?.data;
-                const fullMessage = errorData?.Message || "Kayıt işlemi başarısız!";
+                const fullMessage = errorData?.Message || errorData?.Message || "Kayıt işlemi başarısız!";
 
                 if (fullMessage.includes("|")) {
                     const errorArray = fullMessage.split("|");

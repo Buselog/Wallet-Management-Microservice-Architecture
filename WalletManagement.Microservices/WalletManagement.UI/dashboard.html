@@ -131,8 +131,7 @@
 
                 <h4 class="mb-4">Cüzdanlarım <small class="text-muted" style="font-size: 0.9rem;">(Seçmek için
                         tıklayın)</small></h4>
-                <div class="row g-4" id="walletContainer">
-                </div>
+                <div class="row g-4" id="walletContainer"></div>
             </div>
         </div>
     </div>
@@ -175,7 +174,11 @@
         const token = localStorage.getItem('wallet_token');
         const fullName = localStorage.getItem('user_fullname');
 
-        if (!token) window.location.href = "login.html";
+        if (!token || token === "undefined") {
+            console.warn("Token bulunamadı!");
+            window.location.replace("login.html");
+        }
+
         if (fullName) document.getElementById('welcomeText').innerText = `Hoş Geldiniz, ${fullName}`;
 
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -189,23 +192,28 @@
 
                 container.innerHTML = "";
                 wallets.forEach(w => {
-                    total += w.Balance;
+                    const wId = w.id || w.Id;
+                    const wBalance = w.balance ?? w.Balance ?? 0;
+                    const wCurrency = w.currency || w.Currency || "TRY";
+                    const wType = w.type ?? w.Type ?? 1;
+
+                    total += wBalance;
 
                     container.innerHTML += `
-                <div class="col-md-4">
-                    <div class="wallet-card" id="card-${w.Id}" onclick="selectWallet(${w.Id})">
-                        <i class="bi bi-trash delete-btn" onclick="event.stopPropagation(); deleteWallet(${w.Id})"></i>
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <small class="text-secondary d-block">BİREYSEL CÜZDAN</small>
-                                <span class="currency-badge mt-1">${w.Currency}</span>
+                    <div class="col-md-4">
+                        <div class="wallet-card" id="card-${wId}" onclick="selectWallet(${wId})">
+                            <i class="bi bi-trash delete-btn" onclick="event.stopPropagation(); deleteWallet(${wId})"></i>
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <small class="text-secondary d-block">BİREYSEL CÜZDAN</small>
+                                    <span class="currency-badge mt-1">${wCurrency}</span>
+                                </div>
+                                <small class="text-secondary">ID: #${wId}</small>
                             </div>
-                            <small class="text-secondary">ID: #${w.Id}</small>
+                            <h3 class="mb-0">₺${wBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</h3>
+                            <small class="text-muted mt-2 d-block">${getWalletTypeName(wType)}</small>
                         </div>
-                        <h3 class="mb-0">₺${w.Balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</h3>
-                        <small class="text-muted mt-2 d-block">${getWalletTypeName(w.Type)}</small>
-                    </div>
-                </div>`;
+                    </div>`;
                 });
 
                 document.getElementById('totalBalance').innerText = `₺${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
@@ -218,7 +226,8 @@
 
         function selectWallet(walletId) {
             document.querySelectorAll('.wallet-card').forEach(card => card.classList.remove('selected'));
-            document.getElementById(`card-${walletId}`).classList.add('selected');
+            const card = document.getElementById(`card-${walletId}`);
+            if (card) card.classList.add('selected');
             localStorage.setItem('selected_wallet_id', walletId);
         }
 
@@ -233,12 +242,13 @@
 
             try {
                 await axios.post(`${API_BASE_URL}/api/Wallet/create`, {
-                    Currency: currency,
-                    Type: parseInt(type)
+                    currency: currency,
+                    type: parseInt(type)
                 });
                 location.reload();
             } catch (error) {
-                alert(error.response?.data?.Message || "Cüzdan oluşturulamadı.");
+                const msg = error.response?.data?.message || error.response?.data?.Message || "Cüzdan oluşturulamadı.";
+                alert(msg);
             }
         }
 
@@ -248,16 +258,17 @@
                 await axios.delete(`${API_BASE_URL}/api/Wallet/${id}/delete`);
                 loadWallets();
             } catch (error) {
-                alert(error.response?.data?.Message || "Silme işlemi başarısız.");
+                const msg = error.response?.data?.message || error.response?.data?.Message || "Silme işlemi başarısız.";
+                alert(msg);
             }
         }
 
         function logout() {
             localStorage.clear();
-            window.location.href = "login.html";
+            window.location.replace("login.html");
         }
 
-        loadWallets();
+        window.onload = loadWallets;
     </script>
 </body>
 
