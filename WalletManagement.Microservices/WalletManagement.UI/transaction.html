@@ -205,8 +205,12 @@
                 const preSelectedId = localStorage.getItem('selected_wallet_id');
 
                 userWallets.forEach(w => {
-                    const isSelected = (preSelectedId && preSelectedId == w.Id) ? "selected" : "";
-                    select.innerHTML += `<option value="${w.Id}" ${isSelected}>${w.Currency} Cüzdanı (ID: ${w.Id})</option>`;
+
+                    const wId = w.id || w.Id;
+                    const wCurr = w.currency || w.Currency;
+
+                    const isSelected = (preSelectedId && preSelectedId == wId) ? "selected" : "";
+                    select.innerHTML += `<option value="${wId}" ${isSelected}>${wCurr} Cüzdanı (ID: ${wId})</option>`;
                 });
 
                 if (preSelectedId) updateWalletDisplay();
@@ -219,9 +223,10 @@
             const walletId = document.getElementById('fromWallet').value;
             const infoBox = document.getElementById('selectedWalletInfo');
             if (walletId) {
-                const wallet = userWallets.find(x => x.Id == walletId);
+                const wallet = userWallets.find(x => (x.id || x.Id) == walletId);
                 if (wallet) {
-                    document.getElementById('currentBalance').innerText = `₺${wallet.Balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
+                    const balance = wallet.balance ?? wallet.Balance ?? 0;
+                    document.getElementById('currentBalance').innerText = `₺${balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
                     infoBox.classList.remove('d-none');
                 }
             } else {
@@ -269,13 +274,13 @@
 
             try {
                 const response = await axios.post(endpoint, payload);
-                alert(response.data.Message || "İşlem başarıyla tamamlandı.");
+                alert(response.data.message || response.data.Message || "İşlem başarıyla tamamlandı.");
 
                 localStorage.removeItem('selected_wallet_id');
                 window.location.href = "dashboard.html";
             } catch (error) {
                 const errorData = error.response?.data;
-                const backendError = errorData?.Message || "Sistemsel bir hata oluştu.";
+                const backendError = errorData?.message || errorData?.Message || "Sistemsel bir hata oluştu.";
                 alert("Hata: " + backendError);
             }
         }

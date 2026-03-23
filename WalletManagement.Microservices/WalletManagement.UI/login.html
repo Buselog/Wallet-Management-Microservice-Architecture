@@ -104,23 +104,27 @@
 
             try {
                 const response = await axios.post(`${API_BASE_URL}/api/Auth/login`, {
-                    Email: emailInput,
-                    Password: passwordInput
+                    email: emailInput,
+                    password: passwordInput
                 });
 
                 const data = response.data;
-                localStorage.setItem('wallet_token', data.Token);
-                localStorage.setItem('user_fullname', data.FullName);
+                const token = data.token;
+                const fullName = data.fullName;
 
-                alertBox.className = "alert alert-success";
-                alertBox.innerText = `Hoş geldiniz, ${data.FullName}!`;
-                alertBox.classList.remove('d-none');
+                if (token) {
+                    localStorage.setItem('wallet_token', token);
+                    localStorage.setItem('user_fullname', fullName);
 
-                setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+                    alertBox.className = "alert alert-success";
+                    alertBox.innerText = `Hoş geldiniz, ${fullName}!`;
+                    alertBox.classList.remove('d-none');
+                    setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+                }
 
             } catch (error) {
                 const errorData = error.response?.data;
-                const fullMessage = errorData?.Message || "Giriş yapılırken bir hata oluştu.";
+                const fullMessage = errorData?.message || errorData?.Message || "Giriş yapılırken bir hata oluştu.";
 
                 if (fullMessage.includes("|")) {
                     const errorArray = fullMessage.split("|");

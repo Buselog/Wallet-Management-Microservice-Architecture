@@ -214,22 +214,26 @@
                     }
                 });
 
-                const { Items, TotalCount } = response.data;
+                const items = response.data.items || response.data.Items;
+                const totalCount = response.data.totalCount || response.data.TotalCount || 0;
                 tbody.innerHTML = "";
 
-                if (!Items || Items.length === 0) {
+                if (!items || items.length === 0) {
                     tbody.innerHTML = "<tr><td colspan='4' class='text-center text-secondary py-4'>İşlem kaydı bulunamadı.</td></tr>";
                     document.getElementById('recordCount').innerText = `TOPLAM 0 KAYIT`;
                     document.getElementById('pagination').innerHTML = "";
                     return;
                 }
 
-                Items.forEach(item => {
-                    const transactionType = item.TransactionType || "İşlem";
-                    const typeLower = transactionType.toLowerCase();
-                    const isDeposit = typeLower.includes('deposit') || typeLower.includes('yatırma') || item.Amount > 0;
+                items.forEach(item => {
+                    const transactionType = item.transactionType || item.TransactionType || "İşlem";
+                    const amount = item.amount ?? item.Amount ?? 0;
+                    const createdDate = item.createdDate || item.CreatedDate;
+                    const referenceId = item.referenceId || item.ReferenceId;
 
-                    const date = new Date(item.CreatedDate).toLocaleString('tr-TR');
+                    const typeLower = transactionType.toLowerCase();
+                    const isDeposit = typeLower.includes('deposit') || typeLower.includes('yatırma') || amount > 0;
+                    const date = new Date(createdDate).toLocaleString('tr-TR');
 
                     tbody.innerHTML += `
                     <tr>
@@ -239,14 +243,14 @@
                             <span class="fw-bold">${transactionType.toUpperCase()}</span>
                         </td>
                         <td class="${isDeposit ? 'amount-pos' : 'amount-neg'}">
-                            ${isDeposit ? '+' : '-'} ₺${Math.abs(item.Amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                            ${isDeposit ? '+' : '-'} ₺${Math.abs(amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </td>
-                        <td class="text-secondary small font-monospace">${item.ReferenceId || '-'}</td>
+                        <td class="text-secondary small font-monospace">${referenceId || '-'}</td>
                     </tr>`;
                 });
 
-                document.getElementById('recordCount').innerText = `TOPLAM ${TotalCount} KAYIT`;
-                setupPagination(TotalCount, page);
+                document.getElementById('recordCount').innerText = `TOPLAM ${totalCount} KAYIT`;
+                setupPagination(totalCount, page);
 
             } catch (error) {
                 console.error("Geçmiş yüklenemedi:", error);
@@ -278,20 +282,21 @@
 
                 if (wallets && wallets.length > 0) {
                     wallets.forEach((w, index) => {
+                        const wId = w.id || w.Id;
                         const btn = document.createElement('button');
                         btn.className = `wallet-btn ${index === 0 ? 'active' : ''}`;
-                        btn.id = `btn-${w.id}`;
-                        btn.innerText = `Cüzdan #${w.id}`;
+                        btn.id = `btn-${wId}`;
+                        btn.innerText = `Cüzdan #${wId}`;
                         btn.onclick = () => {
                             document.querySelectorAll('.wallet-btn').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
-                            selectedWalletId = w.id;
+                            selectedWalletId = wId;
                             loadHistory(1);
                         };
                         btnContainer.appendChild(btn);
                     });
 
-                    selectedWalletId = wallets[0].id;
+                    selectedWalletId = wallets[0].id || wallets[0].Id;
                     loadHistory(1);
                 } else {
                     document.getElementById('historyBody').innerHTML = "<tr><td colspan='4' class='text-center py-4 text-secondary'>Aktif bir cüzdanınız bulunmamaktadır.</td></tr>";
