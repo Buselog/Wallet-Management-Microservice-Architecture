@@ -46,12 +46,10 @@
 </head>
 
 <body>
-
     <div class="container d-flex justify-content-center">
         <div class="register-card shadow">
             <h3 class="text-center mb-4 fw-bold">Yeni Hesap Oluştur</h3>
             <div id="alertBox" class="alert d-none py-2 text-center" style="font-size: 0.9rem;"></div>
-
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label text-secondary small fw-bold">Ad</label>
@@ -70,7 +68,7 @@
                 <div id="error_email" class="error-msg"></div>
             </div>
             <div class="mb-3">
-                <label class="form-label text-secondary small fw-bold">Telefon (5xx...)</label>
+                <label class="form-label text-secondary small fw-bold">Telefon</label>
                 <input type="text" id="phone" class="form-control" placeholder="555 444 33 22">
                 <div id="error_phonenumber" class="error-msg"></div>
             </div>
@@ -79,25 +77,18 @@
                 <input type="password" id="password" class="form-control" placeholder="******">
                 <div id="error_password" class="error-msg"></div>
             </div>
-
-            <button onclick="handleRegister()" id="regBtn" class="btn btn-success w-100 mb-3 fw-bold shadow-sm">
-                Kayıt Ol ve Cüzdan Oluştur
-            </button>
-            <p class="text-center mb-0 text-muted small">
-                Zaten hesabın var mı? <a href="login.html" class="text-primary text-decoration-none fw-bold">Giriş
-                    Yap</a>
-            </p>
+            <button onclick="handleRegister()" id="regBtn" class="btn btn-success w-100 mb-3 fw-bold shadow-sm">Kayıt Ol
+                ve Cüzdan Oluştur</button>
+            <p class="text-center mb-0 text-muted small">Zaten hesabın var mı? <a href="login.html"
+                    class="text-primary text-decoration-none fw-bold">Giriş Yap</a></p>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const API_BASE_URL = "https://localhost:5000";
-
         async function handleRegister() {
             const alertBox = document.getElementById('alertBox');
             const regBtn = document.getElementById('regBtn');
-
             const payload = {
                 firstName: document.getElementById('firstName').value.trim(),
                 lastName: document.getElementById('lastName').value.trim(),
@@ -105,64 +96,32 @@
                 phoneNumber: document.getElementById('phone').value.trim(),
                 password: document.getElementById('password').value
             };
-
             alertBox.classList.add('d-none');
-            document.querySelectorAll('.error-msg').forEach(el => {
-                el.innerText = '';
-                el.style.display = 'none';
-            });
-
+            document.querySelectorAll('.error-msg').forEach(el => { el.style.display = 'none'; });
             regBtn.disabled = true;
-            regBtn.innerText = "İşlem Yapılıyor...";
 
             try {
                 const response = await axios.post(`${API_BASE_URL}/api/Auth/register`, payload);
-
                 alertBox.className = "alert alert-success";
                 alertBox.innerText = (response.data.Message || response.data.message || "Kayıt başarılı!") + " Giriş sayfasına yönlendiriliyorsunuz...";
                 alertBox.classList.remove('d-none');
-
                 setTimeout(() => { window.location.href = "login.html"; }, 2000);
-
             } catch (error) {
                 const errorData = error.response?.data;
-                const fullMessage = errorData?.Message || errorData?.Message || "Kayıt işlemi başarısız!";
-
-                if (fullMessage.includes("|")) {
-                    const errorArray = fullMessage.split("|");
-
-                    errorArray.forEach(err => {
-                        const message = err.trim().toLowerCase();
-
-                        if (message.includes("ad") && !message.includes("soyad")) {
-                            showError("error_firstname", err.trim());
-                        } else if (message.includes("soyad")) {
-                            showError("error_lastname", err.trim());
-                        } else if (message.includes("email")) {
-                            showError("error_email", err.trim());
-                        } else if (message.includes("telefon") || message.includes("phone")) {
-                            showError("error_phonenumber", err.trim());
-                        } else if (message.includes("şifre") || message.includes("password")) {
-                            showError("error_password", err.trim());
-                        }
-                    });
-                } else {
+                if (errorData?.errors) {
+                    for (const [key, messages] of Object.entries(errorData.errors)) {
+                        const divId = `error_${key.toLowerCase()}`;
+                        const div = document.getElementById(divId) || document.getElementById(`error_phonenumber`);
+                        if (div) { div.innerText = messages[0]; div.style.display = 'block'; }
+                    }
+                }
+                else {
+                    const msg = errorData?.Message || errorData?.message || "Kayıt başarısız!";
                     alertBox.className = "alert alert-danger";
-                    alertBox.innerText = fullMessage;
+                    alertBox.innerText = msg;
                     alertBox.classList.remove('d-none');
                 }
-            } finally {
-                regBtn.disabled = false;
-                regBtn.innerText = "Kayıt Ol ve Cüzdan Oluştur";
-            }
-        }
-
-        function showError(id, msg) {
-            const div = document.getElementById(id);
-            if (div) {
-                div.innerText = msg;
-                div.style.display = 'block';
-            }
+            } finally { regBtn.disabled = false; }
         }
     </script>
 </body>
