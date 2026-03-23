@@ -43,11 +43,12 @@ namespace Wallet.InnerInfrastructure.Managers
         {
             var walletType = type ?? 0;
 
-            var existing = await _walletRepository.GetWalletsByCustomerNoAsync(currentCustomerNo);
-            if (existing.Any(x => x.Currency == currency && x.Type == walletType && x.IsActive))
+            var allWallets = await _walletRepository.GetWalletsByCustomerNoAsync(currentCustomerNo, false);
+
+            if (allWallets.Any(x => x.Currency == currency && x.Type == walletType && x.IsActive))
                 throw new BaseBusinessException($"{currency} - {walletType} tipinde aktif bir cüzdan zaten mevcut.");
 
-            int nextSuffix = existing.Count + 1;
+            int nextSuffix = allWallets.Any() ? allWallets.Max(x => x.Suffix) + 1 : 1;
 
             var newWallet = _factory.CreateWallet(currentCustomerNo, currency, walletType, nextSuffix);
 

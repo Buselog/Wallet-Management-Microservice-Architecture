@@ -6,7 +6,7 @@ namespace Wallet.Contract.Repositories
     {
         Task<WalletEntity?> GetByCustomerNoAsync(string customerNo);
         Task<WalletEntity?> GetByIbanAsync(string iban);
-        Task<List<WalletEntity>> GetWalletsByCustomerNoAsync(string customerNo);
+        Task<List<WalletEntity>> GetWalletsByCustomerNoAsync(string customerNo, bool onlyActive = true);
         Task<bool> SoftDeleteWalletWithSPAsync(int walletId, string userCode);
         Task<int> ExecuteMoneyTransactionWithSPAsync(int walletId, decimal amount, 
             string type, string targetAddress, string description, string referenceId, string senderInfo);
