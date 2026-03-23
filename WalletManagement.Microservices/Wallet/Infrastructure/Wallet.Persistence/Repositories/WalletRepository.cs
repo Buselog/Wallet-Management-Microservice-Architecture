@@ -26,13 +26,17 @@ namespace Wallet.Persistence.Repositories
             return wallet;
         }
 
-        public async Task<List<WalletEntity>> GetWalletsByCustomerNoAsync(string customerNo)
+        public async Task<List<WalletEntity>> GetWalletsByCustomerNoAsync(string customerNo, bool onlyActive = true)
         {
-            var wallets = await _context.Wallets
-                .Where(w => w.CustomerNo == customerNo && w.IsActive== true)
-                .ToListAsync();
 
-            return wallets;
+            var allWallets = _context.Wallets.Where(w => w.CustomerNo == customerNo);
+
+            if (onlyActive)
+            {
+                allWallets = allWallets.Where(w => w.IsActive == true);
+            }
+
+            return await allWallets.ToListAsync();
         }
 
         public async Task<bool> SoftDeleteWalletWithSPAsync(int walletId, string userCode)
