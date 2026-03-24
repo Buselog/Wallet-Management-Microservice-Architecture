@@ -311,7 +311,7 @@
                 await axios.delete(`${API_BASE_URL}/api/Wallet/${id}/delete`);
                 loadWallets();
             } catch (error) {
-                alert(error.response?.data?.message || "Silme başarısız.");
+                alert(error.response?.data?.Message || "Silme başarısız.");
             }
         }
 
