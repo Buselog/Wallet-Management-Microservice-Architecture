@@ -44,6 +44,8 @@ namespace Wallet.WebAPI.Middlewares
 
                 InsufficientBalanceException => (HttpStatusCode.BadRequest, exception.Message),
 
+                WalletBalanceIsNotEmptyExcepiton => (HttpStatusCode.BadRequest, exception.Message),
+
                 ReferenceAlreadyExistsException => (HttpStatusCode.Conflict, exception.Message),
 
                 ConcurrencyException => (HttpStatusCode.Conflict, exception.Message),

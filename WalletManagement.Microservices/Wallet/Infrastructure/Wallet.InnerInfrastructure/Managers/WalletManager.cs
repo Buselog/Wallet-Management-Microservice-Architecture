@@ -90,7 +90,16 @@ namespace Wallet.InnerInfrastructure.Managers
         {
             await ValidateWalletOwnershipAsync(walletId, customerNo);
 
-            var isDeleted = await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_"+customerNo);
+            var wallet = await _walletRepository.GetByIdAsync(walletId);
+
+            if(wallet.Balance != 0 || wallet.Balance != null)
+            {
+                await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_" + customerNo);
+            }
+            else
+            {
+                throw new WalletBalanceIsNotEmptyExcepiton();
+            }
 
             return "Cüzdan başarıyla kapatıldı.";
         }
