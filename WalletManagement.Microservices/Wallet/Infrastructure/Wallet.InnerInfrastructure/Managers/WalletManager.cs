@@ -94,12 +94,9 @@ namespace Wallet.InnerInfrastructure.Managers
 
             if(wallet.Balance != 0 || wallet.Balance != null)
             {
-                await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_" + customerNo);
-            }
-            else
-            {
                 throw new WalletBalanceIsNotEmptyExcepiton();
             }
+                await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_" + customerNo);
 
             return "Cüzdan başarıyla kapatıldı.";
         }
