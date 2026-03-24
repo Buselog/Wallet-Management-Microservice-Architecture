@@ -14,7 +14,7 @@ namespace Wallet.Application.Dtos
         {
             WalletType.Saving => "Vadeli Hesap",
             WalletType.Checking => "Vadesiz Hesap",
-            WalletType.Investment => "Yatırım",
+            WalletType.Investment => "Yatırım Hesabı",
             _ => "Tanımlanmamış Cüzdan Tipi"
         };
         public DateTime CreatedDate { get; set; }
