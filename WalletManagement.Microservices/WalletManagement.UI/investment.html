@@ -236,8 +236,8 @@
                         <tr>
                             <td><span class="currency-badge">${r.currencyCode}</span></td>
                             <td class="text-secondary fw-semibold">${fullName}</td>
-                            <td><span class="rate-val text-success">₺${r.buyingRate.toFixed(4)}</span></td>
-                            <td><span class="rate-val text-danger">₺${r.sellingRate.toFixed(4)}</span></td>
+                            <td><span class="rate-val text-success">₺${r.buyingRate.toLocaleString('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</span></td>
+                            <td><span class="rate-val text-danger">₺${r.sellingRate.toLocaleString('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</span></td>
                             <td class="text-end pe-4">
                                 <button class="btn btn-trade btn-buy me-2" onclick="passiveAction()">AL</button>
                                 <button class="btn btn-trade btn-sell" onclick="passiveAction()">SAT</button>
