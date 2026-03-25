@@ -220,7 +220,7 @@
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-danger" role="status"></div></td></tr>`;
 
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/Investment/rates`);
+                const response = await axios.get(`${API_BASE_URL}/api/InvestmentRate/rates`);
                 const rates = response.data;
 
                 tbody.innerHTML = "";
