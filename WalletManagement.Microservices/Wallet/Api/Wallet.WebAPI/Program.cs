@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
 using Wallet.Application.DependencyResolvers;
+using Wallet.Application.Services;
 using Wallet.InnerInfrastructure.DependencyResolvers;
 using Wallet.InnerInfrastructure.Services;
 using Wallet.Persistence.DependencyResolvers;
@@ -31,6 +32,11 @@ builder.Services.AddHttpClient<CustomerServiceClient>(options =>
 {
     var baseUrl = builder.Configuration.GetSection("CustomerApiSwaggerAddress:BaseUrl").Value;
     options.BaseAddress = new Uri(baseUrl ?? "https://localhost:7145/");
+});
+
+builder.Services.AddHttpClient<IInvestmentRateService, InvestmentRateService>(client =>
+{
+    client.BaseAddress = new Uri("https://evds3.tcmb.gov.tr/igmevdsms-dis/");
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
