@@ -26,6 +26,19 @@
       "UpstreamPathTemplate": "/swagger/docs/v1/customer",
       "UpstreamHttpMethod": [ "Get" ]
     },
+    {
+      "DownstreamPathTemplate": "/swagger/v1/swagger.json",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7110
+        }
+      ],
+
+      "UpstreamPathTemplate": "/swagger/docs/v1/investment",
+      "UpstreamHttpMethod": [ "Get" ]
+    },
 
     {
       "DownstreamPathTemplate": "/api/Customer/{everything}",
@@ -81,12 +94,12 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 7012
+          "Port": 7110
         }
       ],
       "UpstreamPathTemplate": "/api/InvestmentRate/{everything}",
       "UpstreamHttpMethod": [ "Get" ],
-      "SwaggerKey": "wallet",
+      "SwaggerKey": "investment",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
       }
@@ -169,6 +182,17 @@
           "Name": "Customer API",
           "Version": "v1",
           "Url": "https://localhost:7145/swagger/v1/swagger.json"
+        }
+      ],
+      "TakeUpstreamPath": true
+    },
+    {
+      "Key": "investment",
+      "Config": [
+        {
+          "Name": "Investment API",
+          "Version": "v1",
+          "Url": "https://localhost:7110/swagger/v1/swagger.json"
         }
       ],
       "TakeUpstreamPath": true
