@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Investment.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Wallet.Application.Services;
 
-namespace Wallet.WebAPI.Controllers
+namespace Investment.WebAPI.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]

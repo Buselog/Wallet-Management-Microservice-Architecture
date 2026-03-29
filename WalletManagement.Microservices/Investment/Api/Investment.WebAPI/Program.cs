@@ -1,38 +1,22 @@
-using FluentValidation.AspNetCore;
+using Investment.Application.Services;
+using Investment.InnerInfrastructure.DependencyResolvers;
+using Investment.InnerInfrastructure.Services;
+using Investment.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
-using Wallet.Application.DependencyResolvers;
-using Wallet.InnerInfrastructure.DependencyResolvers;
-using Wallet.InnerInfrastructure.Services;
-using Wallet.Persistence.DependencyResolvers;
-using Wallet.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
 builder.Host.UseSerilog();
 builder.Services.AddLoggerService(builder.Configuration);
 builder.Services.AddControllers();
-builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-
-builder.Services.AddDbContextService(builder.Configuration);
-builder.Services.AddMapperService();
-builder.Services.AddRepositoryServices();
-builder.Services.AddManagerServices();
-builder.Services.AddValidatorServices();
-builder.Services.AddFluentValidationAutoValidation();
-
-
-builder.Services.AddHttpClient<CustomerServiceClient>(options =>
-{
-    var baseUrl = builder.Configuration.GetSection("CustomerApiSwaggerAddress:BaseUrl").Value;
-    options.BaseAddress = new Uri(baseUrl ?? "https://localhost:7145/");
-});
-
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -49,14 +33,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
-
-builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Wallet API", Version = "v1" });
-
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Investment API", Version = "v1" });
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -66,7 +45,6 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
-
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -81,12 +59,13 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()   
-               .AllowAnyMethod()   
-               .AllowAnyHeader();  
-    });
+    options.AddPolicy("AllowAll",
+        builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+builder.Services.AddHttpClient<IInvestmentRateService, InvestmentRateService>(client =>
+{
+    client.BaseAddress = new Uri("https://evds3.tcmb.gov.tr/igmevdsms-dis/");
 });
 
 var app = builder.Build();
@@ -100,9 +79,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

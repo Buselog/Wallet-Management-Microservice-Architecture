@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Investment.Application.Dtos;
+using Investment.Application.Services;
+using Investment.Domain.Exceptions;
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
-using Wallet.Application.Dtos;
-using Wallet.Application.Services;
-using Wallet.Domain.Exceptions;
 
-namespace Wallet.InnerInfrastructure.Services
+namespace Investment.InnerInfrastructure.Services
 {
     public class InvestmentRateService : IInvestmentRateService
     {
@@ -51,7 +51,7 @@ namespace Wallet.InnerInfrastructure.Services
                 CreateDto("CHF", firstItem, "TP_DK_CHF_A_YTL", "TP_DK_CHF_S_YTL"),
                 CreateDto("JPY", firstItem, "TP_DK_JPY_A_YTL", "TP_DK_JPY_S_YTL")
             };
-       
+
         }
 
         private ExchangeRateDto CreateDto(string code, JsonElement item, string buyProperty, string sellProperty)
