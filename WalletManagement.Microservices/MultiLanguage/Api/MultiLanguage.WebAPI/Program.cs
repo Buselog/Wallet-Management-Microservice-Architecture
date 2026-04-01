@@ -71,6 +71,14 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+var supportedCultures = new[] { "tr-TR", "en-US" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture("tr-TR") 
+    .AddSupportedCultures(supportedCultures) 
+    .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

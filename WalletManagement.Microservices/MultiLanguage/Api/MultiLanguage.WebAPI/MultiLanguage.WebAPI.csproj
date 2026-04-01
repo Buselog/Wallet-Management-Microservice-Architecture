@@ -16,10 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\Core\MultiLanguage.Application\MultiLanguage.Application.csproj" />
     <ProjectReference Include="..\..\Infrastructure\MultiLanguage.InnerInfra\MultiLanguage.InnerInfra.csproj" />
     <ProjectReference Include="..\..\Infrastructure\MultiLanguage.Persistence\MultiLanguage.Persistence.csproj" />
