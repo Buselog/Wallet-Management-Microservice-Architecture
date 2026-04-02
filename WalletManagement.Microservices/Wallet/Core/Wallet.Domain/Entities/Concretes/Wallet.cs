@@ -32,7 +32,7 @@ namespace Wallet.Domain.Entities.Concretes
 
             Guard.Against.LengthOutOfRange(currency, 3, 3, nameof(currency));
 
-            Guard.Against.EnumOutOfRange<WalletType>(type, nameof(type), "Geçersiz cüzdan tipi.");
+            Guard.Against.EnumOutOfRange<WalletType>(type, nameof(type), "ERR_INVALID_WALLET_TYPE");
 
             CustomerNo = customerNo;
             IBAN = iban;
@@ -49,7 +49,7 @@ namespace Wallet.Domain.Entities.Concretes
 
             if (Balance < amount)
             {
-                throw new BaseBusinessException("Yetersiz bakiye.");
+                throw new BaseBusinessException("ERR_LOW_BALANCE");
             }
 
             Balance -= amount;

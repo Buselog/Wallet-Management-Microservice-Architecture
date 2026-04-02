@@ -30,10 +30,10 @@ namespace Wallet.WebAPI.Middlewares
         {
             context.Response.ContentType = "application/json";
 
-            var (statusCode, message) = exception switch
+            var (statusCode, errorCode) = exception switch
             {
                 FluentValidation.ValidationException valEx =>
-                  (HttpStatusCode.BadRequest, string.Join(" | ", valEx.Errors.Select(e => e.ErrorMessage))),
+                  (HttpStatusCode.BadRequest, string.Join(" | ", valEx.Errors.Select(e => e.ErrorCode))),
 
                 ArgumentException or ArgumentNullException or ArgumentOutOfRangeException =>
                   (HttpStatusCode.BadRequest, exception.Message),
@@ -50,11 +50,11 @@ namespace Wallet.WebAPI.Middlewares
 
                 ConcurrencyException => (HttpStatusCode.Conflict, exception.Message),
 
-                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
+                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "ERR_UNAUTHORIZED"),
 
                 BaseBusinessException => (HttpStatusCode.BadRequest, exception.Message),
 
-                _ => (HttpStatusCode.InternalServerError, "Sunucu taraflı beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
+                _ => (HttpStatusCode.InternalServerError, "ERR_INTERNAL_SERVER_ERROR")
             };
         
 
@@ -63,12 +63,12 @@ namespace Wallet.WebAPI.Middlewares
             if (statusCode == HttpStatusCode.InternalServerError)
                 Log.Error(exception, "Kritik Sistem Hatası: {Message}", exception.Message);
             else
-                Log.Warning("İş Mantığı İhlali: {Message}", exception.Message);
+                Log.Warning("İş Mantığı İhlali [Key: {ErrorCode}]: {OriginalMessage}", errorCode, exception.Message);
 
             var response = new
             {
                 Status = context.Response.StatusCode, 
-                Message = message,                   
+                Message = errorCode,                   
                 Detail = exception.GetType().Name,
                 Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };

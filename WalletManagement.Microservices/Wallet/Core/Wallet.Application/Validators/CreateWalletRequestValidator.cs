@@ -9,21 +9,21 @@ namespace Wallet.Application.Validators
         {
             RuleFor(x => x.CustomerNo)
                 .NotEmpty()
-                .WithMessage("Müşteri numarası boş olamaz.");
+                .WithErrorCode("ERR_CUSTOMERNO_CANNOT_EMPTY");
 
             RuleFor(x => x.Currency)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("Para birimi alanı boş bırakılamaz.")
+                .WithErrorCode("ERR_CURRENCY_CANNOT_BLANK")
                 .Length(3)
-                .WithMessage("Para birimi 3 karakter olmalıdır (örn: TRY).");
+                .WithErrorCode("ERR_CURRENCY_NAME_CHARACTERS");
 
             RuleFor(x => x.Type)
                 .Cascade(CascadeMode.Stop)
                 .NotNull()
-                .WithMessage("Cüzdan tipi seçimi boş bırakılamaz.")
+                .WithErrorCode("ERR_WALLET_TYPE_CANNOT_BLANK")
                 .IsInEnum()
-                .WithMessage("Geçerli bir cüzdan tipi seçiniz.");
+                .WithErrorCode("ERR_INVALID_WALLET_TYPE");
         }
     }
 }
