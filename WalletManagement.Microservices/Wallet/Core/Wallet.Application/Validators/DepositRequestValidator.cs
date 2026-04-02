@@ -10,20 +10,20 @@ namespace Wallet.Application.Validators
             RuleFor(x => x.WalletId)
                 .Cascade(CascadeMode.Stop)
                 .NotNull()
-                .WithMessage("Cüzdan seçimi zorunludur.")
+                .WithErrorCode("ERR_WALLET_IS_NOT_CHOSEN")
                 .GreaterThan(0)
-                .WithMessage("Lütfen geçerli bir cüzdan seçiniz.");
+                .WithErrorCode("ERR_INVALID_WALLET");
 
             RuleFor(x => x.Amount)
                 .Cascade(CascadeMode.Stop)
                 .NotNull()
-                .WithMessage("Miktar alanı boş bırakılamaz.")
+                .WithErrorCode("ERR_AMOUNT_CANNOT_BE_BLANK")
                 .GreaterThan(0)
-                .WithMessage("Yatırılacak tutar 0'dan büyük olmalıdır.");
+                .WithErrorCode("ERR_AMOUNT_FOR_DEPOSIT_MUST_GREATHER_THAN_0");
 
             RuleFor(x => x.ReferenceId)
                 .NotEmpty()
-                .WithMessage("Referans numarası zorunludur.");
+                .WithErrorCode("ERR_REFERENCE_NUMBER_CANNOT_EMPTY");
         }
     }
 }

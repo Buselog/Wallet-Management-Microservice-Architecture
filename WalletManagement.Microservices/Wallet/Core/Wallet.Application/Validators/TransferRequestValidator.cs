@@ -10,16 +10,16 @@ namespace Wallet.Application.Validators
             RuleFor(x => x.FromWalletId)
                 .Cascade(CascadeMode.Stop)
                 .NotNull()
-                .WithMessage("Cüzdan seçimi zorunludur.")
+                .WithErrorCode("ERR_WALLET_IS_NOT_CHOSEN")
                 .GreaterThan(0)
-                .WithMessage("Geçerli bir gönderici cüzdan seçilmelidir.");
+                .WithErrorCode("ERR_INVALID_WALLET");
 
             RuleFor(x => x.Target)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("Alıcı (IBAN veya Telefon No) boş bırakılamaz.")
+                .WithErrorCode("ERR_TARGET_CANNOT_EMPTY")
                 .Matches(@"^(TR[A-Z0-9]{24}|[0-9\s\(\)\-]+)$")
-                .WithMessage("Alıcı bilgisi ya geçerli bir IBAN ya da geçerli bir telefon numarası olmalıdır.")
+                .WithErrorCode("ERR_TARGET_IS_NOT_VALID")
                 .Must(y =>
                 {
                     if (y.StartsWith("TR", StringComparison.OrdinalIgnoreCase))
@@ -31,18 +31,18 @@ namespace Wallet.Application.Validators
 
                     return digitsOnly.Length == 10; 
                 })
-               .WithMessage("Alıcı bilgisi ya 'TR' ile başlayan bir IBAN ya da geçerli bir telefon numarası olmalıdır.");
+               .WithErrorCode("ERR_TARGET_IS_NOT_VALID_FOR_SECOND_VALIDATION");
 
             RuleFor(x => x.Amount)
                 .Cascade(CascadeMode.Stop)
                 .NotNull()
-                .WithMessage("Miktar alanı boş bırakılamaz.")
+                .WithErrorCode("ERR_AMOUNT_CANNOT_BE_BLANK")
                 .GreaterThan(0)
-                .WithMessage("Transfer tutarı 0'dan büyük olmalıdır.");
+                .WithErrorCode("ERR_AMOUNT_FOR_TRANSFER_MUST_GREATHER_THAN_0");
 
             RuleFor(x => x.ReferenceId)
                 .NotEmpty()
-                .WithMessage("Referans numarası alanı zorunludur.");
+                .WithErrorCode("ERR_REFERENCE_NUMBER_CANNOT_EMPTY");
         }
     }
 }
