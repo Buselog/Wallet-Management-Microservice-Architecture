@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  
+	  <GenerateMSBuildEditorConfig>false</GenerateMSBuildEditorConfig>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\MultiLanguage.Application\MultiLanguage.Application.csproj" />
+    <ProjectReference Include="..\..\Core\MultiLanguage.Contract\MultiLanguage.Contract.csproj" />
+  </ItemGroup>
+
+</Project>
