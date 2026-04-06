@@ -19,9 +19,10 @@ namespace Customer.WebAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CustomerRegisterDto registerDto)
         {
-            var result = await _authManager.RegisterAsync(registerDto);
+            await _authManager.RegisterAsync(registerDto);
 
-            return Ok(new { Message = result });
+            return Ok(new { Message = "SUCCESS_CUSTOMER_REGISTERED" });
+
         }
 
         [HttpPost("login")]

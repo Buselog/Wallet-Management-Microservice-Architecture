@@ -10,53 +10,53 @@ namespace Customer.Application.Validators
             RuleFor(x => x.FirstName)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("Ad alanı boş bırakılamaz.")
+                .WithErrorCode("ERR_NAME_FIELD_CANNOT_BE_EMPTY")
                 .MaximumLength(50)
-                .WithMessage("Ad 50 karakterden uzun olamaz.");
+                .WithErrorCode("ERR_NAME_CANNOT_LONGER_THAN_50_CHARACHTERS");
 
             RuleFor(x => x.LastName)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("Soyad alanı boş bırakılamaz.")
+                .WithErrorCode("ERR_SURNAME_FIELD_CANNOT_BE_EMPTY")
                 .MaximumLength(50)
-                .WithMessage("Soyad 50 karakterden uzun olamaz.");
+                .WithErrorCode("ERR_SURNAME_CANNOT_LONGER_THAN_50_CHARACHTERS");
 
             RuleFor(x => x.Email)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("E-posta adresi zorunludur.")
+                .WithErrorCode("ERR_EMAIL_ADDRESS_CANNOT_EMPTY")
                 .EmailAddress()
-                .WithMessage("Geçerli bir e-posta formatı giriniz.");
+                .WithErrorCode("ERR_INVALID_EMAIL_ADDRESS");
 
             RuleFor(x => x.PhoneNumber)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("Telefon numarası zorunludur.")
+                .WithErrorCode("ERR_PHONE_NUMBER_CANNOT_BE_EMPTY")
                 .Matches(@"^[0-9\s]+$")
-                .WithMessage("Telefon numarası sadece rakam ve boşluk içermelidir.")
+                .WithErrorCode("ERR_PHONE_NUMBER_DOESNT_MATCH_STANDART_FORMAT")
                 .Must(p =>
                  {
                     var digitsOnly = new string(p.Where(char.IsDigit).ToArray());
                     if (digitsOnly.StartsWith("0")) digitsOnly = digitsOnly.Substring(1);
 
                     return digitsOnly.Length == 10;
-                  }).WithMessage("Telefon numarası geçersiz. Lütfen 10 hane (5xx...) olacak şekilde giriniz.");
+                  }).WithErrorCode("ERR_INVALID_PHONE_NUMBER");
 
 
             RuleFor(x => x.Password)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("Şifre boş olamaz.")
+                .WithErrorCode("ERR_PASSWORD_CANNOT_EMPTY")
                 .MinimumLength(8)
-                .WithMessage("Şifre en az 8 karakter olmalıdır.")
+                .WithErrorCode("ERR_PASSWORD_MUST_BE_AT_LEAST_8_CHARACHTERS_LONG")
                 .Matches(@"[A-Z]+")
-                .WithMessage("Şifre en az bir büyük harf içermelidir.")
+                .WithErrorCode("ERR_PASSWORD_MUST_CONTAIN_UPPERCASE_CHARACTER")
                 .Matches(@"[a-z]+")
-                .WithMessage("Şifre en az bir küçük harf içermelidir.")
+                .WithErrorCode("ERR_PASSWORD_MUST_CONTAIN_LOWERCASE_CHARACTER")
                 .Matches(@"[0-9]+")
-                .WithMessage("Şifre en az bir rakam içermelidir.")
+                .WithErrorCode("ERR_PASSWORD_MUST_CONTAIN_ONE_DIGIT")
                 .Matches(@"[\!\?\*\.]+")
-                .WithMessage("Şifre en az bir özel karakter (!?*.) içermelidir.");
+                .WithErrorCode("ERR_PASSWORD_MUST_CONTAIN_SPECIAL_CHARACHTER");
         }
     }
 }

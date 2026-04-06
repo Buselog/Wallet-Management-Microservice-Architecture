@@ -26,7 +26,7 @@ namespace Customer.InnerInfrastructure.Managers
             _walletClient = walletClient;
         }
 
-        public async Task<string> RegisterAsync(CustomerRegisterDto registerDto)
+        public async Task RegisterAsync(CustomerRegisterDto registerDto)
         {
 
             var cleanedPhone = new string(registerDto.PhoneNumber.Where(char.IsDigit).ToArray());
@@ -56,8 +56,6 @@ namespace Customer.InnerInfrastructure.Managers
             {
                 Log.Error(ex, "Kayıt sonrası otomatik cüzdan oluşturulamadı. Müşteri No: {CustomerNo}", newCustomer.CustomerNo);
             }
-
-            return "Kayıt işlemi başarıyla tamamlandı.";
         }
 
         public async Task<LoginResponseDto> LoginAsync(CustomerLoginDto loginDto)

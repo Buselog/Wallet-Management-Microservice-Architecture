@@ -13,8 +13,8 @@ namespace Customer.Application.Managers
         Task<List<T>> GetAllAsync();
         Task<T?> GetByIdAsync(int id);
         Task<T?> FirstOrDefaultAsync(Expression<Func<D, bool>> exp);
-        Task<string> AddAsync(T dto);
-        Task<string> UpdateAsync(T dto);
-        Task<string> DeleteAsync(int id);
+        Task AddAsync(T dto);
+        Task UpdateAsync(T dto);
+        Task DeleteAsync(int id);
     }
 }
