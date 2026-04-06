@@ -23,24 +23,24 @@ namespace WM.Gateway.Handlers
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var errorData = JsonSerializer.Deserialize<Dictionary<string, object>>(content, options);
 
-                if (errorData != null && errorData.ContainsKey("message"))
+                string targetKey = errorData.ContainsKey("Message") ? "Message" : (errorData.ContainsKey("message") ? "message" : null);
+
+                if (targetKey != null)
                 {
-                    var errorKey = errorData["message"]?.ToString();
+                    var errorKey = errorData[targetKey]?.ToString();
 
                     if (!string.IsNullOrEmpty(errorKey) && errorKey.StartsWith("ERR_"))
                     {
                         var culture = request.Headers.AcceptLanguage.FirstOrDefault()?.Value ?? "tr-TR";
-
                         var translatedMessage = await GetTranslationAsync(errorKey, culture);
 
-                        errorData["message"] = translatedMessage;
+                        errorData[targetKey] = translatedMessage;
 
                         var newContent = JsonSerializer.Serialize(errorData);
                         response.Content = new StringContent(newContent, System.Text.Encoding.UTF8, "application/json");
                     }
                 }
             }
-
             return response;
         }
 
@@ -48,7 +48,7 @@ namespace WM.Gateway.Handlers
         {
             try
             {
-                var keys = key.Split('|'); 
+                var keys = key.Split('|');
                 var translatedParts = new List<string>();
 
                 var client = _httpClientFactory.CreateClient("MultiLanguageAPI");
@@ -58,19 +58,34 @@ namespace WM.Gateway.Handlers
                 foreach (var k in keys)
                 {
                     var trimmedKey = k.Trim();
-                    var apiResponse = await client.GetAsync($"api/resource/get-translation?key={trimmedKey}");
+                    var apiResponse = await client.GetAsync($"api/Resource/get-translation?key={trimmedKey}");
 
                     if (apiResponse.IsSuccessStatusCode)
-                        translatedParts.Add(await apiResponse.Content.ReadAsStringAsync());
+                    {
+                        var jsonResponse = await apiResponse.Content.ReadAsStringAsync();
+
+                        using var doc = JsonDocument.Parse(jsonResponse);
+
+                        if (doc.RootElement.TryGetProperty("message", out var messageElement))
+                        {
+                            translatedParts.Add(messageElement.GetString() ?? trimmedKey);
+                        }
+                        else
+                        {
+                            translatedParts.Add(trimmedKey); 
+                        }
+                    }
                     else
-                        translatedParts.Add(trimmedKey); 
+                    {
+                        translatedParts.Add(trimmedKey);
+                    }
                 }
 
                 return string.Join(" | ", translatedParts);
             }
             catch
             {
-                return key;
+                return key; 
             }
         }
     }
