@@ -26,9 +26,9 @@ namespace Wallet.Domain.Entities.Concretes
 
         public Wallet(string customerNo, string iban, string currency, WalletType type, int suffix)
         {
-            Guard.Against.NullOrWhiteSpace(customerNo, nameof(customerNo));
+            Guard.Against.NullOrWhiteSpace(customerNo, nameof(customerNo), "ERR_CUSTOMERNO_CANNOT_EMPTY");
 
-            Guard.Against.NullOrWhiteSpace(iban, nameof(iban));
+            Guard.Against.NullOrWhiteSpace(iban, nameof(iban), "ERR_IBAN_CANNOT_BE_EMPTY");
 
             Guard.Against.LengthOutOfRange(currency, 3, 3, nameof(currency));
 

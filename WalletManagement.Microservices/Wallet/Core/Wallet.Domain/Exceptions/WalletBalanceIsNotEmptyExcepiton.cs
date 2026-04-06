@@ -4,7 +4,7 @@
     {
 
         public WalletBalanceIsNotEmptyExcepiton() 
-            : base("Silmek istediğiniz cüzdanda para bulunmaktadır. Silmek için lütfen parayı başka bir cüzdanınıza aktarınız.")
+            : base("ERR_WALLET_BALANCE_NOT_EMPTY")
         {
 
         }

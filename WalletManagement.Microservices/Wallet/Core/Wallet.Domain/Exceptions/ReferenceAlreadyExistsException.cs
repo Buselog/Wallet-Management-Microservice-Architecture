@@ -4,7 +4,7 @@ namespace Wallet.Domain.Exceptions
 {
     public class ReferenceAlreadyExistsException : BaseBusinessException
     {
-        public ReferenceAlreadyExistsException() : base("Bu referans numarası ile daha önce işlem yapılmış.")
+        public ReferenceAlreadyExistsException() : base("ERR_REFERENCE_ALREADY_EXIST")
         {
 
         }
