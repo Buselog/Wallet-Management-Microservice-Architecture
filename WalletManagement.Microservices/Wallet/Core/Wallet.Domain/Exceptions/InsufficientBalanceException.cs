@@ -3,7 +3,7 @@ namespace Wallet.Domain.Exceptions
 {
     public class InsufficientBalanceException : BaseBusinessException
     {
-        public InsufficientBalanceException() : base("Cüzdan bakiyesi bu işlem için yetersiz.")
+        public InsufficientBalanceException() : base("ERR_LOW_BALANCE")
         {
 
         }

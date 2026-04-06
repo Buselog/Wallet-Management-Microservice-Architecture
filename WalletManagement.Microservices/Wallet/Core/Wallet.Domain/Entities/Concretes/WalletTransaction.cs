@@ -19,10 +19,10 @@ namespace Wallet.Domain.Entities.Concretes
 
         public WalletTransaction(int walletId, decimal amount, string referenceId, string transactionType)
         {
-            Guard.Against.Zero(walletId, nameof(walletId), "Geçerli bir cüzdan ID olmalı.");
-            Guard.Against.Zero(amount, nameof(amount), "İşlem tutarı sıfır olamaz.");
+            Guard.Against.Zero(walletId, nameof(walletId), "ERR_INVALID_WALLET");
+            Guard.Against.Zero(amount, nameof(amount), "ERR_TRANSACTION_AMOUNT_MUST_GREATHER_THAN_0");
             Guard.Against.NullOrWhiteSpace(referenceId, nameof(referenceId));
-            Guard.Against.NullOrWhiteSpace(transactionType, nameof(transactionType), "İşlem tipi boş olamaz.");
+            Guard.Against.NullOrWhiteSpace(transactionType, nameof(transactionType), "ERR_TRANSACTION_TYPE_CANNOT_BE_EMPTY");
 
             WalletId = walletId;
             Amount = amount;
