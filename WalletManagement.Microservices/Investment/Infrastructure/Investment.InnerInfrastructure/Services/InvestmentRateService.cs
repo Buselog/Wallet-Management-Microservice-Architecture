@@ -32,7 +32,7 @@ namespace Investment.InnerInfrastructure.Services
             var response = await _httpClient.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
-                throw new BaseBusinessException($"Kur bilgilerini çekerken bir hata oluştu: {response.StatusCode}");
+                throw new BaseBusinessException("ERR_FETCHING_EXCHANGE_RATES");
 
             var jsonContent = await response.Content.ReadAsStringAsync();
 
