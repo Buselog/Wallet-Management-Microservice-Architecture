@@ -85,7 +85,10 @@
       "SwaggerKey": "wallet",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "DelegatingHandlers": [
+        "LocalizationHandler"
+      ]
     },
 
     {
