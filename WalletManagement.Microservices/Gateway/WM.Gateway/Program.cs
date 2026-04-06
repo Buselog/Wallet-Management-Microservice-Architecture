@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using System.Text;
+using WM.Gateway.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +22,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddHttpClient("MultiLanguageAPI", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7207/"); 
+});
+
+builder.Services.AddTransient<LocalizationHandler>();
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
-builder.Services.AddOcelot();
+builder.Services.AddOcelot().AddDelegatingHandler<LocalizationHandler>();
 
 builder.Services.AddCors(options =>
 {
