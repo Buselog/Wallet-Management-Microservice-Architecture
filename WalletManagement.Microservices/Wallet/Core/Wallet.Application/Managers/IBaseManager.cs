@@ -11,10 +11,10 @@ namespace Wallet.Application.Managers
 
         Task<T?> FirstOrDefaultAsync(Expression<Func<D, bool>> exp);
 
-        Task<string> AddAsync(T dto);
+        Task AddAsync(T dto);
 
-        Task<string> UpdateAsync(T dto);
+        Task UpdateAsync(T dto);
 
-        Task<string> DeleteAsync(int id);
+        Task DeleteAsync(int id);
     }
 }

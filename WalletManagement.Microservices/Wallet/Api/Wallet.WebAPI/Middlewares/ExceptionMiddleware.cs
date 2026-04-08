@@ -40,6 +40,8 @@ namespace Wallet.WebAPI.Middlewares
 
                 CustomerNotFoundException => (HttpStatusCode.NotFound, exception.Message),
 
+                WalletNotFoundException => (HttpStatusCode.NotFound, exception.Message),
+
                 InvalidIbanException => (HttpStatusCode.BadRequest, exception.Message),
 
                 InsufficientBalanceException => (HttpStatusCode.BadRequest, exception.Message),
@@ -50,7 +52,7 @@ namespace Wallet.WebAPI.Middlewares
 
                 ConcurrencyException => (HttpStatusCode.Conflict, exception.Message),
 
-                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "ERR_UNAUTHORIZED"),
+                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
 
                 BaseBusinessException => (HttpStatusCode.BadRequest, exception.Message),
 
@@ -63,7 +65,8 @@ namespace Wallet.WebAPI.Middlewares
             if (statusCode == HttpStatusCode.InternalServerError)
                 Log.Error(exception, "Kritik Sistem Hatası: {Message}", exception.Message);
             else
-                Log.Warning("İş Mantığı İhlali [Key: {ErrorCode}]: {OriginalMessage}", errorCode, exception.Message);
+                //   Log.Warning("İş Mantığı İhlali [Key: {ErrorCode}]: {OriginalMessage}", errorCode, exception.Message);
+                Log.Warning(exception, "İş Mantığı İhlali [Key: {ErrorCode}]", errorCode);
 
             var response = new
             {

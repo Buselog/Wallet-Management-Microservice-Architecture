@@ -3,6 +3,7 @@ using Wallet.Application.Dtos;
 using Wallet.Application.Managers;
 using Wallet.Contract.Repositories;
 using Wallet.Domain.Entities.Concretes;
+using Wallet.Domain.Exceptions;
 
 namespace Wallet.InnerInfrastructure.Managers
 {
@@ -26,11 +27,11 @@ namespace Wallet.InnerInfrastructure.Managers
 
             if(wallet== null || !wallet.IsActive)
             {
-                throw new KeyNotFoundException("İşlem yapılmak istenen aktif cüzdan bulunamadı.");
+                throw new WalletNotFoundException();
             }
 
             if (wallet.CustomerNo != customerNo)
-                throw new UnauthorizedAccessException("Bu cüzdan üzerinde işlem yapma yetkiniz bulunmamaktadır!");
+                throw new UnauthorizedAccessException("ERR_NO_PERMISSION_ON_WALLET");
 
 
             var (entities, totalCount) = await _transactionRepository.GetFilteredHistoryAsync(
