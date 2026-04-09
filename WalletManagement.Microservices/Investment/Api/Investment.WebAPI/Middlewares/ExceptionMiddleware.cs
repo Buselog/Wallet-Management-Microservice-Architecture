@@ -30,14 +30,14 @@ namespace Investment.WebAPI.Middlewares
         {
             context.Response.ContentType = "application/json";
 
-            var (statusCode, message) = exception switch
+            var (statusCode, errorCode) = exception switch
             { 
 
-                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
+                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "ERR_UNAUTHORIZED"),
 
                 BaseBusinessException => (HttpStatusCode.BadRequest, exception.Message),
 
-                _ => (HttpStatusCode.InternalServerError, "Sunucu taraflı beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
+                _ => (HttpStatusCode.InternalServerError, "ERR_INTERNAL_SERVER_ERROR")
             };
 
 
@@ -51,7 +51,7 @@ namespace Investment.WebAPI.Middlewares
             var response = new
             {
                 Status = context.Response.StatusCode,
-                Message = message,
+                Message = errorCode,
                 Detail = exception.GetType().Name,
                 Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };
