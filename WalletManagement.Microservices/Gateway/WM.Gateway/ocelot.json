@@ -54,7 +54,10 @@
       "SwaggerKey": "customer",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "DelegatingHandlers": [
+        "LocalizationHandler"
+      ]
     },
 
     {
@@ -68,7 +71,10 @@
       ],
       "UpstreamPathTemplate": "/api/Auth/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "SwaggerKey": "customer"
+      "SwaggerKey": "customer",
+      "DelegatingHandlers": [
+        "LocalizationHandler"
+      ]
     },
 
     {
@@ -105,7 +111,10 @@
       "SwaggerKey": "investment",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "DelegatingHandlers": [
+        "LocalizationHandler"
+      ]
     },
 
     {
@@ -122,7 +131,10 @@
       "SwaggerKey": "wallet",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "DelegatingHandlers": [
+        "LocalizationHandler"
+      ]
     },
 
     {
