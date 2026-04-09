@@ -46,7 +46,7 @@ namespace Investment.WebAPI.Middlewares
             if (statusCode == HttpStatusCode.InternalServerError)
                 Log.Error(exception, "Investment API - Kritik Sistem Hatası: {Message}", exception.Message);
             else
-                Log.Warning("Investment API - İş Mantığı İhlali: {Message}", exception.Message);
+                Log.Warning(exception, "İş Mantığı İhlali [Key: {ErrorCode}]", errorCode);
 
             var response = new
             {
