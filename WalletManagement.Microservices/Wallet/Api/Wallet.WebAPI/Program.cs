@@ -1,5 +1,6 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -16,7 +17,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 builder.Services.AddLoggerService(builder.Configuration);
 builder.Services.AddControllers();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 builder.Services.AddHttpContextAccessor();
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 builder.Services.AddDbContextService(builder.Configuration);
