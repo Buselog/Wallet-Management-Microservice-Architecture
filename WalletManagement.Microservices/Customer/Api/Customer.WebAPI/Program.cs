@@ -3,6 +3,7 @@ using Customer.Application.Managers;
 using Customer.InnerInfrastructure.DependencyResolvers;
 using Customer.InnerInfrastructure.Services;
 using Customer.Persistence.DependencyResolvers;
+using Customer.WebAPI.Filters;
 using Customer.WebAPI.Middlewares;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 builder.Services.AddLoggerService(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
