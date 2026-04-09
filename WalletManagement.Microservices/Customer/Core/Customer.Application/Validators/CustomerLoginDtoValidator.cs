@@ -10,13 +10,13 @@ namespace Customer.Application.Validators
             RuleFor(x => x.Email)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("E-posta adresi zorunludur.")
+                .WithErrorCode("ERR_EMAIL_ADDRESS_CANNOT_EMPTY")
                 .EmailAddress()
-                .WithMessage("Geçerli bir e-posta formatı giriniz.");
+                .WithErrorCode("ERR_INVALID_EMAIL_ADDRESS");
 
             RuleFor(x => x.Password)
                 .NotEmpty()
-                .WithMessage("Şifre alanı boş bırakılamaz.");
+                .WithErrorCode("ERR_PASSWORD_CANNOT_EMPTY");
         }
     }
 }

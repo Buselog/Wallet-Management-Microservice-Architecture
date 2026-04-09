@@ -58,7 +58,7 @@ namespace Customer.InnerInfrastructure.Managers
         {
             if (phone.Any(c => !char.IsDigit(c) && !" ()-+".Contains(c)))
             {
-                throw new BaseBusinessException("Telefon numarası geçersiz karakterler içeriyor.");
+                throw new BaseBusinessException("ERR_PHONE_NUMBER_CONTAINS_INVALID_CHARACTERS");
             }
 
             var cleanedPhone = new string(phone.Where(char.IsDigit).ToArray());
@@ -66,7 +66,7 @@ namespace Customer.InnerInfrastructure.Managers
 
             if (cleanedPhone.Length != 10)
             {
-                throw new BaseBusinessException("Telefon numarası tam 10 hane (5xx...) olmalıdır.");
+                throw new BaseBusinessException("ERR_PHONE_NUMBER_MUST_CONTAIN_10_DIGITS");
             }
 
             var customerNo = await _customerRepository.GetCustomerNoByPhoneAsync(cleanedPhone);

@@ -18,16 +18,16 @@ namespace Customer.Domain.Entities.Concretes
 
         public Customer(string firstName, string lastName, string phoneNumber, string email, string password, string customerNo)
         {
-            CustomerNo = Guard.Against.NullOrWhiteSpace(customerNo, nameof(customerNo));
-            FirstName = Guard.Against.NullOrWhiteSpace(firstName, nameof(firstName));
-            LastName = Guard.Against.NullOrWhiteSpace(lastName, nameof(lastName));
-            Email = Guard.Against.NullOrWhiteSpace(email, nameof(email));
-            Password = Guard.Against.NullOrWhiteSpace(password, nameof(password));
+            CustomerNo = Guard.Against.NullOrWhiteSpace(customerNo, nameof(customerNo), "ERR_CUSTOMERNO_CANNOT_EMPTY");
+            FirstName = Guard.Against.NullOrWhiteSpace(firstName, nameof(firstName), "ERR_NAME_FIELD_CANNOT_BE_EMPTY");
+            LastName = Guard.Against.NullOrWhiteSpace(lastName, nameof(lastName), "ERR_SURNAME_FIELD_CANNOT_BE_EMPTY");
+            Email = Guard.Against.NullOrWhiteSpace(email, nameof(email), "ERR_EMAIL_ADDRESS_CANNOT_EMPTY");
+            Password = Guard.Against.NullOrWhiteSpace(password, nameof(password), "ERR_PASSWORD_CANNOT_EMPTY");
 
             Guard.Against.NullOrWhiteSpace(phoneNumber, nameof(phoneNumber));
             if (phoneNumber.Length != 10 || !phoneNumber.All(char.IsDigit))
             {
-                throw new ArgumentException("Telefon numarası tam 10 haneli rakamlardan oluşmalıdır.", nameof(phoneNumber));
+                throw new ArgumentException("ERR_PHONE_NUMBER_MUST_CONTAIN_10_DIGITS", nameof(phoneNumber));
             }
 
             PhoneNumber = phoneNumber;

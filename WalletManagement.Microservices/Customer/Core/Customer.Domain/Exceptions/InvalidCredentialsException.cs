@@ -3,7 +3,7 @@ namespace Customer.Domain.Exceptions
 {
     public class InvalidCredentialsException : BaseBusinessException
     {
-        public InvalidCredentialsException() : base("Email veya şifre hatalı.")
+        public InvalidCredentialsException() : base("ERR_EMAIL_OR_PASSWORD_INCORRECT")
         {
 
         }

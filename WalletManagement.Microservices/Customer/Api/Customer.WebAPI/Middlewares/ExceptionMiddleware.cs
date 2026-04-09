@@ -30,10 +30,10 @@ namespace Customer.WebAPI.Middlewares
         {
             context.Response.ContentType = "application/json";
 
-            var (statusCode, message) = exception switch
+            var (statusCode, errorCode) = exception switch
             {
                 FluentValidation.ValidationException valEx =>
-                 (HttpStatusCode.BadRequest, string.Join(" | ", valEx.Errors.Select(e => e.ErrorMessage))),
+                 (HttpStatusCode.BadRequest, string.Join(" | ", valEx.Errors.Select(e => e.ErrorCode))),
 
                 ArgumentNullException or ArgumentException or ArgumentOutOfRangeException =>
                  (HttpStatusCode.BadRequest, exception.Message),
@@ -44,11 +44,11 @@ namespace Customer.WebAPI.Middlewares
 
                 InvalidCredentialsException => (HttpStatusCode.Unauthorized, exception.Message),
 
-                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Bu işlem için yetkiniz bulunmamaktadır."),
+                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "ERR_UNAUTHORIZED"),
 
                 BaseBusinessException => (HttpStatusCode.BadRequest, exception.Message),
 
-                _ => (HttpStatusCode.InternalServerError, "Müşteri tarafında beklenmedik bir hata oluştu.")
+                _ => (HttpStatusCode.InternalServerError, "ERR_INTERNAL_SERVER_ERROR")
             };
 
             context.Response.StatusCode = (int)statusCode;
@@ -56,12 +56,12 @@ namespace Customer.WebAPI.Middlewares
             if (statusCode == HttpStatusCode.InternalServerError)
                 Log.Error(exception, "Customer API - Kritik Sistem Hatası: {Message}", exception.Message);
             else
-                Log.Warning("Customer API - İş Mantığı İhlali: {Message}", exception.Message);
+                Log.Warning("Customer API - İş Mantığı İhlali: [Key: {ErrorCode}]: {OriginalMessage}", errorCode, exception.Message);
 
             var response = new
             {
                 Status = context.Response.StatusCode,
-                Message = message,
+                Message = errorCode,
                 Detail = exception.GetType().Name,
                 Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };

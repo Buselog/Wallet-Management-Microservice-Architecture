@@ -2,7 +2,7 @@
 {
     public class PhoneNumberAlreadyExistException : BaseBusinessException
     {
-        public PhoneNumberAlreadyExistException() : base("Bu telefon numarası zaten kayıtlı.")
+        public PhoneNumberAlreadyExistException() : base("ERR_PHONE_NUMBER_ALREADY_REGISTERED")
         {
 
         }

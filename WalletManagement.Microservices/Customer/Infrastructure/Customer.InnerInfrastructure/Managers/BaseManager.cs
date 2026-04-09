@@ -2,6 +2,7 @@
 using Customer.Application.Managers;
 using Customer.Contract.Repositories;
 using Customer.Domain.Entities.Abstracts;
+using Customer.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,32 +35,28 @@ namespace Customer.InnerInfrastructure.Managers
             return _mapper.Map<T>(entity);
         }
 
-        public async Task<string> AddAsync(T dto)
+        public async Task AddAsync(T dto)
         {
             var entity = _mapper.Map<D>(dto);
 
             await _repository.AddAsync(entity);
             await _repository.SaveChangesAsync();
-
-            return "Kayıt başarıyla eklendi.";
         }
 
-        public async Task<string> UpdateAsync(T dto)
+        public async Task UpdateAsync(T dto)
         {
             var entity = _mapper.Map<D>(dto);
             _repository.Update(entity);
             await _repository.SaveChangesAsync();
-            return "Güncelleme başarılı.";
         }
 
-        public async Task<string> DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
             var entity = await _repository.GetByIdAsync(id);
-            if (entity == null) return "Kayıt bulunamadı.";
+            if (entity == null) throw new CustomerNotFoundException();
 
             _repository.Delete(entity);
             await _repository.SaveChangesAsync();
-            return "Kayıt silindi.";
         }
 
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<D, bool>> exp)
