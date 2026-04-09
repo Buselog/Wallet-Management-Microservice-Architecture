@@ -46,24 +46,24 @@ namespace Wallet.WebAPI.Controllers
         [HttpPost("deposit")]
         public async Task<IActionResult> Deposit([FromBody] DepositRequestDto dto)
         {
-            var message = await _walletManager.DepositAsync(dto, currentCustomerNo);
-            return Ok(new { Message = message });
+            await _walletManager.DepositAsync(dto, currentCustomerNo);
+            return Ok();
         }
 
         [Authorize]
         [HttpPost("withdraw")]
         public async Task<IActionResult> Withdraw([FromBody] WithdrawRequestDto dto)
         {
-            var message = await _walletManager.WithdrawAsync(dto, currentCustomerNo);
-            return Ok(new { Message = message });
+            await _walletManager.WithdrawAsync(dto, currentCustomerNo);
+            return Ok();
         }
 
         [Authorize]
         [HttpPost("transfer")]
         public async Task<IActionResult> Transfer([FromBody] TransferRequestDto dto)
         {
-            var message = await _walletManager.TransferAsync(dto, currentCustomerNo);
-            return Ok(new { Message = message });
+            await _walletManager.TransferAsync(dto, currentCustomerNo);
+            return Ok();
         }
 
 
@@ -71,8 +71,8 @@ namespace Wallet.WebAPI.Controllers
         [HttpDelete("{id}/delete")]
         public async Task<IActionResult> DeleteWallet(int id)
         {
-            var message = await _walletManager.SoftDeleteWalletAsync(id, currentCustomerNo);
-            return Ok(new { Message = message });
+            await _walletManager.SoftDeleteWalletAsync(id, currentCustomerNo);
+            return Ok();
         }
     }
 

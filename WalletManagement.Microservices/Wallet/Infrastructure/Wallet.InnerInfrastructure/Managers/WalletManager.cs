@@ -46,7 +46,7 @@ namespace Wallet.InnerInfrastructure.Managers
             var allWallets = await _walletRepository.GetWalletsByCustomerNoAsync(currentCustomerNo, false);
 
             if (allWallets.Any(x => x.Currency == currency && x.Type == walletType && x.IsActive))
-                throw new BaseBusinessException($"{currency} - {walletType} tipinde aktif bir cüzdan zaten mevcut.");
+                throw new BaseBusinessException($"ERR_ACTIVE_WALLET_ALREADY_EXISTS | Detay: {currency} - {walletType}");
 
             int nextSuffix = allWallets.Any() ? allWallets.Max(x => x.Suffix) + 1 : 1;
 
@@ -58,35 +58,35 @@ namespace Wallet.InnerInfrastructure.Managers
             return _mapper.Map<WalletDto>(newWallet);
         }
 
-        public async Task<string> DepositAsync(DepositRequestDto dto, string customerNo)
+        public async Task DepositAsync(DepositRequestDto dto, string customerNo)
         {
             var walletId = dto.WalletId ?? 0;
             var amount = dto.Amount ?? 0;
 
             await ValidateWalletOwnershipAsync(walletId, customerNo);
-            return await ProcessTransactionAsync(walletId, amount, "Deposit", string.Empty, string.Empty, dto.ReferenceId);
+            await ProcessTransactionAsync(walletId, amount, "Deposit", string.Empty, string.Empty, dto.ReferenceId);
         }
 
-        public async Task<string> WithdrawAsync(WithdrawRequestDto dto, string customerNo)
+        public async Task WithdrawAsync(WithdrawRequestDto dto, string customerNo)
         {
             var walletId = dto.WalletId ?? 0;
             var amount = dto.Amount ?? 0;
 
             await ValidateWalletOwnershipAsync(walletId, customerNo);
-            return await  ProcessTransactionAsync(walletId, amount, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
+            await  ProcessTransactionAsync(walletId, amount, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
         }
 
-        public async Task<string> TransferAsync(TransferRequestDto dto, string customerNo)
+        public async Task TransferAsync(TransferRequestDto dto, string customerNo)
         {
             var fromWalletId = dto.FromWalletId ?? 0;
             var amount = dto.Amount ?? 0;
 
             await ValidateWalletOwnershipAsync(fromWalletId, customerNo);
             var resolvedTarget = await ResolveTargetAddress(dto.Target);
-            return await  ProcessTransactionAsync(fromWalletId, amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
+            await  ProcessTransactionAsync(fromWalletId, amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
         }
 
-        public async Task<string> SoftDeleteWalletAsync(int walletId, string customerNo)
+        public async Task SoftDeleteWalletAsync(int walletId, string customerNo)
         {
             await ValidateWalletOwnershipAsync(walletId, customerNo);
 
@@ -97,21 +97,19 @@ namespace Wallet.InnerInfrastructure.Managers
                 throw new WalletBalanceIsNotEmptyExcepiton();
             }
                 await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_" + customerNo);
-
-            return "Cüzdan başarıyla kapatıldı.";
         }
 
         private async Task ValidateWalletOwnershipAsync(int walletId, string customerNo)
         {
             var wallet = await _walletRepository.GetByIdNoTrackingAsync(walletId);
             if (wallet == null || !wallet.IsActive)
-                throw new BaseBusinessException("İşlem yapılmak istenen aktif cüzdan bulunamadı.");
+                throw new WalletNotFoundException();
 
             if (wallet.CustomerNo != customerNo)
-                throw new UnauthorizedAccessException("Bu cüzdan üzerinde işlem yapma yetkiniz bulunmamaktadır!");
+                throw new UnauthorizedAccessException("ERR_NO_PERMISSION_ON_WALLET");
         }
 
-        private async Task<string> ProcessTransactionAsync(int walletId, decimal amount, string type, string target, string description, string referenceId)
+        private async Task ProcessTransactionAsync(int walletId, decimal amount, string type, string target, string description, string referenceId)
         {
             var exists = await _transactionRepository.ReferenceIdExistsAsync(referenceId);
             if (exists) throw new ReferenceAlreadyExistsException();
@@ -126,21 +124,21 @@ namespace Wallet.InnerInfrastructure.Managers
 
             var result = await _walletRepository.ExecuteMoneyTransactionWithSPAsync(walletId, amount, type, target, description, referenceId, senderName);
 
-            return HandleSPResult(result);
+            HandleSPResult(result);
         }
 
-        private string HandleSPResult(int result)
+        private void HandleSPResult(int result)
         {
-            if (result == 1) return "İşlem başarıyla tamamlandı.";
+            if (result == 1) return;
 
-            return result switch
+            throw result switch
             {
-                
-                0 => throw new InsufficientBalanceException(),
-                -1 => throw new CustomerNotFoundException(),
-                -2 => throw new BaseBusinessException("Veritabanı seviyesinde bir hata oluştu (Rollback). Lütfen verileri kontrol edin."),
-                -3 => throw new BaseBusinessException("İşlem yapılmak istenen cüzdan bulunamadı veya pasif durumda."),
-                _ => throw new Exception($"İşlem sırasında sistemsel bir hata oluştu: {result}. Lütfen daha sonra tekrar deneyin.")
+
+                0 => new InsufficientBalanceException(),
+                -1 => new CustomerNotFoundException(),
+                -2 => new BaseBusinessException("ERR_DB_ROLLBACK"),
+                -3 => new WalletNotFoundException(),
+                _ => new Exception($"ERR_SYSTEM_TRANSACTION_FAILED | SP_Result: {result}")
 
             };
         }
@@ -163,7 +161,7 @@ namespace Wallet.InnerInfrastructure.Managers
 
             if (cleanedPhone.Length != 10)
             {
-                throw new BaseBusinessException("Telefon numarası formatı hatalı.");
+                throw new BaseBusinessException("ERR_INVALID_PHONE_FORMAT");
             }
 
             var customerNo = await GetCustomerNoByPhoneFromApi(cleanedPhone);

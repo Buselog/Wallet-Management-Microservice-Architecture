@@ -35,43 +35,28 @@ namespace Wallet.InnerInfrastructure.Managers
             return _mapper.Map<T>(entity);
         }
 
-        public async Task<string> AddAsync(T dto)
+        public async Task AddAsync(T dto)
         {
             D domainEntity = _mapper.Map<D>(dto);
             await _repository.AddAsync(domainEntity);
             var result = await _repository.SaveChangesAsync();
-
-            if (result <= 0)
-                throw new Exception("Kayıt işlemi sırasında bir hata oluştu.");
-
-            return "Success";
         }
 
-        public async Task<string> UpdateAsync(T dto)
+        public async Task UpdateAsync(T dto)
         {
             D domainEntity = _mapper.Map<D>(dto);
             _repository.Update(domainEntity);
             var result = await _repository.SaveChangesAsync();
-
-            if (result <= 0)
-                throw new Exception("Güncelleme işlemi başarısız oldu.");
-
-            return "Updated successfully";
         }
 
-        public async Task<string> DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
 
             var value = await _repository.GetByIdAsync(id);
-            if (value == null) throw new KeyNotFoundException("Silinmek istenen kayıt bulunamadı.");
+            if (value == null) throw new KeyNotFoundException("ERR_NO_RECORD_FOUND_TO_DELETE");
 
             _repository.Delete(value);
             var result = await _repository.SaveChangesAsync();
-
-            if (result <= 0)
-                throw new Exception("Silme işlemi sırasında bir hata oluştu.");
-
-            return "Deleted successfully";
         }
     }
 }
