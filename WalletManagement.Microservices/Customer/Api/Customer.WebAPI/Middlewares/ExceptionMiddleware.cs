@@ -56,8 +56,8 @@ namespace Customer.WebAPI.Middlewares
             if (statusCode == HttpStatusCode.InternalServerError)
                 Log.Error(exception, "Customer API - Kritik Sistem Hatası: {Message}", exception.Message);
             else
-                Log.Warning("Customer API - İş Mantığı İhlali: [Key: {ErrorCode}]: {OriginalMessage}", errorCode, exception.Message);
-
+                Log.Warning(exception, "İş Mantığı İhlali [Key: {ErrorCode}]", errorCode);
+           
             var response = new
             {
                 Status = context.Response.StatusCode,
