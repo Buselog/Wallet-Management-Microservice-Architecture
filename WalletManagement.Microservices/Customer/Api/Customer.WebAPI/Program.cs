@@ -5,7 +5,6 @@ using Customer.InnerInfrastructure.Services;
 using Customer.Persistence.DependencyResolvers;
 using Customer.WebAPI.Filters;
 using Customer.WebAPI.Middlewares;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -35,7 +34,6 @@ builder.Services.AddMapperService();
 builder.Services.AddPersistenceServices();
 builder.Services.AddManagerServices();
 builder.Services.AddValidatorServices();
-builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddHttpClient<IWalletServiceClient, WalletServiceClient>(options =>
 {
