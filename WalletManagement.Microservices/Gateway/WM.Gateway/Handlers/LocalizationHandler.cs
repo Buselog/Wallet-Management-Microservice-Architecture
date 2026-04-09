@@ -48,44 +48,44 @@ namespace WM.Gateway.Handlers
         {
             try
             {
-                var keys = key.Split('|');
+                var parts = key.Split('|');
                 var translatedParts = new List<string>();
 
                 var client = _httpClientFactory.CreateClient("MultiLanguageAPI");
                 client.DefaultRequestHeaders.AcceptLanguage.Clear();
                 client.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue(culture));
 
-                foreach (var k in keys)
+                foreach (var p in parts)
                 {
-                    var trimmedKey = k.Trim();
-                    var apiResponse = await client.GetAsync($"api/Resource/get-translation?key={trimmedKey}");
+                    var trimmedPart = p.Trim();
 
-                    if (apiResponse.IsSuccessStatusCode)
+                    if (trimmedPart.StartsWith("ERR_"))
                     {
-                        var jsonResponse = await apiResponse.Content.ReadAsStringAsync();
+                        var apiResponse = await client.GetAsync($"api/Resource/get-translation?key={trimmedPart}");
 
-                        using var doc = JsonDocument.Parse(jsonResponse);
+                        if (apiResponse.IsSuccessStatusCode)
+                        {
+                            var jsonResponse = await apiResponse.Content.ReadAsStringAsync();
 
-                        if (doc.RootElement.TryGetProperty("message", out var messageElement))
-                        {
-                            translatedParts.Add(messageElement.GetString() ?? trimmedKey);
+                            using var doc = JsonDocument.Parse(jsonResponse);
+
+                            if (doc.RootElement.TryGetProperty("message", out var messageElement))
+                            {
+                                translatedParts.Add(messageElement.GetString() ?? trimmedPart);
+                                continue;
+                            }
                         }
-                        else
-                        {
-                            translatedParts.Add(trimmedKey); 
-                        }
+                        translatedParts.Add(trimmedPart);
+                    
                     }
-                    else
-                    {
-                        translatedParts.Add(trimmedKey);
-                    }
+
                 }
 
                 return string.Join(" | ", translatedParts);
             }
-            catch
+            catch (Exception ex)
             {
-                return key; 
+                return key.Split('|')[0].Trim();
             }
         }
     }
