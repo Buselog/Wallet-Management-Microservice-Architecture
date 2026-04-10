@@ -56,8 +56,14 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "DelegatingHandlers": [
+        "ResilienceHandler",
         "LocalizationHandler"
-      ]
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10000,
+        "TimeoutValue": 5000
+      }
     },
 
     {
@@ -73,8 +79,14 @@
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "SwaggerKey": "customer",
       "DelegatingHandlers": [
+        "ResilienceHandler",
         "LocalizationHandler"
-      ]
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10000,
+        "TimeoutValue": 5000
+      }
     },
 
     {
@@ -93,8 +105,14 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "DelegatingHandlers": [
+        "ResilienceHandler",
         "LocalizationHandler"
-      ]
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10000,
+        "TimeoutValue": 5000
+      }
     },
 
     {
@@ -113,8 +131,14 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "DelegatingHandlers": [
+        "ResilienceHandler",
         "LocalizationHandler"
-      ]
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10000,
+        "TimeoutValue": 5000
+      }
     },
 
     {
@@ -133,8 +157,14 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "DelegatingHandlers": [
+        "ResilienceHandler",
         "LocalizationHandler"
-      ]
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10000,
+        "TimeoutValue": 5000
+      }
     },
 
     {
