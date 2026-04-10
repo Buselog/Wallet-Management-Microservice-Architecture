@@ -40,8 +40,8 @@ builder.Services.AddTransient<LocalizationHandler>();
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
 builder.Services.AddOcelot()
-    .AddDelegatingHandler<ResilienceHandler>()
     .AddDelegatingHandler<LocalizationHandler>()
+    .AddDelegatingHandler<ResilienceHandler>()
     .AddPolly();
 
 builder.Services.AddCors(options =>
