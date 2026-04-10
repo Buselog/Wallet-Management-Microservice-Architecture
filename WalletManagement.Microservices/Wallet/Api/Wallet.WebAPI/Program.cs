@@ -9,6 +9,7 @@ using Wallet.Application.DependencyResolvers;
 using Wallet.InnerInfrastructure.DependencyResolvers;
 using Wallet.InnerInfrastructure.Services;
 using Wallet.Persistence.DependencyResolvers;
+using Wallet.WebAPI.Filters;
 using Wallet.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +17,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Host.UseSerilog();
 builder.Services.AddLoggerService(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -33,7 +37,7 @@ builder.Services.AddMapperService();
 builder.Services.AddRepositoryServices();
 builder.Services.AddManagerServices();
 builder.Services.AddValidatorServices();
-builder.Services.AddFluentValidationAutoValidation();
+
 
 
 builder.Services.AddHttpClient<CustomerServiceClient>(options =>
