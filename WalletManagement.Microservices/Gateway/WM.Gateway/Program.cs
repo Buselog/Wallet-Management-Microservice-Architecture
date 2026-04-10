@@ -2,10 +2,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Provider.Polly;
 using System.Text;
+using Serilog;
 using WM.Gateway.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer("Bearer", options => 
@@ -27,10 +35,14 @@ builder.Services.AddHttpClient("MultiLanguageAPI", client =>
     client.BaseAddress = new Uri("https://localhost:7207/"); 
 });
 
+builder.Services.AddTransient<ResilienceHandler>();
 builder.Services.AddTransient<LocalizationHandler>();
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
-builder.Services.AddOcelot().AddDelegatingHandler<LocalizationHandler>();
+builder.Services.AddOcelot()
+    .AddDelegatingHandler<ResilienceHandler>()
+    .AddDelegatingHandler<LocalizationHandler>()
+    .AddPolly();
 
 builder.Services.AddCors(options =>
 {
