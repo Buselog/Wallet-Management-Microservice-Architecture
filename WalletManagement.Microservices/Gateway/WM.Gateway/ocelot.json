@@ -56,8 +56,8 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "DelegatingHandlers": [
-        "ResilienceHandler",
-        "LocalizationHandler"
+        "LocalizationHandler",
+        "ResilienceHandler"
       ],
       "QoSOptions": {
         "ExceptionsAllowedBeforeBreaking": 3,
@@ -79,8 +79,8 @@
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "SwaggerKey": "customer",
       "DelegatingHandlers": [
-        "ResilienceHandler",
-        "LocalizationHandler"
+        "LocalizationHandler",
+        "ResilienceHandler"
       ],
       "QoSOptions": {
         "ExceptionsAllowedBeforeBreaking": 3,
@@ -105,8 +105,8 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "DelegatingHandlers": [
-        "ResilienceHandler",
-        "LocalizationHandler"
+        "LocalizationHandler",
+        "ResilienceHandler"
       ],
       "QoSOptions": {
         "ExceptionsAllowedBeforeBreaking": 3,
@@ -131,8 +131,8 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "DelegatingHandlers": [
-        "ResilienceHandler",
-        "LocalizationHandler"
+        "LocalizationHandler",
+        "ResilienceHandler"
       ],
       "QoSOptions": {
         "ExceptionsAllowedBeforeBreaking": 3,
@@ -157,8 +157,8 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "DelegatingHandlers": [
-        "ResilienceHandler",
-        "LocalizationHandler"
+        "LocalizationHandler",
+        "ResilienceHandler"
       ],
       "QoSOptions": {
         "ExceptionsAllowedBeforeBreaking": 3,
