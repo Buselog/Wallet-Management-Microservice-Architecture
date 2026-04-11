@@ -1,4 +1,5 @@
 ﻿using MultiLanguage.Application.Dtos;
+using MultiLanguage.Domain.Entities;
 
 namespace MultiLanguage.Application.Managers
 {
