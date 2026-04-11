@@ -38,6 +38,14 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "MultiLang_";
+});
+
+builder.Services.AddExternalServices();
+
 
 builder.Services.AddSwaggerGen(options =>
 {

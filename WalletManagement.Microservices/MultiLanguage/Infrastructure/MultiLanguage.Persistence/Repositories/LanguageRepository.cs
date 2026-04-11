@@ -36,5 +36,10 @@ namespace MultiLanguage.Persistence.Repositories
         {
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<Language> GetByIdAsync(int id)
+        {
+            return await _dbSet.FirstOrDefaultAsync(x => x.Id == id);
+        }
     }
 }
