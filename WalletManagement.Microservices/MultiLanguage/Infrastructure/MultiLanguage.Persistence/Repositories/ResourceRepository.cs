@@ -2,6 +2,7 @@
 using MultiLanguage.Contract.Repositories;
 using MultiLanguage.Domain.Entities;
 using MultiLanguage.Persistence.Context;
+using System.Linq.Expressions;
 
 namespace MultiLanguage.Persistence.Repositories
 {
@@ -25,17 +26,18 @@ namespace MultiLanguage.Persistence.Repositories
         public async Task<string> GetValueAsync(string key, string culture)
         {
             var resource = await _dbSet
-                .Include(r => r.Language)
-                .FirstOrDefaultAsync(r => r.Key == key && r.Language.CultureCode == culture);
+                .Where(r => r.Key == key && r.Language.CultureCode == culture)
+                .Select(r => r.Value)
+                .FirstOrDefaultAsync();
 
-            return resource?.Value ?? key;
+            return resource ?? key;
         }
 
         public async Task<Dictionary<string, string>> GetAllByCultureCodeAsync(string culture)
         {
             return await _dbSet
-                .Include(r => r.Language)
                 .Where(r => r.Language.CultureCode == culture)
+                .Select(r=> new {r.Key, r.Value })
                 .ToDictionaryAsync(r => r.Key, r => r.Value);
         }
 
