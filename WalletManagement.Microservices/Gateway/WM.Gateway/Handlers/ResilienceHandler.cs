@@ -1,4 +1,5 @@
-﻿using Serilog; 
+﻿using Polly.CircuitBreaker;
+using Serilog; 
 using System.Net;
 
 namespace WM.Gateway.Handlers
@@ -32,6 +33,11 @@ namespace WM.Gateway.Handlers
             {
                 Log.Error(ex, "Resilience: Servis zaman aşımına uğradı (Timeout). URL: {Url}", request.RequestUri);
                 return CreateCustomErrorResponse(HttpStatusCode.GatewayTimeout, "ERR_SERVICE_TIMEOUT");
+            }
+            catch (BrokenCircuitException ex)
+            {
+                Log.Warning(ex, "Resilience: Polly, servisi bir süreliğine devre dışı bıraktı. Servis karantinada.");
+                return CreateCustomErrorResponse(HttpStatusCode.ServiceUnavailable, "ERR_SERVICE_QUARANTINED");
             }
             catch (Exception ex)
             {
