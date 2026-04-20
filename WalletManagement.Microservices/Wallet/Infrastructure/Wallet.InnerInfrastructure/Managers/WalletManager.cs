@@ -99,6 +99,28 @@ namespace Wallet.InnerInfrastructure.Managers
                 await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_" + customerNo);
         }
 
+        public async Task ExecuteTradeAsync(CurrencyTradeRequestDto dto)
+        {
+     
+            await ValidateWalletOwnershipAsync(dto.SourceWalletId, dto.CustomerNo);
+
+            await ValidateWalletOwnershipAsync(dto.TargetWalletId, dto.CustomerNo);
+
+            var exists = await _transactionRepository.ReferenceIdExistsAsync(dto.ReferenceId);
+            if (exists) throw new ReferenceAlreadyExistsException();
+
+            var result = await _walletRepository.ExecuteCurrencyTradeWithSPAsync(
+                dto.CustomerNo,
+                dto.SourceWalletId,
+                dto.TargetWalletId,
+                dto.Amount,
+                dto.TargetRate,
+                dto.TradeType,
+                dto.ReferenceId);
+
+            HandleSPResult(result);
+        }
+
         private async Task ValidateWalletOwnershipAsync(int walletId, string customerNo)
         {
             var wallet = await _walletRepository.GetByIdNoTrackingAsync(walletId);

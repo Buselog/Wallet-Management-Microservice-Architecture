@@ -5,6 +5,7 @@ using Wallet.Application.Managers;
 
 namespace Wallet.WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class WalletController : ControllerBase
@@ -18,7 +19,6 @@ namespace Wallet.WebAPI.Controllers
 
         private string currentCustomerNo => User.FindFirst("CustomerNo")?.Value!;
 
-        [Authorize]
         [HttpGet("{id}/balance")]
         public async Task<IActionResult> GetBalance(int id)
         {
@@ -26,7 +26,6 @@ namespace Wallet.WebAPI.Controllers
             return Ok(new { WalletId = id, Balance = balance });
         }
 
-        [Authorize]
         [HttpGet("wallets/")]
         public async Task<IActionResult> GetCustomerWallets()
         {
@@ -34,7 +33,6 @@ namespace Wallet.WebAPI.Controllers
             return Ok(wallets);
         }
 
-        [Authorize]
         [HttpPost("create")]
         public async Task<IActionResult> CreateWallet([FromBody] CreateWalletRequestDto request)
         {
@@ -42,7 +40,6 @@ namespace Wallet.WebAPI.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpPost("deposit")]
         public async Task<IActionResult> Deposit([FromBody] DepositRequestDto dto)
         {
@@ -50,7 +47,6 @@ namespace Wallet.WebAPI.Controllers
             return Ok();
         }
 
-        [Authorize]
         [HttpPost("withdraw")]
         public async Task<IActionResult> Withdraw([FromBody] WithdrawRequestDto dto)
         {
@@ -58,7 +54,6 @@ namespace Wallet.WebAPI.Controllers
             return Ok();
         }
 
-        [Authorize]
         [HttpPost("transfer")]
         public async Task<IActionResult> Transfer([FromBody] TransferRequestDto dto)
         {
@@ -66,12 +61,17 @@ namespace Wallet.WebAPI.Controllers
             return Ok();
         }
 
-
-        [Authorize]
         [HttpDelete("{id}/delete")]
         public async Task<IActionResult> DeleteWallet(int id)
         {
             await _walletManager.SoftDeleteWalletAsync(id, currentCustomerNo);
+            return Ok();
+        }
+
+        [HttpPost("execute-trade")]
+        public async Task<IActionResult> ExecuteTrade([FromBody] CurrencyTradeRequestDto dto)
+        {
+            await _walletManager.ExecuteTradeAsync(dto);
             return Ok();
         }
     }
