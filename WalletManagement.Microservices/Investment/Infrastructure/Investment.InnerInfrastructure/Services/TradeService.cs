@@ -22,10 +22,10 @@ namespace Investment.InnerInfrastructure.Services
             var targetRate = allRates.FirstOrDefault(x => x.CurrencyCode == currencyCode);
 
             if (targetRate == null)
-                throw new BaseBusinessException("ERR_CURRENCY_RATE_NOT_FOUND");
+                throw new CurrencyRateNotFoundException();
 
             if (targetRate.SellingRate <= 0)
-                throw new BaseBusinessException("ERR_INVALID_RATE_VALUE");
+                throw new InvalidRateValueException();
 
             var tradeRequest = new CurrencyTradeRequestDto
             {
@@ -40,7 +40,7 @@ namespace Investment.InnerInfrastructure.Services
             var result = await _walletClient.ExecuteTradeAsync(tradeRequest);
 
             if (!result)
-                throw new BaseBusinessException("ERR_TRADE_EXECUTION_FAILED_ON_WALLET");
+                throw new TradeExecutionFailedOnWalletException();
 
             return result;
         }
@@ -51,7 +51,7 @@ namespace Investment.InnerInfrastructure.Services
 
             var targetRate = allRates.FirstOrDefault(x => x.CurrencyCode == currencyCode);
 
-            if (targetRate == null) throw new BaseBusinessException("ERR_CURRENCY_RATE_NOT_FOUND");
+            if (targetRate == null) throw new CurrencyRateNotFoundException();
 
             var tradeRequest = new CurrencyTradeRequestDto
             {
@@ -66,7 +66,7 @@ namespace Investment.InnerInfrastructure.Services
             var result = await _walletClient.ExecuteTradeAsync(tradeRequest);
 
             if (!result)
-                throw new BaseBusinessException("ERR_TRADE_EXECUTION_FAILED_ON_WALLET");
+                throw new TradeExecutionFailedOnWalletException();
 
             return result;
         }

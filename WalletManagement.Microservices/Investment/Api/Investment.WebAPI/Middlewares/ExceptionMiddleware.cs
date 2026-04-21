@@ -31,7 +31,12 @@ namespace Investment.WebAPI.Middlewares
             context.Response.ContentType = "application/json";
 
             var (statusCode, errorCode) = exception switch
-            { 
+            {
+                CurrencyRateNotFoundException => (HttpStatusCode.NotFound, exception.Message),
+
+                InvalidRateValueException => (HttpStatusCode.UnprocessableEntity, exception.Message),
+
+                TradeExecutionFailedOnWalletException => (HttpStatusCode.UnprocessableEntity, exception.Message),
 
                 UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "ERR_UNAUTHORIZED"),
 
