@@ -10,15 +10,23 @@ namespace Investment.InnerInfrastructure.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
+        private readonly ICacheService _cacheService;
 
-        public InvestmentRateService(HttpClient httpClient, IConfiguration configuration)
+        public InvestmentRateService(HttpClient httpClient, IConfiguration configuration, ICacheService cacheService)
         {
             _httpClient = httpClient;
             _apiKey = configuration["InvestmentApi:Key"];
+            _cacheService = cacheService;
         }
 
         public async Task<List<ExchangeRateDto>> GetDailyRatesAsync()
         {
+
+            string cacheKey = "currency:daily_rates";
+
+            var cachedRates = await _cacheService.GetAsync<List<ExchangeRateDto>>(cacheKey);
+            if (cachedRates != null) return cachedRates;
+
             var startDate = DateTime.Now.AddDays(-4).ToString("dd-MM-yyyy");
             var endDate = DateTime.Now.ToString("dd-MM-yyyy");
 
@@ -40,13 +48,13 @@ namespace Investment.InnerInfrastructure.Services
             var items = doc.RootElement.GetProperty("items").EnumerateArray().ToList();
 
             var latestValidItem = items
-                .Where(x => x.TryGetProperty("TP_DK_USD_A_YTL", out var val) && val.ValueKind != JsonValueKind.Null)
+                .Where(x => x.TryGetProperty("TP_DK_USD_A_YTL", out var val) && val.ValueKind != JsonValueKind.Null && !string.IsNullOrEmpty(val.GetString()))
                 .LastOrDefault();
 
             if (latestValidItem.ValueKind == JsonValueKind.Undefined) return new List<ExchangeRateDto>();
 
          
-            return new List<ExchangeRateDto>
+            var rates = new List<ExchangeRateDto>
             {
 
                 CreateDto("USD", latestValidItem, "TP_DK_USD_A_YTL", "TP_DK_USD_S_YTL"),
@@ -55,6 +63,10 @@ namespace Investment.InnerInfrastructure.Services
                 CreateDto("CHF", latestValidItem, "TP_DK_CHF_A_YTL", "TP_DK_CHF_S_YTL"),
                 CreateDto("JPY", latestValidItem, "TP_DK_JPY_A_YTL", "TP_DK_JPY_S_YTL")
             };
+
+            await _cacheService.SetAsync(cacheKey, rates, TimeSpan.FromMinutes(15));
+
+            return rates;
 
         }
 

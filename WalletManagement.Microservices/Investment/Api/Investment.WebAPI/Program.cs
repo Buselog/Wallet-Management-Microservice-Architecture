@@ -17,6 +17,19 @@ builder.Services.AddLoggerService(builder.Configuration);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddServices();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient<IWalletClient, WalletClient>(client => {
+    client.BaseAddress = new Uri(builder.Configuration["ExternalServices:WalletApiUrl"]);
+});
+
+builder.Services.AddStackExchangeRedisCache(options =>
+   {
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Investment_";
+   });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
