@@ -1,4 +1,5 @@
-﻿using Investment.Application.Services;
+﻿using Investment.Application.Helpers;
+using Investment.Application.Services;
 using Investment.InnerInfrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,7 @@ namespace Investment.InnerInfrastructure.DependencyResolvers
         {
             services.AddScoped<ICacheService, RedisCacheService>();
             services.AddScoped<ITradeService, TradeService>();
+            services.AddSingleton<IReferenceGenerator, ReferenceGenerator>();
         }
     }
 }

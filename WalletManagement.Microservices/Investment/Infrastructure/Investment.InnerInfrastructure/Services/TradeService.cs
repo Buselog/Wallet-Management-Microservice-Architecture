@@ -8,11 +8,13 @@ namespace Investment.InnerInfrastructure.Services
     {
         private readonly IInvestmentRateService _rateService;
         private readonly IWalletClient _walletClient;
+        private readonly IReferenceGenerator _referenceGenerator;
 
-        public TradeService(IInvestmentRateService rateService, IWalletClient walletClient)
+        public TradeService(IInvestmentRateService rateService, IWalletClient walletClient, IReferenceGenerator referenceGenerator)
         {
             _rateService = rateService;
             _walletClient = walletClient;
+            _referenceGenerator = referenceGenerator;
         }
 
         public async Task<bool> BuyCurrencyAsync(int sourceWalletId, int targetWalletId, string customerNo, string currencyCode, decimal amount)
@@ -32,9 +34,10 @@ namespace Investment.InnerInfrastructure.Services
                 CustomerNo = customerNo,
                 SourceWalletId = sourceWalletId,
                 TargetWalletId = targetWalletId,
-                Amount = amount, 
-                TargetRate = targetRate.SellingRate, 
-                TradeType = "BUY"
+                Amount = amount,
+                TargetRate = targetRate.SellingRate,
+                TradeType = "BUY",
+                ReferenceId = _referenceGenerator.GenerateTradeReference()
             };
 
             var result = await _walletClient.ExecuteTradeAsync(tradeRequest);
@@ -60,7 +63,8 @@ namespace Investment.InnerInfrastructure.Services
                 TargetWalletId = targetWalletId, 
                 Amount = amount,
                 TargetRate = targetRate.BuyingRate,
-                TradeType = "SELL"
+                TradeType = "SELL",
+                ReferenceId = _referenceGenerator.GenerateTradeReference()
             };
 
             var result = await _walletClient.ExecuteTradeAsync(tradeRequest);
