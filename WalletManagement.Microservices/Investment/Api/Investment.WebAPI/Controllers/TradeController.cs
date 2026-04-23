@@ -1,9 +1,11 @@
 ﻿using Investment.Application.Dtos;
 using Investment.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Investment.WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TradeController : ControllerBase
