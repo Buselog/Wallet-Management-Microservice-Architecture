@@ -7,10 +7,6 @@ namespace Wallet.Application.Validators
     {
         public CreateWalletRequestValidator()
         {
-            RuleFor(x => x.CustomerNo)
-                .NotEmpty()
-                .WithErrorCode("ERR_CUSTOMERNO_CANNOT_EMPTY");
-
             RuleFor(x => x.Currency)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
