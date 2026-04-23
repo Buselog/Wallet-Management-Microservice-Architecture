@@ -10,13 +10,6 @@ namespace Wallet.Application.Dtos
         public decimal Balance { get; set; }
         public string Currency { get; set; } = "TRY";
         public WalletType Type { get; set; }
-        public string TypeName => Type switch
-        {
-            WalletType.Saving => "Vadeli Hesap",
-            WalletType.Checking => "Vadesiz Hesap",
-            WalletType.Investment => "Yatırım Hesabı",
-            _ => "Tanımlanmamış Cüzdan Tipi"
-        };
         public DateTime CreatedDate { get; set; }
         public List<WalletTransactionDto> Transactions { get; set; } = new();
     }
