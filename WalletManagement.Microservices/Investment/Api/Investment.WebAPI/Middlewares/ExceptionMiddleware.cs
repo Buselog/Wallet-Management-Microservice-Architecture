@@ -36,7 +36,7 @@ namespace Investment.WebAPI.Middlewares
 
                 InvalidRateValueException => (HttpStatusCode.UnprocessableEntity, exception.Message),
 
-                TradeExecutionFailedOnWalletException => (HttpStatusCode.UnprocessableEntity, exception.Message),
+                WalletServiceException walEx => ((HttpStatusCode)walEx.StatusCode, walEx.Message),
 
                 UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "ERR_UNAUTHORIZED"),
 

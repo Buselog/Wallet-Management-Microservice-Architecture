@@ -42,9 +42,6 @@ namespace Investment.InnerInfrastructure.Services
 
             var result = await _walletClient.ExecuteTradeAsync(tradeRequest);
 
-            if (!result)
-                throw new TradeExecutionFailedOnWalletException();
-
             return result;
         }
 
@@ -68,9 +65,6 @@ namespace Investment.InnerInfrastructure.Services
             };
 
             var result = await _walletClient.ExecuteTradeAsync(tradeRequest);
-
-            if (!result)
-                throw new TradeExecutionFailedOnWalletException();
 
             return result;
         }

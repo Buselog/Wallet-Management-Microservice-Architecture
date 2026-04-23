@@ -1,7 +1,9 @@
 ﻿using Investment.Application.Dtos;
 using Investment.Application.Services;
+using Investment.Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace Investment.InnerInfrastructure.Services
 {
@@ -29,7 +31,18 @@ namespace Investment.InnerInfrastructure.Services
 
             var response = await _httpClient.PostAsJsonAsync("api/Wallet/execute-trade", tradeRequest);
 
-            return response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+
+                var errorObj = JsonSerializer.Deserialize<JsonElement>(errorContent);
+
+                string errorMessage = errorObj.GetProperty("Message").GetString() ?? "ERR_TRADE_EXECUTION_FAILED_ON_WALLET";
+
+                throw new WalletServiceException((int)response.StatusCode, errorMessage);
+            }
+
+            return true;
         }
     }
 }
