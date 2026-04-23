@@ -68,6 +68,25 @@ namespace Wallet.Persistence.Repositories
 
             return result.FirstOrDefault();
         }
+
+        public async Task<int> ExecuteCurrencyTradeWithSPAsync(string customerNo, int sourceWalletId, int targetWalletId, decimal amount, decimal targetRate, string tradeType, string referenceId)
+        {
+            var CustomerNo = new SqlParameter("@CustomerNo", customerNo);
+            var SourceId = new SqlParameter("@SourceWalletId", sourceWalletId);
+            var TargetId = new SqlParameter("@TargetWalletId", targetWalletId);
+            var Amount = new SqlParameter("@Amount", amount);
+            var Rate = new SqlParameter("@TargetRate", targetRate);
+            var TradeType = new SqlParameter("@TradeType", tradeType);
+            var ReferenceId = new SqlParameter("@ReferenceId", referenceId);
+
+            var result = await _context.Database
+                .SqlQueryRaw<int>(
+                    "EXEC SP_ExecuteCurrencyTrade @CustomerNo, @SourceWalletId, @TargetWalletId, @Amount, @TargetRate, @TradeType, @ReferenceId",
+                    CustomerNo, SourceId, TargetId, Amount, Rate, TradeType, ReferenceId)
+                .ToListAsync();
+
+            return result.FirstOrDefault();
+        }
     }
 }
 
