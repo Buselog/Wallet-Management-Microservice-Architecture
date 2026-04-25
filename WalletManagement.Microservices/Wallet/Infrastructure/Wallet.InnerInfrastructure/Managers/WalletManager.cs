@@ -109,7 +109,7 @@ namespace Wallet.InnerInfrastructure.Managers
             if (exists) throw new ReferenceAlreadyExistsException();
 
             if (dto.Amount <= 0)
-                throw new BaseBusinessException("ERR_INVALID_AMOUNT");
+                throw new BaseBusinessException("ERR_INVALID_AMOUNT_FOR_CURRENCY_TRADE");
 
             var sourceWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.SourceWalletId);
             var targetWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.TargetWalletId);
