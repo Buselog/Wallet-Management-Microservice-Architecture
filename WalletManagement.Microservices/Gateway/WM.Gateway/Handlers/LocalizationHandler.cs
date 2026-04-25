@@ -23,6 +23,12 @@ namespace WM.Gateway.Handlers
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var errorData = JsonSerializer.Deserialize<Dictionary<string, object>>(content, options);
 
+                object[] parameters = null;
+                if (errorData.ContainsKey("Parameters") && errorData["Parameters"] is JsonElement paramElement)
+                {
+                    parameters = JsonSerializer.Deserialize<object[]>(paramElement.GetRawText());
+                }
+
                 string targetKey = errorData.ContainsKey("Message") ? "Message" : (errorData.ContainsKey("message") ? "message" : null);
 
                 if (targetKey != null)
@@ -34,7 +40,20 @@ namespace WM.Gateway.Handlers
                         var culture = request.Headers.AcceptLanguage.FirstOrDefault()?.Value ?? "tr-TR";
                         var translatedMessage = await GetTranslationAsync(errorKey, culture);
 
+                        if (parameters != null && parameters.Length > 0)
+                        {
+                            try
+                            {
+                                translatedMessage = string.Format(translatedMessage, parameters);
+                            }
+                            catch {
+                            
+                            }
+                        }
+
                         errorData[targetKey] = translatedMessage;
+
+                        errorData.Remove("Parameters");
 
                         var newContent = JsonSerializer.Serialize(errorData);
                         response.Content = new StringContent(newContent, System.Text.Encoding.UTF8, "application/json");
