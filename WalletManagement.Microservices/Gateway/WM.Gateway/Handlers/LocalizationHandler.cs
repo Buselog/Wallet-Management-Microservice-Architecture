@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using Serilog;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace WM.Gateway.Handlers
@@ -24,9 +25,19 @@ namespace WM.Gateway.Handlers
                 var errorData = JsonSerializer.Deserialize<Dictionary<string, object>>(content, options);
 
                 object[] parameters = null;
-                if (errorData.ContainsKey("Parameters") && errorData["Parameters"] is JsonElement paramElement)
+
+                var paramKey = errorData.Keys.FirstOrDefault(k => k.Equals("parameters", StringComparison.OrdinalIgnoreCase));
+
+                if (paramKey != null && errorData[paramKey] is JsonElement paramElement && paramElement.ValueKind == JsonValueKind.Array)
                 {
-                    parameters = JsonSerializer.Deserialize<object[]>(paramElement.GetRawText());
+                    try
+                    {
+                        parameters = JsonSerializer.Deserialize<object[]>(paramElement.GetRawText());
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning("Hata parametreleri deserialize edilemedi: {Message}", ex.Message);
+                    }
                 }
 
                 string targetKey = errorData.ContainsKey("Message") ? "Message" : (errorData.ContainsKey("message") ? "message" : null);
@@ -46,13 +57,15 @@ namespace WM.Gateway.Handlers
                             {
                                 translatedMessage = string.Format(translatedMessage, parameters);
                             }
-                            catch {
-                            
+                            catch (FormatException)
+                            {
+                                Log.Warning("Mesaj formatlanamadı. Şablon: {Template}", translatedMessage);
                             }
                         }
 
                         errorData[targetKey] = translatedMessage;
 
+                        errorData.Remove("parameters");
                         errorData.Remove("Parameters");
 
                         var newContent = JsonSerializer.Serialize(errorData);
