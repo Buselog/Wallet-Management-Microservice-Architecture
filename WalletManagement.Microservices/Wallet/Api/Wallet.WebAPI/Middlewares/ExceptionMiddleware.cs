@@ -30,6 +30,12 @@ namespace Wallet.WebAPI.Middlewares
         {
             context.Response.ContentType = "application/json";
 
+            object[]? parameters = null;
+            if (exception is BaseBusinessException businessEx)
+            {
+                parameters = businessEx.Parameters;
+            }
+
             var (statusCode, errorCode) = exception switch
             {
                 FluentValidation.ValidationException valEx =>
@@ -47,6 +53,10 @@ namespace Wallet.WebAPI.Middlewares
                 InsufficientBalanceException => (HttpStatusCode.BadRequest, exception.Message),
 
                 WalletBalanceIsNotEmptyExcepiton => (HttpStatusCode.BadRequest, exception.Message),
+
+                WalletCurrencyMismatchException => (HttpStatusCode.UnprocessableEntity, exception.Message),
+
+                InvalidWalletTypeForTradeException => (HttpStatusCode.UnprocessableEntity, exception.Message),
 
                 ReferenceAlreadyExistsException => (HttpStatusCode.Conflict, exception.Message),
 
@@ -72,6 +82,7 @@ namespace Wallet.WebAPI.Middlewares
             {
                 Status = context.Response.StatusCode, 
                 Message = errorCode,                   
+                Parameters = parameters,
                 Detail = exception.GetType().Name,
                 Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };
