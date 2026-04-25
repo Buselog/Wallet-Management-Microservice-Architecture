@@ -101,13 +101,38 @@ namespace Wallet.InnerInfrastructure.Managers
 
         public async Task ExecuteTradeAsync(CurrencyTradeRequestDto dto)
         {
-     
             await ValidateWalletOwnershipAsync(dto.SourceWalletId, dto.CustomerNo);
 
             await ValidateWalletOwnershipAsync(dto.TargetWalletId, dto.CustomerNo);
 
             var exists = await _transactionRepository.ReferenceIdExistsAsync(dto.ReferenceId);
             if (exists) throw new ReferenceAlreadyExistsException();
+
+            var sourceWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.SourceWalletId);
+
+            var targetWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.TargetWalletId);
+
+            if (sourceWallet.Type == WalletType.Saving || targetWallet.Type == WalletType.Saving)
+            {
+                throw new InvalidWalletTypeForTradeException();
+            }
+
+            if (dto.TradeType == "BUY")
+            {
+                if (sourceWallet.Currency != "TRY")
+                    throw new WalletCurrencyMismatchException("ERR_BUY_SOURCE_MUST_BE_TRY");
+
+                if (targetWallet.Currency != dto.CurrencyCode)
+                    throw new WalletCurrencyMismatchException("ERR_BUY_TARGET_CURRENCY_MISMATCH", dto.CurrencyCode);
+            }
+            else if (dto.TradeType == "SELL")
+            {
+                if (sourceWallet.Currency != dto.CurrencyCode)
+                    throw new WalletCurrencyMismatchException("ERR_SELL_SOURCE_CURRENCY_MISMATCH", dto.CurrencyCode);
+
+                if (targetWallet.Currency != "TRY")
+                    throw new WalletCurrencyMismatchException("ERR_SELL_TARGET_MUST_BE_TRY");
+            }
 
             var result = await _walletRepository.ExecuteCurrencyTradeWithSPAsync(
                 dto.CustomerNo,
