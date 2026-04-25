@@ -8,6 +8,8 @@
         public decimal Amount { get; set; }
         public decimal TargetRate { get; set; }
         public string TradeType { get; set; }
+        public string CurrencyCode { get; set; }
         public string ReferenceId { get; set; }
     }
 }
+

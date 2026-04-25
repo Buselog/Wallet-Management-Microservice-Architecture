@@ -37,6 +37,7 @@ namespace Investment.InnerInfrastructure.Services
                 Amount = amount,
                 TargetRate = targetRate.SellingRate,
                 TradeType = "BUY",
+                CurrencyCode = currencyCode,
                 ReferenceId = _referenceGenerator.GenerateTradeReference()
             };
 
@@ -61,6 +62,7 @@ namespace Investment.InnerInfrastructure.Services
                 Amount = amount,
                 TargetRate = targetRate.BuyingRate,
                 TradeType = "SELL",
+                CurrencyCode = currencyCode,
                 ReferenceId = _referenceGenerator.GenerateTradeReference()
             };
 
