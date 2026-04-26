@@ -26,17 +26,17 @@ namespace WM.Gateway.Handlers
 
                 object[] parameters = null;
 
-                var paramKey = errorData.Keys.FirstOrDefault(k => k.Equals("parameters", StringComparison.OrdinalIgnoreCase));
+                var parametersProperty = errorData.Keys.FirstOrDefault(k => k.Equals("parameters", StringComparison.OrdinalIgnoreCase));
 
-                if (paramKey != null && errorData[paramKey] is JsonElement paramElement && paramElement.ValueKind == JsonValueKind.Array)
+                if (parametersProperty != null)
                 {
-                    try
+                    var rawParams = errorData[parametersProperty];
+
+                    Console.WriteLine($"Parametre bulundu: {rawParams}");
+
+                    if (rawParams is JsonElement element && element.ValueKind == JsonValueKind.Array)
                     {
-                        parameters = JsonSerializer.Deserialize<object[]>(paramElement.GetRawText());
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning("Hata parametreleri deserialize edilemedi: {Message}", ex.Message);
+                        parameters = JsonSerializer.Deserialize<object[]>(element.GetRawText());
                     }
                 }
 
