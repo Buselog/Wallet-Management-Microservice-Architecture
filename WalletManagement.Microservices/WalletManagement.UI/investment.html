@@ -190,14 +190,6 @@
                         </table>
                     </div>
                 </div>
-
-                <div class="mt-4 p-3 rounded-3 border border-secondary bg-dark bg-opacity-25 d-flex align-items-center">
-                    <i class="bi bi-info-square-fill text-danger fs-4 me-3"></i>
-                    <small class="text-secondary">
-                        <strong>Not:</strong> Alım ve satım butonları şu an simülasyon aşamasındadır. İşlem yapmak için
-                        cüzdanınızda ilgili para biriminin tanımlı olması gerekmektedir.
-                    </small>
-                </div>
             </div>
         </div>
     </div>
@@ -239,8 +231,8 @@
                             <td><span class="rate-val text-success">₺${r.buyingRate.toLocaleString('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</span></td>
                             <td><span class="rate-val text-danger">₺${r.sellingRate.toLocaleString('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</span></td>
                             <td class="text-end pe-4">
-                                <button class="btn btn-trade btn-buy me-2" onclick="passiveAction()">AL</button>
-                                <button class="btn btn-trade btn-sell" onclick="passiveAction()">SAT</button>
+                               <button class="btn btn-trade btn-buy me-2" onclick="openTradeModal('BUY', '${r.currencyCode}', ${r.sellingRate})">AL</button>
+                               <button class="btn btn-trade btn-sell" onclick="openTradeModal('SELL', '${r.currencyCode}', ${r.buyingRate})">SAT</button>
                             </td>
                         </tr>
                     `;
@@ -278,9 +270,6 @@
             return map[code] || 'Yabancı Para Birimi';
         }
 
-        function passiveAction() {
-            alert("İşlem Merkezi: Alım/Satım fonksiyonları entegrasyon aşamasındadır.");
-        }
 
         function logout() {
             localStorage.clear();
@@ -288,7 +277,147 @@
         }
 
         window.onload = loadRates;
+
+
+        let userWallets = [];
+
+        // 1. Modalı Aç ve Hazırla
+        async function openTradeModal(type, code, rate) {
+            document.getElementById('tradeType').value = type;
+            document.getElementById('currencyCode').value = code;
+            document.getElementById('currentRate').value = rate;
+            document.getElementById('tradeAmount').value = "";
+            document.getElementById('totalCost').innerText = "0.00 ₺";
+            document.getElementById('displayRate').innerText = `${rate.toFixed(4)} ₺`;
+
+            const title = type === 'BUY' ? `${code} Alım İşlemi` : `${code} Satış İşlemi`;
+            document.getElementById('tradeModalTitle').innerText = title;
+
+            // Cüzdanları yükle
+            await loadWalletsForTrade(type, code);
+
+            const tradeModal = new bootstrap.Modal(document.getElementById('tradeModal'));
+            tradeModal.show();
+        }
+
+        // 2. Filtreli Cüzdan Yükleme (Backend Kurallarımıza Göre)
+        async function loadWalletsForTrade(type, targetCurrency) {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/Wallet/customer-wallets`);
+                userWallets = response.data;
+
+                const sourceSelect = document.getElementById('sourceWalletSelect');
+                const targetSelect = document.getElementById('targetWalletSelect');
+
+                sourceSelect.innerHTML = '<option value="">Cüzdan Seçiniz</option>';
+                targetSelect.innerHTML = '<option value="">Cüzdan Seçiniz</option>';
+
+                userWallets.forEach(w => {
+                    const option = `<option value="${w.id}">${w.currency} - ${w.type} (Bakiye: ${w.balance})</option>`;
+
+                    if (type === 'BUY') {
+                        if (w.currency === 'TRY') sourceSelect.innerHTML += option;
+                        if (w.currency === targetCurrency && w.type === 'Investment') targetSelect.innerHTML += option;
+                    } else {
+                        if (w.currency === targetCurrency && w.type === 'Investment') sourceSelect.innerHTML += option;
+                        if (w.currency === 'TRY') targetSelect.innerHTML += option;
+                    }
+                });
+            } catch (err) {
+                alert("Cüzdanlar yüklenirken hata oluştu.");
+            }
+        }
+
+        // 3. Hesaplama (Anlık)
+        function calculateTotal() {
+            const amount = document.getElementById('tradeAmount').value;
+            const rate = document.getElementById('currentRate').value;
+            const total = amount * rate;
+            document.getElementById('totalCost').innerText = `${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺`;
+        }
+
+        // 4. İşlemi Başlat (Backend'e Gönder)
+        async function executeTrade() {
+            const btn = document.getElementById('confirmTradeBtn');
+            btn.disabled = true;
+            btn.innerText = "İşlem Yapılıyor...";
+
+            const payload = {
+                sourceWalletId: parseInt(document.getElementById('sourceWalletSelect').value),
+                targetWalletId: parseInt(document.getElementById('targetWalletSelect').value),
+                currencyCode: document.getElementById('currencyCode').value,
+                amount: parseFloat(document.getElementById('tradeAmount').value),
+                tradeType: document.getElementById('tradeType').value
+            };
+
+            try {
+                const url = payload.tradeType === 'BUY' ? '/api/Trade/buy' : '/api/Trade/sell';
+                await axios.post(`${API_BASE_URL}${url}`, payload);
+
+                alert("İşlem başarıyla gerçekleşti!");
+                location.reload();
+            } catch (error) {
+                const msg = error.response?.data?.Message || "İşlem başarısız!";
+                alert("HATA: " + msg); // Burada senin LocalizationHandler devreye girecek!
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "İşlemi Onayla";
+            }
+        }
     </script>
+
+    <div class="modal fade" id="tradeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border-secondary text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="tradeModalTitle">Döviz İşlemi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="tradeForm">
+                        <input type="hidden" id="tradeType">
+                        <input type="hidden" id="currencyCode">
+                        <input type="hidden" id="currentRate">
+
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">Miktar</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary"
+                                id="tradeAmount" placeholder="0.00" step="0.01" required oninput="calculateTotal()">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">Kaynak Cüzdan (Ödeme)</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="sourceWalletSelect"
+                                required></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">Hedef Cüzdan (Yatırılacak)</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="targetWalletSelect"
+                                required></select>
+                        </div>
+
+                        <div class="p-3 rounded bg-secondary bg-opacity-10 border border-secondary mb-3">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>Birim Kur:</span>
+                                <span id="displayRate" class="fw-bold">0.00 ₺</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold text-danger">Toplam Tutar:</span>
+                                <span id="totalCost" class="fw-bold text-danger">0.00 ₺</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-danger w-100 mt-2" id="confirmTradeBtn"
+                        onclick="executeTrade()">İşlemi Onayla</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
