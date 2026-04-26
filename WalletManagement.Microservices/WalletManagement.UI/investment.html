@@ -301,31 +301,34 @@
         }
 
         // 2. Filtreli Cüzdan Yükleme (Backend Kurallarımıza Göre)
-        async function loadWalletsForTrade(type, targetCurrency) {
+        async function loadWalletsForTrade() {
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/Wallet/customer-wallets`);
+
+                const response = await axios.get(`${API_BASE_URL}/api/Wallet/wallets`);
                 userWallets = response.data;
 
                 const sourceSelect = document.getElementById('sourceWalletSelect');
                 const targetSelect = document.getElementById('targetWalletSelect');
 
-                sourceSelect.innerHTML = '<option value="">Cüzdan Seçiniz</option>';
-                targetSelect.innerHTML = '<option value="">Cüzdan Seçiniz</option>';
+                sourceSelect.innerHTML = '<option value="">Kaynak Cüzdan Seçiniz</option>';
+                targetSelect.innerHTML = '<option value="">Hedef Cüzdan Seçiniz</option>';
 
                 userWallets.forEach(w => {
                     const option = `<option value="${w.id}">${w.currency} - ${w.type} (Bakiye: ${w.balance})</option>`;
-
-                    if (type === 'BUY') {
-                        if (w.currency === 'TRY') sourceSelect.innerHTML += option;
-                        if (w.currency === targetCurrency && w.type === 'Investment') targetSelect.innerHTML += option;
-                    } else {
-                        if (w.currency === targetCurrency && w.type === 'Investment') sourceSelect.innerHTML += option;
-                        if (w.currency === 'TRY') targetSelect.innerHTML += option;
-                    }
+                    sourceSelect.innerHTML += option;
+                    targetSelect.innerHTML += option;
                 });
             } catch (err) {
-                alert("Cüzdanlar yüklenirken hata oluştu.");
+                showTradeError("Cüzdanlar listelenirken bir hata oluştu.");
             }
+        }
+
+        function showTradeError(msg) {
+            const alertDiv = document.getElementById('tradeErrorAlert');
+            alertDiv.innerText = msg;
+            alertDiv.classList.remove('d-none');
+            // 5 saniye sonra hatayı gizle
+            setTimeout(() => alertDiv.classList.add('d-none'), 5000);
         }
 
         // 3. Hesaplama (Anlık)
@@ -339,6 +342,15 @@
         // 4. İşlemi Başlat (Backend'e Gönder)
         async function executeTrade() {
             const btn = document.getElementById('confirmTradeBtn');
+            const alertDiv = document.getElementById('tradeErrorAlert');
+            alertDiv.classList.add('d-none'); // Önceki hatayı temizle
+
+            // Temel UI Kontrolü
+            if (!document.getElementById('sourceWalletSelect').value || !document.getElementById('targetWalletSelect').value) {
+                showTradeError("Lütfen kaynak ve hedef cüzdanları seçiniz.");
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = "İşlem Yapılıyor...";
 
@@ -357,8 +369,9 @@
                 alert("İşlem başarıyla gerçekleşti!");
                 location.reload();
             } catch (error) {
-                const msg = error.response?.data?.Message || "İşlem başarısız!";
-                alert("HATA: " + msg); // Burada senin LocalizationHandler devreye girecek!
+                // Backend'den gelen senin LocalizationHandler'ından geçmiş mesajı yakalıyoruz
+                const msg = error.response?.data?.Message || error.response?.data?.message || "İşlem reddedildi.";
+                showTradeError(msg); // Hata Modal üzerindeki kırmızı kartta görünecek
             } finally {
                 btn.disabled = false;
                 btn.innerText = "İşlemi Onayla";
@@ -367,6 +380,9 @@
     </script>
 
     <div class="modal fade" id="tradeModal" tabindex="-1" aria-hidden="true">
+        <div id="tradeErrorAlert" class="alert alert-danger d-none small py-2" role="alert">
+        </div>
+
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark border-secondary text-white">
                 <div class="modal-header border-secondary">
