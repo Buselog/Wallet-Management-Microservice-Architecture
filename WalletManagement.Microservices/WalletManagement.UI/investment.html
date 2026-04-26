@@ -303,7 +303,7 @@
         // 2. Filtreli Cüzdan Yükleme (Backend Kurallarımıza Göre)
         async function loadWalletsForTrade() {
             try {
-                // Not: Endpoint'in tam URL'ini kontrol et (Örn: Port 7110 veya 5000)
+
                 const response = await axios.get(`${API_BASE_URL}/api/Wallet/wallets`);
                 userWallets = response.data;
 
