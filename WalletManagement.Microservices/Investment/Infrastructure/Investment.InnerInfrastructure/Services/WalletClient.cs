@@ -39,7 +39,13 @@ namespace Investment.InnerInfrastructure.Services
 
                 string errorMessage = errorObj.GetProperty("Message").GetString() ?? "ERR_TRADE_EXECUTION_FAILED_ON_WALLET";
 
-                throw new WalletServiceException((int)response.StatusCode, errorMessage);
+                object[] parameters = null;
+                if (errorObj.TryGetProperty("Parameters", out var paramElement) && paramElement.ValueKind == JsonValueKind.Array)
+                {
+                    parameters = JsonSerializer.Deserialize<object[]>(paramElement.GetRawText());
+                }
+
+                throw new WalletServiceException((int)response.StatusCode, errorMessage, parameters);
             }
 
             return true;
