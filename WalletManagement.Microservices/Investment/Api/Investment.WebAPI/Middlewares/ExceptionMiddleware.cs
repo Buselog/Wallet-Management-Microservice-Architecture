@@ -30,6 +30,12 @@ namespace Investment.WebAPI.Middlewares
         {
             context.Response.ContentType = "application/json";
 
+            object[]? parameters = null;
+            if (exception is BaseBusinessException businessEx)
+            {
+                parameters = businessEx.Parameters;
+            }
+
             var (statusCode, errorCode) = exception switch
             {
                 CurrencyRateNotFoundException => (HttpStatusCode.NotFound, exception.Message),
@@ -57,6 +63,7 @@ namespace Investment.WebAPI.Middlewares
             {
                 Status = context.Response.StatusCode,
                 Message = errorCode,
+                Parameters = parameters,
                 Detail = exception.GetType().Name,
                 Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };

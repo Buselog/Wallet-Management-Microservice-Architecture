@@ -2,9 +2,10 @@
 {
     public class BaseBusinessException : Exception
     {
-        public BaseBusinessException(string message) : base(message)
+        public object[] Parameters { get; }
+        public BaseBusinessException(string message, params object[] parameters) : base(message)
         {
-
+            Parameters = parameters;
         }
     }
 }
