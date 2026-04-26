@@ -108,14 +108,22 @@ namespace Wallet.InnerInfrastructure.Managers
             var exists = await _transactionRepository.ReferenceIdExistsAsync(dto.ReferenceId);
             if (exists) throw new ReferenceAlreadyExistsException();
 
-            var sourceWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.SourceWalletId);
+            if (dto.Amount <= 0)
+                throw new BaseBusinessException("ERR_INVALID_AMOUNT_FOR_CURRENCY_TRADE");
 
+            var sourceWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.SourceWalletId);
             var targetWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.TargetWalletId);
+
+            if (sourceWallet.Currency == targetWallet.Currency)
+                throw new SameCurrencyTradeException();
 
             if (sourceWallet.Type == WalletType.Saving || targetWallet.Type == WalletType.Saving)
             {
                 throw new InvalidWalletTypeForTradeException();
             }
+
+            if (sourceWallet.Balance < dto.Amount)
+                throw new InsufficientBalanceException();
 
             if (dto.TradeType == "BUY")
             {

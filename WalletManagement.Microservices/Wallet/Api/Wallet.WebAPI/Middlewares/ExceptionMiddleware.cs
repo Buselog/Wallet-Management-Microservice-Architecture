@@ -54,6 +54,8 @@ namespace Wallet.WebAPI.Middlewares
 
                 WalletBalanceIsNotEmptyExcepiton => (HttpStatusCode.BadRequest, exception.Message),
 
+                SameCurrencyTradeException => (HttpStatusCode.UnprocessableEntity, exception.Message),
+
                 WalletCurrencyMismatchException => (HttpStatusCode.UnprocessableEntity, exception.Message),
 
                 InvalidWalletTypeForTradeException => (HttpStatusCode.UnprocessableEntity, exception.Message),
