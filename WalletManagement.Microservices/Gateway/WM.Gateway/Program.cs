@@ -6,8 +6,21 @@ using Ocelot.Provider.Polly;
 using System.Text;
 using Serilog;
 using WM.Gateway.Handlers;
+using WM.Gateway.Services.Abstracts;
+using WM.Gateway.Services.Concretes;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers(); 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient("CustomerAPI", c => { 
+    c.BaseAddress = new Uri("https://localhost:7145/"); 
+});
+
+builder.Services.AddHttpClient("WalletAPI", c => { 
+    c.BaseAddress = new Uri("https://localhost:7012/"); 
+});
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -44,6 +57,8 @@ builder.Services.AddOcelot()
     .AddDelegatingHandler<ResilienceHandler>()
     .AddPolly();
 
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -65,6 +80,8 @@ app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 await app.UseOcelot();
 
