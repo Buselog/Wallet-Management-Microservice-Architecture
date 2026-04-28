@@ -4,8 +4,8 @@ namespace WM.Gateway.Services.Abstracts
 {
     public interface IAuthService
     {
-        Task<AuthResponseDto> LoginAsync(UserLoginRequestDto loginRequestDto);
-        Task<bool> RegisterAsync(UserRegisterRequestDto registerRequestDto);
+        Task<HttpResponseMessage> LoginAsync(UserLoginRequestDto loginRequestDto);
+        Task<HttpResponseMessage> RegisterAsync(UserRegisterRequestDto registerRequestDto);
 
     }
 }

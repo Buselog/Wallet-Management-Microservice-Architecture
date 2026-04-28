@@ -12,21 +12,16 @@ namespace WM.Gateway.Services.Concretes
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<AuthResponseDto> LoginAsync(UserLoginRequestDto loginRequestDto)
+        public async Task<HttpResponseMessage> LoginAsync(UserLoginRequestDto loginRequestDto)
         {
             var client = _httpClientFactory.CreateClient("CustomerAPI");
-            var response = await client.PostAsJsonAsync("api/Auth/login", loginRequestDto);
-
-            if (!response.IsSuccessStatusCode) return null;
-
-            return await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+            return await client.PostAsJsonAsync("api/Auth/login", loginRequestDto);
         }
 
-        public async Task<bool> RegisterAsync(UserRegisterRequestDto registerRequestDto)
+        public async Task<HttpResponseMessage> RegisterAsync(UserRegisterRequestDto registerRequestDto)
         {
             var client = _httpClientFactory.CreateClient("CustomerAPI");
-            var response = await client.PostAsJsonAsync("api/Auth/register", registerRequestDto);
-            return response.IsSuccessStatusCode;
+            return await client.PostAsJsonAsync("api/Auth/register", registerRequestDto);
 
         }
     }
