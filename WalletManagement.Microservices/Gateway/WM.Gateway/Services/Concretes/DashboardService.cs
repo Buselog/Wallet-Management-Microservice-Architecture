@@ -25,22 +25,30 @@ namespace WM.Gateway.Services.Concretes
 
             await Task.WhenAll(customerTask, walletTask);
 
-            var nameResponse = await customerTask.Result.Content.ReadAsStringAsync();
-            var walletsResponse = await walletTask.Result.Content.ReadFromJsonAsync<List<WalletDetailDto>>();
+            string fullName = "Değerli Müşterimiz";
+            if (customerTask.Result.IsSuccessStatusCode)
+            {
+                fullName = await customerTask.Result.Content.ReadAsStringAsync();
+            }
 
-            var currencySummaries = walletsResponse
-               .GroupBy(w => w.Currency) 
+            List<WalletDetailDto> wallets = new();
+            if (walletTask.Result.IsSuccessStatusCode)
+            {
+                wallets = await walletTask.Result.Content.ReadFromJsonAsync<List<WalletDetailDto>>() ?? new();
+            }
+
+            var currencySummaries = wallets
+               .GroupBy(w => w.Currency)
                .Select(group => new CurrencySummaryDto
                {
-                  Currency = group.Key, 
-                  TotalBalance = group.Sum(x => x.Balance) 
-               })
-               .ToList();
+                   Currency = group.Key,
+                   TotalBalance = group.Sum(x => x.Balance)
+               }).ToList();
 
             return new UserDashboardDto
             {
-                FullName = nameResponse,
-                Wallets = walletsResponse,
+                FullName = fullName,
+                Wallets = wallets,
                 CurrencySummaries = currencySummaries
             };
         }
