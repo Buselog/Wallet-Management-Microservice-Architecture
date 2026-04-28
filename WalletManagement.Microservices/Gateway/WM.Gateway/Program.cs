@@ -60,6 +60,7 @@ builder.Services.AddOcelot()
     .AddPolly();
 
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddCors(options =>
 {

@@ -4,7 +4,7 @@
     {
         public string FullName { get; set; }
         public List<WalletDetailDto> Wallets { get; set; }
-        public List<CurrencySummaryDto> CurrencySummaries { get; set }
+        public List<CurrencySummaryDto> CurrencySummaries { get; set; }
     }
 
     public class CurrencySummaryDto
