@@ -1,4 +1,6 @@
-﻿using WM.Gateway.Dtos;
+﻿using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
+using WM.Gateway.Dtos;
 using WM.Gateway.Services.Abstracts;
 
 namespace WM.Gateway.Services.Concretes
@@ -12,13 +14,16 @@ namespace WM.Gateway.Services.Concretes
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<UserDashboardDto> GetUserSummaryAsync(string customerNo, string token)
+        public async Task<UserDashboardDto> GetUserSummaryAsync(string customerNo, string token, string culture)
         {
             var customerClient = _httpClientFactory.CreateClient("CustomerAPI");
             var walletClient = _httpClientFactory.CreateClient("WalletAPI");
 
-            customerClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Replace("Bearer ", ""));
-            walletClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Replace("Bearer ", ""));
+            customerClient.DefaultRequestHeaders.AcceptLanguage.Clear();
+            walletClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue(culture));
+
+            customerClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("Bearer ", ""));
+            walletClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("Bearer ", ""));
 
             var customerTask = customerClient.GetAsync($"api/Customer/getCustomerName-byCustomerNo/{customerNo}");
             var walletTask = walletClient.GetAsync("api/Wallet/wallets");

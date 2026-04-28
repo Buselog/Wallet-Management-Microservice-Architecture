@@ -13,21 +13,23 @@ namespace WM.Gateway.Controllers
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequestDto loginDto)
-        {
-            var result = await _authService.LoginAsync(loginDto);
+        { 
+            var culture = Request.Headers["Accept-Language"].FirstOrDefault() ?? "tr-TR";
+
+            var result = await _authService.LoginAsync(loginDto, culture);
 
             return await HandleResponse(result);
-         
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterRequestDto registerDto)
         {
-            var result = await _authService.RegisterAsync(registerDto);
+            var culture = Request.Headers["Accept-Language"].FirstOrDefault() ?? "tr-TR";
+
+            var result = await _authService.RegisterAsync(registerDto, culture);
 
             return await HandleResponse(result);
         }
-
 
         private async Task<IActionResult> HandleResponse(HttpResponseMessage response)
         {
