@@ -21,7 +21,9 @@ namespace WM.Gateway.Controllers
             var customerNo = User.FindFirst("CustomerNo")?.Value;
             var token = Request.Headers["Authorization"].ToString();
 
-            var result = await _service.GetUserSummaryAsync(customerNo!, token);
+            var culture = Request.Headers["Accept-Language"].FirstOrDefault() ?? "tr-TR";
+
+            var result = await _service.GetUserSummaryAsync(customerNo!, token, culture);
             return Ok(result);
         }
     }
