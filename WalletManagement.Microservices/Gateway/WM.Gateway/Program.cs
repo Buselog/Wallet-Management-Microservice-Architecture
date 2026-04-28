@@ -12,17 +12,23 @@ using WM.Gateway.Services.Concretes;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer(); 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddHttpClient("CustomerAPI", c => { 
-    c.BaseAddress = new Uri("https://localhost:7145/"); 
-});
+builder.Services.AddHttpClient("CustomerAPI", c =>
+{
+    c.BaseAddress = new Uri("https://localhost:7145/");
+})
+   .AddHttpMessageHandler<LocalizationHandler>()
+   .AddHttpMessageHandler<ResilienceHandler>();
 
-builder.Services.AddHttpClient("WalletAPI", c => { 
-    c.BaseAddress = new Uri("https://localhost:7012/"); 
-});
+builder.Services.AddHttpClient("WalletAPI", c =>
+{
+    c.BaseAddress = new Uri("https://localhost:7012/");
+})
+    .AddHttpMessageHandler<LocalizationHandler>()
+    .AddHttpMessageHandler<ResilienceHandler>();
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -31,7 +37,7 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer("Bearer", options => 
+    .AddJwtBearer("Bearer", options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -47,7 +53,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddHttpClient("MultiLanguageAPI", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7207/"); 
+    client.BaseAddress = new Uri("https://localhost:7207/");
 });
 
 builder.Services.AddTransient<ResilienceHandler>();
@@ -66,9 +72,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder.AllowAnyOrigin()   
-               .AllowAnyMethod()   
-               .AllowAnyHeader();  
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
     });
 });
 
@@ -94,7 +100,7 @@ app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapControllers(); 
+    endpoints.MapControllers();
 });
 
 
