@@ -28,11 +28,20 @@ namespace WM.Gateway.Services.Concretes
             var nameResponse = await customerTask.Result.Content.ReadAsStringAsync();
             var walletsResponse = await walletTask.Result.Content.ReadFromJsonAsync<List<WalletDetailDto>>();
 
+            var currencySummaries = walletsResponse
+               .GroupBy(w => w.Currency) 
+               .Select(group => new CurrencySummaryDto
+               {
+                  Currency = group.Key, 
+                  TotalBalance = group.Sum(x => x.Balance) 
+               })
+               .ToList();
+
             return new UserDashboardDto
             {
-                FullName = nameResponse, 
+                FullName = nameResponse,
                 Wallets = walletsResponse,
-                TotalBalanceTRY = walletsResponse.Where(x => x.Currency == "TRY").Sum(x => x.Balance)
+                CurrencySummaries = currencySummaries
             };
         }
     }
