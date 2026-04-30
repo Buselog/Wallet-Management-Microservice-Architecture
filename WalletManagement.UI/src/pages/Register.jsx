@@ -71,7 +71,12 @@ const Register = () => {
                         <Text className="text-slate-500 text-xs">Cüzdanınızı yönetmek için hemen kayıt olun.</Text>
                     </div>
 
-                    <Form name="register" layout="vertical" onFinish={onFinish} requiredMark={false}>
+                    <Form
+                        form={form}
+                        name="register"
+                        layout="vertical"
+                        onFinish={onFinish}
+                        requiredMark={false}>
                         <Row gutter={12}>
                             <Col span={12}>
                                 <Form.Item
