@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+    --color-volcano-400: #ff7a45;
+    --color-volcano-600: #d4380d;
+}
