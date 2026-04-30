@@ -10,6 +10,7 @@ const { Title, Text } = Typography;
 
 const Login = () => {
     const [loading, setLoading] = useState(false);
+    const [form] = Form.useForm();
     const navigate = useNavigate();
 
     const onFinish = async (values) => {
@@ -63,7 +64,12 @@ const Login = () => {
                         <Text className="text-slate-500">Dijital asistanına bağlan ve cüzdanını yönet.</Text>
                     </div>
 
-                    <Form name="login" layout="vertical" onFinish={onFinish} requiredMark={false}>
+                    <Form
+                        form={form}
+                        name="login"
+                        layout="vertical"
+                        onFinish={onFinish}
+                        requiredMark={false}>
                         <Form.Item
                             label={<span className="text-xs font-bold text-slate-400 uppercase tracking-wider">E-POSTA</span>}
                             name="email"
