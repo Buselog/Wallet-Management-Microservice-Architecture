@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Card, Typography, message, Row, Col } from 'antd';
+import { Form, Input, Button, Card, Typography, message, Row, Col, Alert } from 'antd';
 import { MailOutlined, LockOutlined, WalletOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { volcano } from '@ant-design/colors';
 import loginImg from '../assets/login-page.jpg'
@@ -12,10 +12,12 @@ const { Title, Text } = Typography;
 const Register = () => {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
+    const [generalError, setGeneralError] = useState(null);
     const navigate = useNavigate();
 
     const onFinish = async (values) => {
         setLoading(true);
+        setGeneralError(null);
         try {
             await api.post('/Auth/register', values);
             message.success('Kayıt başarıyla tamamlandı!');
@@ -40,15 +42,13 @@ const Register = () => {
                     } else if (code.includes('PHONE')) {
                         fields.push({ name: 'phone', errors: [code] });
                     }
+                    else {
+                        setGeneralError(code);
+                    }
                 });
                 if (fields.length > 0) {
                     form.setFields(fields);
-                } else {
-                    // Eğer spesifik bir alana bağlayamazsak genel mesaj olarak göster
-                    message.error(responseData.Message);
                 }
-            } else {
-                message.error('Sistemsel bir hata oluştu.');
             }
         } finally {
             setLoading(false);
@@ -69,6 +69,12 @@ const Register = () => {
                         </div>
                         <Title level={2} className="!mb-0 !text-slate-900">Hesap Oluştur</Title>
                         <Text className="text-slate-500 text-xs">Cüzdanınızı yönetmek için hemen kayıt olun.</Text>
+
+                        {generalError && (
+                            <div className="mt-4">
+                                <Alert message={generalError} type="error" showIcon closable />
+                            </div>
+                        )}
                     </div>
 
                     <Form

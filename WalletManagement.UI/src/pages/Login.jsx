@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Row, Col, Typography, message } from 'antd';
+import { Form, Input, Button, Row, Col, Typography, message, Alert } from 'antd';
 import { volcano } from '@ant-design/colors';
 import { MailOutlined, LockOutlined, WalletOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import loginImg from '../assets/login-page.jpg'
@@ -11,10 +11,12 @@ const { Title, Text } = Typography;
 const Login = () => {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
+    const [generalError, setGeneralError] = useState(null);
     const navigate = useNavigate();
 
     const onFinish = async (values) => {
         setLoading(true);
+        setGeneralError(null);
         try {
             const response = await api.post('/Auth/login', values);
             localStorage.setItem('token', response.data.token);
@@ -34,20 +36,18 @@ const Login = () => {
                     } else if (code.includes('PASSWORD')) {
                         fields.push({ name: 'password', errors: [code] });
                     }
+                    else {
+                        setGeneralError(code);
+                    }
                 });
-                if (fields.length > 0) {
-                    form.setFields(fields);
-                } else {
-                    message.error(responseData.Message);
-                }
-            } else {
-                message.error('Sistemsel bir hata oluştu.');
+
+                if (fields.length > 0) form.setFields(fields);
+
             }
         } finally {
             setLoading(false);
         }
     };
-
     return (
         <div className="flex h-screen items-center justify-center bg-slate-50 p-4 overflow-hidden">
             <div className="bg-white rounded-3x1 shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row max-h-[98vh]">
@@ -62,6 +62,12 @@ const Login = () => {
                         </div>
                         <Title level={1} className="!mb-2 !text-slate-900">Giriş Yap</Title>
                         <Text className="text-slate-500">Dijital asistanına bağlan ve cüzdanını yönet.</Text>
+
+                        {generalError && (
+                            <div className="mt-4">
+                                <Alert message={generalError} type="error" showIcon closable />
+                            </div>
+                        )}
                     </div>
 
                     <Form
