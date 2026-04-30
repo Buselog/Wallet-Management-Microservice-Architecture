@@ -19,17 +19,14 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("CustomerAPI", c =>
 {
     c.BaseAddress = new Uri("https://localhost:7145/");
-})
-   .AddHttpMessageHandler<LocalizationHandler>()
-   .AddHttpMessageHandler<ResilienceHandler>();
+});
+
 
 builder.Services.AddHttpClient("WalletAPI", c =>
 {
     c.BaseAddress = new Uri("https://localhost:7012/");
-})
-    .AddHttpMessageHandler<LocalizationHandler>()
-    .AddHttpMessageHandler<ResilienceHandler>();
-
+});
+ 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
