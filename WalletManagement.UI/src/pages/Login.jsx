@@ -20,6 +20,7 @@ const Login = () => {
         try {
             const response = await api.post('/Auth/login', values);
             localStorage.setItem('token', response.data.token);
+            localStorage.setItem('customerNo', response.data.customerNo);
             message.success('Hesabınıza erişim sağlandı. Yönlendiriliyorsunuz..');
             navigate('/dashboard');
         } catch (error) {
