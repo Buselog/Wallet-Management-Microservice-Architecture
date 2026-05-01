@@ -23,31 +23,27 @@ const Register = () => {
             message.success('Kayıt başarıyla tamamlandı!');
             navigate('/login');
         } catch (error) {
+            const status = error.response?.status;
             const responseData = error.response?.data;
+            const errorMsg = responseData?.Message || responseData?.message;
 
-            if (responseData && responseData.Message) {
-                const errorCodes = responseData.Message.split(' | ');
+            if (errorMsg) {
+                if (status === 400) {
+                    const errorCodes = errorMsg.includes('|') ? errorMsg.split(' | ') : [errorMsg];
+                    const fields = [];
 
-                const fields = [];
+                    errorCodes.forEach(code => {
+                        if (code.includes('EMAIL')) fields.push({ name: 'email', errors: [code] });
+                        else if (code.includes('PASSWORD')) fields.push({ name: 'password', errors: [code] });
+                        else if (code.includes('NAME')) fields.push({ name: 'firstName', errors: [code] });
+                        else if (code.includes('SURNAME')) fields.push({ name: 'lastName', errors: [code] });
+                        else if (code.includes('PHONE')) fields.push({ name: 'phoneNumber', errors: [code] });
+                    });
 
-                errorCodes.forEach(code => {
-                    if (code.includes('EMAIL')) {
-                        fields.push({ name: 'email', errors: [code] });
-                    } else if (code.includes('PASSWORD')) {
-                        fields.push({ name: 'password', errors: [code] });
-                    } else if (code.includes('NAME')) {
-                        fields.push({ name: 'name', errors: [code] });
-                    } else if (code.includes('SURNAME')) {
-                        fields.push({ name: 'surname', errors: [code] });
-                    } else if (code.includes('PHONE')) {
-                        fields.push({ name: 'phone', errors: [code] });
-                    }
-                    else {
-                        setGeneralError(code);
-                    }
-                });
-                if (fields.length > 0) {
-                    form.setFields(fields);
+                    if (fields.length > 0) form.setFields(fields);
+                }
+                else {
+                    setGeneralError(errorMsg);
                 }
             }
         } finally {
@@ -87,7 +83,7 @@ const Register = () => {
                             <Col span={12}>
                                 <Form.Item
                                     label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">AD</span>}
-                                    name="name"
+                                    name="firstName"
                                     className="!mb-3"
                                     rules={[{ required: true, message: 'Ad alanı boş bırakılamaz.' }]}
                                 >
@@ -97,7 +93,7 @@ const Register = () => {
                             <Col span={12}>
                                 <Form.Item
                                     label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SOYAD</span>}
-                                    name="surname"
+                                    name="lastName"
                                     className="!mb-3"
                                     rules={[{ required: true, message: 'Soyad alanı boş bırakılamaz.' }]}
                                 >
@@ -124,7 +120,7 @@ const Register = () => {
 
                         <Form.Item
                             label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TELEFON</span>}
-                            name="phone"
+                            name="phoneNumber"
                             className="!mb-3"
                             rules={[{ required: true, message: 'Telefon alanı boş bırakılamaz.' }]}
                         >
