@@ -30,22 +30,25 @@ const Login = () => {
 
             if (errorMsg) {
                 if (status === 400) {
-                    const errorCodes = errorMsg.includes('|') ? errorMsg.split(' | ') : [errorMsg];
+                    const parts = errorMsg.split(' | ');
                     const fields = [];
 
-                    errorCodes.forEach(code => {
-                        if (code.includes('EMAIL')) fields.push({ name: 'email', errors: [code] });
-                        else if (code.includes('PASSWORD')) fields.push({ name: 'password', errors: [code] });
-                        else setGeneralError(code);
+                    parts.forEach(part => {
+                        if (part.includes(':')) {
+                            const [property, msg] = part.split(':');
+                            const fieldName = property.toLowerCase().includes('EMAIL') ? 'email' : 'password';
+                            fields.push({ name: fieldName, errors: [msg] });
+                        } else {
+                            setGeneralError(part);
+                        }
                     });
-
                     if (fields.length > 0) form.setFields(fields);
                 }
                 else {
                     setGeneralError(errorMsg);
                 }
             } else {
-                setGeneralError("Sistemsel bir hata oluştu.");
+                setGeneralError("Giriş yapılırken bir sorun oluştu.");
             }
         } finally {
             setLoading(false);

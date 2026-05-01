@@ -29,34 +29,36 @@ const Register = () => {
 
             if (errorMsg) {
                 if (status === 400) {
-                    const errorCodes = errorMsg.includes('|') ? errorMsg.split(' | ') : [errorMsg];
+                    const parts = errorMsg.split(' | ');
                     const fields = [];
 
-                    errorCodes.forEach(code => {
-                        const cleanCode = code.trim();
+                    parts.forEach(part => {
+                        if (part.includes(':')) {
+                            const [property, msg] = part.split(':');
 
-                        if (cleanCode.includes('EMAIL')) {
-                            fields.push({ name: 'email', errors: [cleanCode] });
-                        } else if (cleanCode.includes('PASSWORD')) {
-                            fields.push({ name: 'password', errors: [cleanCode] });
-                        } else if (cleanCode.includes('NAME')) {
-                            fields.push({ name: 'firstName', errors: [cleanCode] });
-                        } else if (cleanCode.includes('SURNAME')) {
-                            fields.push({ name: 'lastName', errors: [cleanCode] });
-                        } else if (cleanCode.includes('PHONE')) {
-                            fields.push({ name: 'phoneNumber', errors: [cleanCode] });
+                            const propertyMap = {
+                                'FirstName': 'firstName',
+                                'LastName': 'lastName',
+                                'Email': 'email',
+                                'PhoneNumber': 'phoneNumber',
+                                'Password': 'password'
+                            };
+
+                            const fieldName = propertyMap[property];
+                            if (fieldName) {
+                                fields.push({ name: fieldName, errors: [msg] });
+                            } else {
+                                setGeneralError(msg);
+                            }
                         } else {
-                            setGeneralError(cleanCode);
+                            setGeneralError(part);
                         }
                     });
-
                     if (fields.length > 0) form.setFields(fields);
                 }
                 else {
                     setGeneralError(errorMsg);
                 }
-            } else {
-                setGeneralError("Beklenmedik bir hata oluştu.");
             }
         } finally {
             setLoading(false);
