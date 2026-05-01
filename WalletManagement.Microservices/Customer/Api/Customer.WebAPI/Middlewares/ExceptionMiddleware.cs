@@ -33,7 +33,7 @@ namespace Customer.WebAPI.Middlewares
             var (statusCode, errorCode) = exception switch
             {
                 FluentValidation.ValidationException valEx =>
-                 (HttpStatusCode.BadRequest, string.Join(" | ", valEx.Errors.Select(e => e.ErrorCode))),
+                 (HttpStatusCode.BadRequest, string.Join(" | ", valEx.Errors.Select(e => $"{e.PropertyName}:{e.ErrorCode}"))),
 
                 ArgumentNullException or ArgumentException or ArgumentOutOfRangeException =>
                  (HttpStatusCode.BadRequest, exception.Message),
