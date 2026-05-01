@@ -25,7 +25,7 @@ const Dashboard = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [rates, setRates] = useState([]); // Dinamik kurlar için
+    const [rates, setRates] = useState([]);
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
@@ -42,7 +42,7 @@ const Dashboard = () => {
 
     const fetchRates = async () => {
         try {
-            const response = await api.get('/Investment/rates');
+            const response = await api.get('/InvestmentRate/rates');
             setRates(response.data);
         } catch (error) {
             console.error("Kurlar alınamadı");
@@ -61,7 +61,7 @@ const Dashboard = () => {
 
     const createWallet = async (values) => {
         try {
-            await api.post('/api/Wallet/create', values);
+            await api.post('/Wallet/create', values);
             message.success("Cüzdan başarıyla oluşturuldu.");
             setIsModalVisible(false);
             form.resetFields();
@@ -72,11 +72,11 @@ const Dashboard = () => {
 
     const deleteWallet = async (id) => {
         try {
-            await api.delete(`/api/Wallet/${id}/delete`);
-            message.success("Cüzdan kapatıldı.");
+            await api.delete(`/Wallet/${id}/delete`);
+            message.success("Cüzdan başarıyla kapatıldı.");
             fetchSummary();
         } catch (error) {
-            message.error(error.response?.data?.Message || "Hata oluştu.");
+            message.error(error.response?.data?.Message || "Bir hata oluştu.");
         }
     };
 
