@@ -33,30 +33,22 @@ const Register = () => {
                     const fields = [];
 
                     parts.forEach(part => {
-                        if (part.includes(':')) {
-                            const [property, msg] = part.split(':');
-
+                        if (part.includes(':') && !part.includes('Detay')) {
+                            const [property, msg] = part.split(':').map(s => s.trim());
                             const propertyMap = {
-                                'FirstName': 'firstName',
-                                'LastName': 'lastName',
-                                'Email': 'email',
-                                'PhoneNumber': 'phoneNumber',
-                                'Password': 'password'
+                                'FirstName': 'firstName', 'LastName': 'lastName',
+                                'Email': 'email', 'PhoneNumber': 'phoneNumber', 'Password': 'password'
                             };
-
                             const fieldName = propertyMap[property];
-                            if (fieldName) {
-                                fields.push({ name: fieldName, errors: [msg] });
-                            } else {
-                                setGeneralError(msg);
-                            }
-                        } else {
+                            if (fieldName) fields.push({ name: fieldName, errors: [msg] });
+                            else setGeneralError(msg);
+                        }
+                        else {
                             setGeneralError(part);
                         }
                     });
                     if (fields.length > 0) form.setFields(fields);
-                }
-                else {
+                } else {
                     setGeneralError(errorMsg);
                 }
             }
