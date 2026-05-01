@@ -24,31 +24,34 @@ const Login = () => {
             message.success('Hesabınıza erişim sağlandı. Yönlendiriliyorsunuz..');
             navigate('/dashboard');
         } catch (error) {
+            const status = error.response?.status;
             const responseData = error.response?.data;
+            const errorMsg = responseData?.Message || responseData?.message;
 
-            if (responseData && responseData.Message) {
-                const errorCodes = responseData.Message.split(' | ');
+            if (errorMsg) {
+                if (status === 400) {
+                    const errorCodes = errorMsg.includes('|') ? errorMsg.split(' | ') : [errorMsg];
+                    const fields = [];
 
-                const fields = [];
+                    errorCodes.forEach(code => {
+                        if (code.includes('EMAIL')) fields.push({ name: 'email', errors: [code] });
+                        else if (code.includes('PASSWORD')) fields.push({ name: 'password', errors: [code] });
+                        else setGeneralError(code);
+                    });
 
-                errorCodes.forEach(code => {
-                    if (code.includes('EMAIL')) {
-                        fields.push({ name: 'email', errors: [code] });
-                    } else if (code.includes('PASSWORD')) {
-                        fields.push({ name: 'password', errors: [code] });
-                    }
-                    else {
-                        setGeneralError(code);
-                    }
-                });
-
-                if (fields.length > 0) form.setFields(fields);
-
+                    if (fields.length > 0) form.setFields(fields);
+                }
+                else {
+                    setGeneralError(errorMsg);
+                }
+            } else {
+                setGeneralError("Sistemsel bir hata oluştu.");
             }
         } finally {
             setLoading(false);
         }
     };
+
     return (
         <div className="flex h-screen items-center justify-center bg-slate-50 p-4 overflow-hidden">
             <div className="bg-white rounded-3x1 shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row max-h-[98vh]">
