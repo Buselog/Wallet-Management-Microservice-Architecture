@@ -80,7 +80,7 @@ namespace WM.Gateway.Handlers
         {
             try
             {
-                var parts = key.Split('|');
+                var parts = key.Split(new[] { " | " }, StringSplitOptions.RemoveEmptyEntries);
                 var translatedParts = new List<string>();
 
                 var client = _httpClientFactory.CreateClient("MultiLanguageAPI");
@@ -90,32 +90,43 @@ namespace WM.Gateway.Handlers
                 foreach (var p in parts)
                 {
                     var trimmedPart = p.Trim();
-                    string prefix = "";
-                    string actualKey = trimmedPart;
 
                     if (trimmedPart.Contains(":"))
                     {
-                        var split = trimmedPart.Split(':');
-                        prefix = split[0] + ":"; 
-                        actualKey = split[1];    
+                        var subParts = trimmedPart.Split(':', 2);
+                        var prefix = subParts[0].Trim();
+                        var possibleKey = subParts[1].Trim();
+
+                        if (possibleKey.StartsWith("ERR_"))
+                        {
+                            var apiResponse = await client.GetAsync($"api/Resource/get-translation?key={possibleKey}");
+                            if (apiResponse.IsSuccessStatusCode)
+                            {
+                                var jsonResponse = await apiResponse.Content.ReadAsStringAsync();
+                                using var doc = JsonDocument.Parse(jsonResponse);
+                                if (doc.RootElement.TryGetProperty("message", out var messageElement))
+                                {
+                                    translatedParts.Add($"{prefix}: {messageElement.GetString()}");
+                                    continue;
+                                }
+                            }
+                        }
                     }
-
-                    if (actualKey.StartsWith("ERR_"))
+                    else if (trimmedPart.StartsWith("ERR_"))
                     {
-                        var apiResponse = await client.GetAsync($"api/Resource/get-translation?key={actualKey}");
-
+                        var apiResponse = await client.GetAsync($"api/Resource/get-translation?key={trimmedPart}");
                         if (apiResponse.IsSuccessStatusCode)
                         {
                             var jsonResponse = await apiResponse.Content.ReadAsStringAsync();
                             using var doc = JsonDocument.Parse(jsonResponse);
-
                             if (doc.RootElement.TryGetProperty("message", out var messageElement))
                             {
-                                translatedParts.Add(prefix + (messageElement.GetString() ?? actualKey));
+                                translatedParts.Add(messageElement.GetString());
                                 continue;
                             }
                         }
                     }
+
                     translatedParts.Add(trimmedPart);
                 }
 
@@ -123,7 +134,7 @@ namespace WM.Gateway.Handlers
             }
             catch (Exception)
             {
-                return key.Split('|')[0].Trim();
+                return key;
             }
         }
     }
