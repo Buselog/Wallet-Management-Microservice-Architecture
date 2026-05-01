@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Menu, Typography, Card, Row, Col, Button, Statistic, Modal, Select, Avatar, Space, Tag, Divider, Form, message, Alert } from 'antd';
+import {
+    Layout, Menu, Typography, Card, Row, Col, Button,
+    Statistic, Modal, Select, Avatar, Space, Tag, Form,
+    message, Spin, Popconfirm
+} from 'antd';
 import {
     AppstoreOutlined,
     SwapOutlined,
@@ -9,7 +13,6 @@ import {
     PlusOutlined,
     WalletOutlined,
     UserOutlined,
-    ArrowRightOutlined,
     DeleteOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -22,33 +25,33 @@ const Dashboard = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [rates, setRates] = useState([]); // Dinamik kurlar için
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
-    // 1. Veri çekme fonksiyonu
-    const fetchDashboardData = async () => {
-        setLoading(true);
+    const fetchSummary = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const customerNo = localStorage.getItem('customerNo') || "123456";
-
-            if (!token) {
-                navigate('/login');
-                return;
-            }
-
-            const response = await api.get(`/Dashboard/user-summary?customerNo=${customerNo}`);
+            const response = await api.get('/v1/Dashboard/summary');
             setData(response.data);
         } catch (error) {
-            console.error("Dashboard hatası:", error);
-            message.error("Veriler yüklenirken bir sorun oluştu.");
+            message.error("Veriler yüklenirken hata oluştu.");
         } finally {
             setLoading(false);
         }
     };
 
+    const fetchRates = async () => {
+        try {
+            const response = await api.get('/Investment/rates');
+            setRates(response.data);
+        } catch (error) {
+            console.error("Kurlar alınamadı");
+        }
+    };
+
     useEffect(() => {
-        fetchDashboardData();
+        fetchSummary();
+        fetchRates();
     }, []);
 
     const handleLogout = () => {
@@ -56,101 +59,108 @@ const Dashboard = () => {
         navigate('/login');
     };
 
+    const createWallet = async (values) => {
+        try {
+            await api.post('/api/Wallet/create', values);
+            message.success("Cüzdan başarıyla oluşturuldu.");
+            setIsModalVisible(false);
+            form.resetFields();
+            fetchSummary();
+        } catch (error) {
+        }
+    };
+
+    const deleteWallet = async (id) => {
+        try {
+            await api.delete(`/api/Wallet/${id}/delete`);
+            message.success("Cüzdan kapatıldı.");
+            fetchSummary();
+        } catch (error) {
+            message.error(error.response?.data?.Message || "Hata oluştu.");
+        }
+    };
+
+    if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><Spin size="large" /></div>;
+
     return (
-        <Layout className="min-h-screen bg-[#f8fafc]">
+        <Layout style={{ minHeight: '100vh' }}>
             <Sider
                 width={260}
-                className="overflow-auto h-screen fixed left-0 top-0 bottom-0 bg-white border-r border-slate-100 z-50 shadow-sm"
+                style={{
+                    overflow: 'auto',
+                    height: '100vh',
+                    position: 'fixed',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    backgroundColor: '#fff',
+                    borderRight: '1px solid #f0f0f0'
+                }}
             >
-                <div className="p-8 flex items-center gap-3">
-                    <div className="bg-volcano-400 p-2 rounded-xl shadow-lg shadow-volcano-100">
-                        <WalletOutlined className="text-white text-xl" />
-                    </div>
-                    <span className="font-black text-lg tracking-tighter text-slate-800">WalletApp</span>
+                <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <WalletOutlined style={{ fontSize: '24px', color: '#ff4d4f' }} />
+                    <span style={{ fontWeight: 'bold', fontSize: '18px' }}>Wallet App</span>
                 </div>
-
-                <Menu mode="inline" defaultSelectedKeys={['1']} className="border-none px-4 font-medium">
-                    <Menu.Item key="1" icon={<AppstoreOutlined />} className="rounded-xl mb-2">Ana Sayfa</Menu.Item>
-                    <Menu.Item key="2" icon={<SwapOutlined />} className="rounded-xl mb-2">İşlem Yap</Menu.Item>
-                    <Menu.Item key="3" icon={<HistoryOutlined />} className="rounded-xl mb-2">İşlem Geçmişi</Menu.Item>
-                    <Menu.Item key="4" icon={<LineChartOutlined />} className="rounded-xl mb-2">Kurlar</Menu.Item>
-
-                    <div className="mt-12 px-6 mb-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Hesap Yönetimi</div>
-                    <Menu.Item key="5" icon={<LogoutOutlined />} onClick={handleLogout} className="rounded-xl text-red-500 hover:!text-red-600">Çıkış Yap</Menu.Item>
+                <Menu mode="inline" defaultSelectedKeys={['1']} style={{ borderRight: 0 }}>
+                    <Menu.Item key="1" icon={<AppstoreOutlined />}>Ana Sayfa</Menu.Item>
+                    <Menu.Item key="2" icon={<SwapOutlined />}>İşlem Yap</Menu.Item>
+                    <Menu.Item key="3" icon={<HistoryOutlined />}>İşlem Geçmişi</Menu.Item>
+                    <Menu.Item key="4" icon={<LineChartOutlined />}>Döviz Kurları</Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item key="logout" icon={<LogoutOutlined />} danger onClick={handleLogout}>Çıkış Yap</Menu.Item>
                 </Menu>
             </Sider>
 
-            <Layout className="ml-[260px] bg-transparent transition-all duration-300">
-                <Header className="bg-white/80 backdrop-blur-md sticky top-0 z-40 px-10 border-b border-slate-100 flex items-center justify-between h-20 shadow-sm">
-                    <div className="flex flex-col">
-                        <Title level={4} className="!mb-0 !text-slate-800 font-bold">
-                            Hoş Geldin, {data?.FullName?.split(' ')[0] || 'Değerli Kullanıcı'}
-                        </Title>
-                        <Text className="text-slate-400 text-xs font-medium">Finansal durumuna göz at.</Text>
-                    </div>
-                    <Space size="large" className="bg-slate-50 p-1 px-4 rounded-2xl border border-slate-100">
-                        <Text className="font-bold text-slate-600">{data?.FullName || '...'}</Text>
-                        <Avatar icon={<UserOutlined />} className="bg-volcano-100 text-volcano-500" />
-                    </Space>
+            <Layout style={{ marginLeft: 260, backgroundColor: '#f8fafc' }}>
+                <Header style={{ background: '#fff', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0' }}>
+                    <Title level={4} style={{ margin: 0 }}>Hoş Geldin, {data?.FullName}</Title>
+                    <Button type="primary" danger icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
+                        Yeni Cüzdan
+                    </Button>
                 </Header>
 
-                <Content className="p-10 max-w-[1400px]">
-                    <Row gutter={[24, 24]} className="mb-12">
-                        {data?.CurrencySummaries?.map((summary, idx) => (
-                            <Col xs={24} sm={12} lg={8} key={summary.Currency}>
-                                <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[32px] bg-white group hover:-translate-y-1 transition-all duration-300">
+                <Content style={{ padding: '32px', overflow: 'initial' }}>
+                    <Title level={5} style={{ color: '#64748b', marginBottom: '16px' }}>Varlıklarınızın Güncel Dağılımı</Title>
+                    <Row gutter={[16, 16]} style={{ marginBottom: '32px' }}>
+                        {data?.CurrencySummaries.map(summary => (
+                            <Col xs={24} sm={12} lg={6} key={summary.Currency}>
+                                <Card bordered={false} className="stat-card">
                                     <Statistic
-                                        title={<span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">TOPLAM {summary.Currency}</span>}
+                                        title={`TOPLAM ${summary.Currency} BAKİYE`}
                                         value={summary.TotalBalance}
                                         precision={2}
-                                        valueStyle={{ color: '#0f172a', fontWeight: '900', fontSize: '28px' }}
-                                        prefix={<span className="text-slate-300 mr-2">{summary.Currency === 'TRY' ? '₺' : '$'}</span>}
+                                        suffix={summary.Currency === 'TRY' ? '₺' : summary.Currency}
                                     />
                                 </Card>
                             </Col>
                         ))}
                     </Row>
 
-                    <div className="flex justify-between items-end mb-8">
-                        <div>
-                            <div className="bg-volcano-100 text-volcano-600 px-3 py-1 rounded-full text-[10px] font-bold inline-block mb-2">CÜZDANLARIN</div>
-                            <Title level={2} className="!mb-0 !text-slate-800 font-black">Varlık Listesi</Title>
-                        </div>
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            className="h-12 px-8 rounded-2xl bg-slate-900 hover:!bg-volcano-500 border-none font-bold text-sm shadow-lg shadow-slate-200"
-                            onClick={() => setIsModalVisible(true)}
-                        >
-                            Yeni Cüzdan
-                        </Button>
-                    </div>
-
-                    <Row gutter={[24, 24]}>
-                        {data?.Wallets?.map(wallet => (
+                    <Title level={4} style={{ marginBottom: '24px' }}>Cüzdanlarım</Title>
+                    <Row gutter={[20, 20]}>
+                        {data?.Wallets.map(wallet => (
                             <Col xs={24} md={12} lg={8} key={wallet.Id}>
                                 <Card
-                                    className="border-slate-100 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-500 group relative overflow-hidden"
+                                    hoverable
+                                    style={{ borderRadius: '12px', border: '1px solid #e2e8f0' }}
                                     actions={[
-                                        <div className="flex items-center justify-center gap-2 py-2 font-bold text-slate-400 hover:text-volcano-500">
-                                            İşlemler <ArrowRightOutlined className="text-xs" />
-                                        </div>
+                                        <Popconfirm title="Cüzdanı silmek istediğinize emin misiniz?" onConfirm={() => deleteWallet(wallet.Id)}>
+                                            <DeleteOutlined key="delete" style={{ color: '#ff4d4f' }} />
+                                        </Popconfirm>,
+                                        <ArrowRightOutlined key="go" onClick={() => navigate(`/wallet/${wallet.Id}`)} />
                                     ]}
                                 >
-                                    <div className="flex justify-between items-center mb-8">
-                                        <div className="bg-slate-50 p-4 rounded-3xl group-hover:bg-volcano-50 transition-colors">
-                                            <WalletOutlined className="text-2xl text-slate-300 group-hover:text-volcano-400" />
-                                        </div>
-                                        <div className="text-right">
-                                            <Tag className="rounded-full border-none bg-slate-100 text-slate-500 font-black px-4 py-1">
-                                                {wallet.Currency}
-                                            </Tag>
-                                            <div className="text-[10px] text-slate-300 mt-1 font-mono">ID: {wallet.Id}</div>
-                                        </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <Space direction="vertical" size={0}>
+                                            <Text type="secondary" strong style={{ fontSize: '12px' }}>#{wallet.Id}</Text>
+                                            <Tag color="blue">{wallet.Currency}</Tag>
+                                        </Space>
+                                        <Text strong>{wallet.TypeName || "Cüzdan"}</Text>
                                     </div>
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Kullanılabilir Bakiye</div>
-                                    <div className="text-3xl font-black text-slate-900 tracking-tighter">
-                                        {wallet.Currency === 'TRY' ? '₺' : '$'} {wallet.Balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                    <div style={{ marginTop: '20px' }}>
+                                        <Title level={3} style={{ margin: 0 }}>
+                                            {wallet.Currency === 'TRY' ? '₺' : ''} {wallet.Balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {wallet.Currency !== 'TRY' ? wallet.Currency : ''}
+                                        </Title>
                                     </div>
                                 </Card>
                             </Col>
@@ -160,31 +170,32 @@ const Dashboard = () => {
             </Layout>
 
             <Modal
-                title={<Title level={4} className="!mb-0 font-black">Yeni Bir Cüzdan Aç</Title>}
+                title="Yeni Cüzdan Oluştur"
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
-                footer={null}
-                centered
-                width={440}
-                className="modern-modal"
+                onOk={() => form.submit()}
+                okText="Oluştur"
+                cancelText="İptal"
+                okButtonProps={{ danger: true }}
             >
-                <Form form={form} layout="vertical" className="mt-6">
-                    <Form.Item label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cüzdan Tipi</span>}>
-                        <Select placeholder="Örn: Yatırım Cüzdanı" size="large" className="rounded-2xl h-12 overflow-hidden border-slate-200 shadow-sm">
-                            <Select.Option value="Standard">Standart Nakit Cüzdanı</Select.Option>
-                            <Select.Option value="Investment">Dijital Yatırım Cüzdanı</Select.Option>
+                <Form form={form} layout="vertical" onFinish={createWallet}>
+                    <Form.Item name="type" label="Cüzdan Tipi" rules={[{ required: true }]}>
+                        <Select placeholder="Seçiniz...">
+                            <Select.Option value={1}>Vadesiz Hesap (Checking)</Select.Option>
+                            <Select.Option value={2}>Vadeli Hesap (Saving)</Select.Option>
+                            <Select.Option value={3}>Yatırım Hesabı (Investment)</Select.Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Para Birimi</span>}>
-                        <Select placeholder="Para birimi seçiniz" size="large" className="rounded-2xl h-12 overflow-hidden border-slate-200 shadow-sm">
+                    <Form.Item name="currency" label="Para Birimi" rules={[{ required: true }]}>
+                        <Select placeholder="Para birimi seçiniz...">
                             <Select.Option value="TRY">TRY - Türk Lirası</Select.Option>
-                            <Select.Option value="USD">USD - Amerikan Doları</Select.Option>
-                            <Select.Option value="EUR">EUR - Euro</Select.Option>
+                            {rates.map(rate => (
+                                <Select.Option key={rate.CurrencyCode} value={rate.CurrencyCode}>
+                                    {rate.CurrencyCode} - {rate.CurrencyCode === 'USD' ? 'Amerikan Doları' : 'Döviz'}
+                                </Select.Option>
+                            ))}
                         </Select>
                     </Form.Item>
-                    <Button type="primary" block size="large" className="h-14 bg-volcano-400 hover:!bg-volcano-500 border-none rounded-2xl font-bold text-base shadow-lg shadow-volcano-100 mt-6">
-                        Cüzdanı Oluştur
-                    </Button>
                 </Form>
             </Modal>
         </Layout>
