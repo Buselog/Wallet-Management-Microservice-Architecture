@@ -90,32 +90,38 @@ namespace WM.Gateway.Handlers
                 foreach (var p in parts)
                 {
                     var trimmedPart = p.Trim();
+                    string prefix = "";
+                    string actualKey = trimmedPart;
 
-                    if (trimmedPart.StartsWith("ERR_"))
+                    if (trimmedPart.Contains(":"))
                     {
-                        var apiResponse = await client.GetAsync($"api/Resource/get-translation?key={trimmedPart}");
+                        var split = trimmedPart.Split(':');
+                        prefix = split[0] + ":"; 
+                        actualKey = split[1];    
+                    }
+
+                    if (actualKey.StartsWith("ERR_"))
+                    {
+                        var apiResponse = await client.GetAsync($"api/Resource/get-translation?key={actualKey}");
 
                         if (apiResponse.IsSuccessStatusCode)
                         {
                             var jsonResponse = await apiResponse.Content.ReadAsStringAsync();
-
                             using var doc = JsonDocument.Parse(jsonResponse);
 
                             if (doc.RootElement.TryGetProperty("message", out var messageElement))
                             {
-                                translatedParts.Add(messageElement.GetString() ?? trimmedPart);
+                                translatedParts.Add(prefix + (messageElement.GetString() ?? actualKey));
                                 continue;
                             }
                         }
-                        translatedParts.Add(trimmedPart);
-                    
                     }
-
+                    translatedParts.Add(trimmedPart);
                 }
 
                 return string.Join(" | ", translatedParts);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return key.Split('|')[0].Trim();
             }
