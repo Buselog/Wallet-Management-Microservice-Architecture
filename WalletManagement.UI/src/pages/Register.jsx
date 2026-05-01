@@ -33,11 +33,21 @@ const Register = () => {
                     const fields = [];
 
                     errorCodes.forEach(code => {
-                        if (code.includes('EMAIL')) fields.push({ name: 'email', errors: [code] });
-                        else if (code.includes('PASSWORD')) fields.push({ name: 'password', errors: [code] });
-                        else if (code.includes('NAME')) fields.push({ name: 'firstName', errors: [code] });
-                        else if (code.includes('SURNAME')) fields.push({ name: 'lastName', errors: [code] });
-                        else if (code.includes('PHONE')) fields.push({ name: 'phoneNumber', errors: [code] });
+                        const cleanCode = code.trim();
+
+                        if (cleanCode.includes('EMAIL')) {
+                            fields.push({ name: 'email', errors: [cleanCode] });
+                        } else if (cleanCode.includes('PASSWORD')) {
+                            fields.push({ name: 'password', errors: [cleanCode] });
+                        } else if (cleanCode.includes('NAME')) {
+                            fields.push({ name: 'firstName', errors: [cleanCode] });
+                        } else if (cleanCode.includes('SURNAME')) {
+                            fields.push({ name: 'lastName', errors: [cleanCode] });
+                        } else if (cleanCode.includes('PHONE')) {
+                            fields.push({ name: 'phoneNumber', errors: [cleanCode] });
+                        } else {
+                            setGeneralError(cleanCode);
+                        }
                     });
 
                     if (fields.length > 0) form.setFields(fields);
@@ -45,6 +55,8 @@ const Register = () => {
                 else {
                     setGeneralError(errorMsg);
                 }
+            } else {
+                setGeneralError("Beklenmedik bir hata oluştu.");
             }
         } finally {
             setLoading(false);
