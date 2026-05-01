@@ -46,7 +46,7 @@ namespace WM.Gateway.Handlers
                 {
                     var errorKey = errorData[targetKey]?.ToString();
 
-                    if (!string.IsNullOrEmpty(errorKey) && errorKey.StartsWith("ERR_"))
+                    if (!string.IsNullOrEmpty(errorKey) && (errorKey.StartsWith("ERR_") || errorKey.Contains(":ERR_")))
                     {
                         var culture = request.Headers.AcceptLanguage.FirstOrDefault()?.Value ?? "tr-TR";
                         var translatedMessage = await GetTranslationAsync(errorKey, culture);
