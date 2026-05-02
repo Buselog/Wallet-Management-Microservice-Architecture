@@ -114,6 +114,8 @@ namespace Wallet.InnerInfrastructure.Managers
             var sourceWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.SourceWalletId);
             var targetWallet = await _walletRepository.GetByIdNoTrackingAsync(dto.TargetWalletId);
 
+            decimal requiredBalance;
+
             if (sourceWallet.Currency == targetWallet.Currency)
                 throw new SameCurrencyTradeException();
 
@@ -122,11 +124,10 @@ namespace Wallet.InnerInfrastructure.Managers
                 throw new InvalidWalletTypeForTradeException();
             }
 
-            if (sourceWallet.Balance < dto.Amount)
-                throw new InsufficientBalanceException();
-
             if (dto.TradeType == "BUY")
             {
+                requiredBalance = dto.Amount * dto.TargetRate;
+
                 if (sourceWallet.Currency != "TRY")
                     throw new WalletCurrencyMismatchException("ERR_BUY_SOURCE_MUST_BE_TRY");
 
@@ -135,12 +136,21 @@ namespace Wallet.InnerInfrastructure.Managers
             }
             else if (dto.TradeType == "SELL")
             {
+                requiredBalance = dto.Amount;
+
                 if (sourceWallet.Currency != dto.CurrencyCode)
                     throw new WalletCurrencyMismatchException("ERR_SELL_SOURCE_CURRENCY_MISMATCH", dto.CurrencyCode);
 
                 if (targetWallet.Currency != "TRY")
                     throw new WalletCurrencyMismatchException("ERR_SELL_TARGET_MUST_BE_TRY");
             }
+            else
+            {
+                throw new BaseBusinessException("ERR_INVALID_TRADE_TYPE");
+            }
+
+            if (sourceWallet.Balance < requiredBalance)
+                throw new InsufficientBalanceException();
 
             var result = await _walletRepository.ExecuteCurrencyTradeWithSPAsync(
                 dto.CustomerNo,
