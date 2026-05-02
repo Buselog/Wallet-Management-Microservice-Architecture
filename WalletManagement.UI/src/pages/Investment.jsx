@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-    Layout, Menu, Typography, Table, Card, Button, Modal,
-    Form, InputNumber, Select, Space, Tag, Avatar, notification, Divider
+    Layout, Menu, Typography, Table, Card, Button, Modal, Col,
+    Form, InputNumber, Select, Space, Tag, Avatar, notification, Divider, Row
 } from 'antd';
 import {
     AppstoreOutlined, SwapOutlined, HistoryOutlined, LineChartOutlined,
@@ -185,26 +185,39 @@ const Investment = () => {
             </Layout>
 
             <Modal
-                title={null} open={modalVisible} onCancel={() => setModalVisible(false)}
-                footer={null} centered width={450} className="trade-modal"
+                title={null}
+                open={modalVisible}
+                onCancel={() => setModalVisible(false)}
+                footer={null}
+                centered
+                width={520}
+                className="trade-modal"
+                styles={{ body: { padding: '20px 24px' } }}
             >
-                <div className="text-center mb-6">
-                    <div className={`trade-icon-circle ${tradeType === 'BUY' ? 'buy' : 'sell'}`}>
-                        <TransactionOutlined style={{ fontSize: '24px' }} />
+                <div className="text-center mb-4">
+                    <div className={`trade-icon-circle ${tradeType === 'BUY' ? 'buy' : 'sell'}`} style={{ width: '48px', height: '48px', marginBottom: '8px' }}>
+                        <TransactionOutlined style={{ fontSize: '20px' }} />
                     </div>
-                    <Title level={4} className="m-0 mt-3 font-black">
+                    <Title level={4} style={{ margin: 0, fontWeight: '900', fontSize: '18px' }}>
                         {selectedRate?.currencyCode} {tradeType === 'BUY' ? 'ALIM İŞLEMİ' : 'SATIŞ İŞLEMİ'}
                     </Title>
-                    <Text className="text-slate-400 text-[11px] uppercase tracking-widest font-black">
-                        İşlem Kuru: ₺{tradeType === 'BUY' ? selectedRate?.sellingRate : selectedRate?.buyingRate}
+                    <Text className="text-slate-400 text-[10px] uppercase tracking-widest font-black">
+                        KUR: ₺{tradeType === 'BUY' ? selectedRate?.sellingRate : selectedRate?.buyingRate}
                     </Text>
                 </div>
 
                 <Form form={form} layout="vertical" onFinish={onExecuteTrade} requiredMark={false}>
-                    <Form.Item name="amount" label={<span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Miktar</span>} rules={[{ required: true, message: 'Miktar giriniz' }]}>
+                    <Form.Item
+                        name="amount"
+                        label={<span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Miktar</span>}
+                        rules={[{ required: true, message: 'Miktar giriniz' }]}
+                        style={{ marginBottom: '12px' }}
+                    >
                         <InputNumber
-                            className="w-full h-12 rounded-xl flex items-center font-black text-lg"
-                            placeholder="0.00" min={0.01}
+                            className="w-full h-10 rounded-xl flex items-center font-black text-base"
+                            style={{ width: '100%' }}
+                            placeholder="0.00"
+                            min={0.01}
                             onChange={() => {
                                 const amt = form.getFieldValue('amount') || 0;
                                 const rate = tradeType === 'BUY' ? selectedRate?.sellingRate : selectedRate?.buyingRate;
@@ -214,31 +227,57 @@ const Investment = () => {
                         />
                     </Form.Item>
 
-                    <Form.Item name="sourceWalletId" label={<span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Ödeme Yapılacak Cüzdan</span>} rules={[{ required: true, message: 'Seçiniz' }]}>
-                        <Select size="large" className="rounded-xl" placeholder="Kaynak Cüzdan">
-                            {wallets.map(w => <Select.Option key={w.id} value={w.id}>{w.currency} - {walletTypeMap[w.type]} (₺{w.balance.toLocaleString()})</Select.Option>)}
-                        </Select>
-                    </Form.Item>
+                    <Row gutter={12}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="sourceWalletId"
+                                label={<span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Kaynak Cüzdan</span>}
+                                rules={[{ required: true, message: 'Seçiniz' }]}
+                                style={{ marginBottom: '12px' }}
+                            >
+                                <Select size="middle" className="rounded-lg" placeholder="Ödeme">
+                                    {wallets.map(w => (
+                                        <Select.Option key={w.id} value={w.id}>
+                                            {w.currency} - {walletTypeMap[w.type]} (₺{w.balance.toLocaleString('tr-TR')})
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="targetWalletId"
+                                label={<span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Hedef Cüzdan</span>}
+                                rules={[{ required: true, message: 'Seçiniz' }]}
+                                style={{ marginBottom: '12px' }}
+                            >
+                                <Select size="middle" className="rounded-lg" placeholder="Yatırım">
+                                    {wallets.map(w => (
+                                        <Select.Option key={w.id} value={w.id}>
+                                            {w.currency} - {walletTypeMap[w.type]} (₺{w.balance.toLocaleString('tr-TR')})
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
 
-                    <Form.Item name="targetWalletId" label={<span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Yatırılacak Cüzdan</span>} rules={[{ required: true, message: 'Seçiniz' }]}>
-                        <Select size="large" className="rounded-xl" placeholder="Hedef Cüzdan">
-                            {wallets.map(w => <Select.Option key={w.id} value={w.id}>{w.currency} - {walletTypeMap[w.type]}</Select.Option>)}
-                        </Select>
-                    </Form.Item>
-
-                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 mb-5">
                         <div className="flex justify-between items-center">
-                            <Text className="text-xs font-black text-slate-500 uppercase">Tahmini Toplam:</Text>
-                            <Title level={3} id="total-calc" className="m-0 text-volcano-600 font-black">₺ 0.00</Title>
+                            <Text className="text-[10px] font-black text-slate-500 uppercase">Tahmini Toplam:</Text>
+                            <Title level={4} id="total-calc" style={{ margin: 0, color: '#ff4d4f', fontWeight: '900' }}>₺ 0.00</Title>
                         </div>
                     </div>
 
                     <Button
-                        type="primary" htmlType="submit" block loading={loading}
-                        className={`h-14 rounded-2xl font-black tracking-widest text-base ${tradeType === 'BUY' ? 'btn-execute-buy' : 'btn-execute-sell'}`}
+                        type="primary"
+                        htmlType="submit"
+                        block
+                        loading={loading}
+                        className={`h-12 rounded-xl font-black tracking-widest text-xs ${tradeType === 'BUY' ? 'btn-execute-buy' : 'btn-execute-sell'}`}
                         style={{ border: 'none' }}
                     >
-                        {tradeType === 'BUY' ? 'ALIM KURUNU ONAYLA' : 'SATIŞI GERÇEKLEŞTİR'}
+                        {tradeType === 'BUY' ? 'ALIM İŞLEMİNİ ONAYLA' : 'SATIŞ İŞLEMİNİ ONAYLA'}
                     </Button>
                 </Form>
             </Modal>
