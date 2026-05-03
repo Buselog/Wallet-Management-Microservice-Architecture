@@ -14,7 +14,10 @@ const Register = () => {
     const { loading, generalError, register } = useAuth(form);
 
     return (
-        <div className="flex h-screen items-center justify-center bg-slate-50 p-4 overflow-hidden">
+        <div className="flex h-screen items-center justify-center bg-slate-50 p-4 overflow-hidden relative">
+            <div className="absolute top-6 right-8 z-50">
+                <LanguageSwitcher />
+            </div>
             <div className="bg-white rounded-3x1 shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row max-h-[99vh]">
 
                 <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">

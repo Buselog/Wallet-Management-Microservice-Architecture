@@ -4,17 +4,22 @@ import { MailOutlined, LockOutlined, WalletOutlined, ArrowRightOutlined } from '
 import loginImg from '../assets/login-page.jpg'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from 'react-i18next'
 
 const { Title, Text } = Typography;
 
 const Login = () => {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
     const { loading, generalError, login } = useAuth(form);
 
     return (
-        <div className="flex h-screen items-center justify-center bg-slate-50 p-4 overflow-hidden">
+        <div className="flex h-screen items-center justify-center bg-slate-50 p-4 overflow-hidden relative">
+            <div className="absolute top-6 right-8 z-50">
+                <LanguageSwitcher />
+            </div>
             <div className="bg-white rounded-3x1 shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row max-h-[98vh]">
 
                 <div className="w-full md:w-1/2 p-12 flex flex-col justify-center">
@@ -25,8 +30,8 @@ const Login = () => {
                             </div>
                             <span className="font-bold text-xl tracking-tight text-slate-800">WalletManagement</span>
                         </div>
-                        <Title level={1} className="!mb-2 !text-slate-900">Giriş Yap</Title>
-                        <Text className="text-slate-500">Dijital asistanına bağlan ve cüzdanını yönet.</Text>
+                        <Title level={1} className="!mb-2 !text-slate-900">{t('login_title')}</Title>
+                        <Text className="text-slate-500">{t('login_subtitle')}</Text>
 
                         {generalError && (
                             <div className="mt-4">
@@ -43,22 +48,22 @@ const Login = () => {
                         requiredMark={false}>
 
                         <Form.Item
-                            label={<span className="text-xs font-bold text-slate-400 uppercase tracking-wider">E-POSTA</span>}
+                            label={<span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('email_label')}</span>}
                             name="email"
-                            rules={[{ required: true, message: 'E-posta alanı boş bırakılamaz.' }, { type: 'email', message: 'Geçerli bir e-posta giriniz.' }]}
+                            rules={[{ required: true, message: t('email_required') }, { type: 'email', message: t('email_invalid') }]}
                         >
                             <Input
                                 prefix={<MailOutlined className="text-slate-400" />}
-                                placeholder="example@gmail.com"
+                                placeholder={t('email_placeholder')}
                                 size="large"
                                 className="rounded-xl h-12 border-slate-200"
                             />
                         </Form.Item>
 
                         <Form.Item
-                            label={<span className="text-xs font-bold text-slate-400 uppercase tracking-wider">ŞİFRE</span>}
+                            label={<span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('password_label')}</span>}
                             name="password"
-                            rules={[{ required: true, message: 'Şifre alanı boş bırakılamaz.' }]}
+                            rules={[{ required: true, message: t('password_required') }]}
                         >
                             <Input.Password
                                 prefix={<LockOutlined className="text-slate-400" />}
@@ -77,12 +82,12 @@ const Login = () => {
                                 loading={loading}
                                 className="h-12 !bg-volcano-400 !hover:bg-volcano-600 rounded-xl font-bold text-base flex items-center justify-center gap-2"
                             >
-                                Giriş Yap <ArrowRightOutlined />
+                                {t('login_button')} <ArrowRightOutlined />
                             </Button>
                         </Form.Item>
 
                         <div className="text-center text-slate-500 mt-4">
-                            Henüz hesabın yok mu? <Button type="link" className="p-0 font-bold !text-volcano-600" onClick={() => navigate('/register')}>Kaydol</Button>
+                            {t('no_account')} <Button type="link" className="p-0 font-bold !text-volcano-600" onClick={() => navigate('/register')}>{t('register_link')}</Button>
                         </div>
                     </Form>
                 </div>
@@ -93,8 +98,8 @@ const Login = () => {
                         <img src={loginImg} alt="Login" className="w-full h-auto drop-shadow-2xl rounded-3xl" />
                     </div>
                     <div className="text-center relative z-10">
-                        <Title level={3} className="!text-slate-800 !mb-2">Finansal Geleceğini Yönet</Title>
-                        <Text className="text-slate-500 text-base">Tüm varlıklarını tek bir güvenli noktadan takip et, verimliliğini artır.</Text>
+                        <Title level={3} className="!text-slate-800 !mb-2">{t('hero_title')}</Title>
+                        <Text className="text-slate-500 text-base">{t('hero_subtitle')}</Text>
                     </div>
                 </div>
 

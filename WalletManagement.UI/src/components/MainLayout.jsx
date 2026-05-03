@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Menu, Typography } from 'antd';
 import { AppstoreOutlined, SwapOutlined, HistoryOutlined, LineChartOutlined, LogoutOutlined, WalletOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const { Sider, Content } = Layout;
 
@@ -75,6 +76,9 @@ const MainLayout = ({ children }) => {
                 />
             </Sider>
             <Layout style={{ marginLeft: 260, backgroundColor: 'transparent' }}>
+                <div style={{ position: 'absolute', top: 20, right: 32, zIndex: 1100 }}>
+                    <LanguageSwitcher />
+                </div>
                 <Content>{children}</Content>
             </Layout>
 

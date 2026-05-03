@@ -1,4 +1,5 @@
 import axios from 'axios';
+import i18n from 'i18next';
 
 const api = axios.create({
     baseURL: 'https://localhost:5000/api',
@@ -8,8 +9,8 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    const lang = localStorage.getItem('lang') || 'tr-TR';
-    config.headers['Accept-Language'] = lang;
+    const currentLang = i18n.language || 'tr';
+    config.headers['Accept-Language'] = currentLang === 'tr' ? 'tr-TR' : 'en-US';
 
     const token = localStorage.getItem('token');
     if (token) {
