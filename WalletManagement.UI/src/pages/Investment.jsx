@@ -4,6 +4,7 @@ import { UserOutlined, ReloadOutlined, SafetyCertificateOutlined } from '@ant-de
 import { useInvestment } from '../hooks/useInvestment';
 import TradeModal from '../components/TradeModal';
 import { Form } from 'antd';
+import { getCurrencyName } from '../utils/formatters';
 
 const { Title, Text } = Typography;
 
@@ -24,7 +25,11 @@ const Investment = () => {
         {
             title: 'BİRİM ADI',
             dataIndex: 'currencyName',
-            render: (name) => <Text className="font-bold text-slate-600">{name || 'Yabancı Para'}</Text>
+            render: (_, record) => (
+                <Text className="font-bold text-slate-600">
+                    {getCurrencyName(record.currencyCode)}
+                </Text>
+            )
         },
         {
             title: 'ALIŞ (BUY)',
