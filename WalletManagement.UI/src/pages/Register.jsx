@@ -1,34 +1,17 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Card, Typography, message, Row, Col, Alert } from 'antd';
+import React from 'react';
+import { Form, Input, Button, Typography, Row, Col, Alert } from 'antd';
 import { MailOutlined, LockOutlined, WalletOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import { volcano } from '@ant-design/colors';
-import loginImg from '../assets/login-page.jpg'
-import registerImg from '../assets/register-page.jpg'
+import registerImg from '../assets/register-page.jpg';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { handleApiError } from '../utils/errorHandler';
+import { useAuth } from '../hooks/useAuth';
 
 const { Title, Text } = Typography;
 
 const Register = () => {
-    const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
-    const [generalError, setGeneralError] = useState(null);
     const navigate = useNavigate();
 
-    const onFinish = async (values) => {
-        setLoading(true);
-        setGeneralError(null);
-        try {
-            await api.post('/Auth/register', values);
-            message.success('Kayıt başarıyla tamamlandı!');
-            navigate('/login');
-        } catch (error) {
-            handleApiError(error, form, setGeneralError);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { loading, generalError, register } = useAuth(form);
 
     return (
         <div className="flex h-screen items-center justify-center bg-slate-50 p-4 overflow-hidden">
@@ -56,8 +39,9 @@ const Register = () => {
                         form={form}
                         name="register"
                         layout="vertical"
-                        onFinish={onFinish}
-                        requiredMark={false}>
+                        onFinish={register}
+                        requiredMark={false}
+                    >
                         <Row gutter={12}>
                             <Col span={12}>
                                 <Form.Item
@@ -145,7 +129,6 @@ const Register = () => {
 
                 <div className="hidden md:flex md:w-1/2 bg-slate-50 p-12 flex-col items-center justify-center relative">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
-
                     <div className="relative z-10 w-full max-w-sm mb-5 transform hover:scale-105 transition-transform duration-500">
                         <img
                             src={registerImg}
@@ -153,7 +136,6 @@ const Register = () => {
                             className="w-full h-auto drop-shadow-2xl rounded-3xl"
                         />
                     </div>
-
                     <div className="text-center relative z-10">
                         <Title level={3} className="!text-slate-800 !mb-2">Finansal Geleceğini Yönet</Title>
                         <Text className="text-slate-500 text-base">Tüm varlıklarını tek bir güvenli noktadan takip et, verimliliğini artır.</Text>
