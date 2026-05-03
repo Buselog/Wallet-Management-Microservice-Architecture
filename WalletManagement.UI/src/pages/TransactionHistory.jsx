@@ -1,60 +1,25 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-    Layout, Menu, Typography, Table, Card, Space, DatePicker,
-    Tag, Avatar, Radio, Spin, Empty
-} from 'antd';
-import {
-    AppstoreOutlined, SwapOutlined, HistoryOutlined, LineChartOutlined,
-    LogoutOutlined, WalletOutlined, UserOutlined, FilterOutlined,
-    ArrowUpOutlined, ArrowDownOutlined
-} from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import React from 'react';
+import { Typography, Table, Card, DatePicker, Tag, Radio, Empty } from 'antd';
+import { WalletOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useTransactionHistory } from '../hooks/useTransactionHistory';
 
 const { Title, Text } = Typography;
 
 const TransactionHistory = () => {
-    const [wallets, setWallets] = useState([]);
-    const [selectedWalletId, setSelectedWalletId] = useState(null);
-    const [transactions, setTransactions] = useState([]);
-    const [totalCount, setTotalCount] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [pageSize] = useState(3); // Her sayfada tam 3 satır
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
-    const [userData, setUserData] = useState(null);
-
-    const navigate = useNavigate();
-
-    const fetchInitialData = useCallback(async () => {
-        try {
-            const response = await api.get('/v1/Dashboard/summary');
-            setUserData(response.data);
-            const userWallets = response.data.wallets || [];
-            setWallets(userWallets);
-            if (userWallets.length > 0) setSelectedWalletId(userWallets[0].id);
-        } catch (error) { console.error("Veri yüklenemedi"); }
-    }, []);
-
-    const fetchHistory = useCallback(async () => {
-        if (!selectedWalletId) return;
-        setLoading(true);
-        try {
-            const params = { pageNumber: page, pageSize: pageSize };
-            if (startDate) params.startDate = startDate.startOf('day').toISOString();
-            if (endDate) params.endDate = endDate.endOf('day').toISOString();
-
-            const response = await api.get(`/WalletTransaction/history/${selectedWalletId}`, { params });
-            setTransactions(response.data.items || response.data.Items || []);
-            setTotalCount(response.data.totalCount || response.data.TotalCount || 0);
-        } catch (error) { console.error("Geçmiş yüklenemedi"); }
-        finally { setLoading(false); }
-    }, [selectedWalletId, page, pageSize, startDate, endDate]);
-
-    useEffect(() => { fetchInitialData(); }, [fetchInitialData]);
-    useEffect(() => { fetchHistory(); }, [fetchHistory]);
+    const {
+        wallets,
+        selectedWalletId,
+        transactions,
+        totalCount,
+        loading,
+        page,
+        setPage,
+        pageSize,
+        setStartDate,
+        setEndDate,
+        handleWalletChange
+    } = useTransactionHistory();
 
     const columns = [
         {
@@ -101,9 +66,7 @@ const TransactionHistory = () => {
         <>
             <div className="flex justify-between items-start my-6 mx-6">
                 <div>
-                    <Title level={3} style={{ margin: 0, fontWeight: 900, color: '#1e293b' }}>
-                        <i className="bi bi-list-ul text-danger"></i> İşlem Geçmişi
-                    </Title>
+                    <Title level={3} style={{ margin: 0, fontWeight: 900, color: '#1e293b' }}>İşlem Geçmişi</Title>
                     <Text type="secondary" className="text-xs">Cüzdan hareketlerini saniye bazlı takip edin</Text>
                 </div>
 
@@ -121,7 +84,7 @@ const TransactionHistory = () => {
 
             <div className="mb-6 mx-6">
                 <Text style={{ color: '#ff4d4f', fontWeight: '900', fontSize: '11px', letterSpacing: '2px', display: 'block', marginBottom: '12px' }}>CÜZDAN SEÇİMİ</Text>
-                <Radio.Group value={selectedWalletId} onChange={(e) => { setSelectedWalletId(e.target.value); setPage(1); }}>
+                <Radio.Group value={selectedWalletId} onChange={(e) => handleWalletChange(e.target.value)}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                         {wallets.map(w => (
                             <Radio.Button key={w.id} value={w.id} className="wallet-radio-btn">
@@ -159,30 +122,15 @@ const TransactionHistory = () => {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .wallet-radio-btn {
-                    height: 44px !important;
-                    line-height: 44px !important;
-                    border-radius: 12px !important;
-                    border: 1px solid #e2e8f0 !important;
-                    font-weight: 700 !important;
-                }
-                .wallet-radio-btn:hover { color: #ffa39e !important; }
-                .ant-radio-button-wrapper-checked.wallet-radio-btn {
-                    background: #ff4d4f !important;
-                    border-color: #ff4d4f !important;
-                    color: white !important;
-                }
+                .wallet-radio-btn { height: 44px !important; line-height: 44px !important; border-radius: 12px !important; border: 1px solid #e2e8f0 !important; font-weight: 700 !important; }
+                .ant-radio-button-wrapper-checked.wallet-radio-btn { background: #ff4d4f !important; border-color: #ff4d4f !important; color: white !important; }
                 .wallet-radio-btn:before { display: none !important; }
-                
-                .ant-table-thead > tr > th { background: #fdfcfc !important; color: #94a3b8 !important; font-weight: 900 !important; font-size: 11px !important; padding: 12px 16px !important; }
-                .ant-table-tbody > tr > td { padding: 12px 16px !important; }
+                .ant-table-thead > tr > th { background: #fdfcfc !important; color: #94a3b8 !important; font-weight: 900 !important; font-size: 11px !important; }
                 .ant-table-tbody > tr:hover > td { background: #fff2f0 !important; }
-                
                 .custom-pagination .ant-pagination-item-active { background: #ff4d4f; border-color: #ff4d4f; }
                 .custom-pagination .ant-pagination-item-active a { color: white !important; }
             `}} />
         </>
-
     );
 };
 

@@ -1,20 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-    Layout, Menu, Typography, Card, Row, Col, Button,
-    Statistic, Modal, Select, Avatar, Space, Tag, Form,
-    message, Spin, Popconfirm, Divider
-} from 'antd';
-import {
-    AppstoreOutlined, SwapOutlined, HistoryOutlined, LineChartOutlined,
-    LogoutOutlined, PlusOutlined, WalletOutlined, UserOutlined,
-    DeleteOutlined, ArrowRightOutlined, LoadingOutlined
-} from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import React, { useState } from 'react';
+import { Typography, Card, Row, Col, Button, Statistic, Avatar, Space, Tag, Form, Spin, Popconfirm, Layout } from 'antd';
+import { PlusOutlined, WalletOutlined, UserOutlined, DeleteOutlined, ArrowRightOutlined, LoadingOutlined } from '@ant-design/icons';
+import { useDashboard } from '../../hooks/useDashboard';
+import CreateWalletModal from './components/CreateWalletModal';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
-
 
 const customStyles = {
     volcanoButton: {
@@ -39,82 +30,10 @@ const customStyles = {
 };
 
 const Dashboard = () => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [rates, setRates] = useState([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+
     const [form] = Form.useForm();
-    const navigate = useNavigate();
-
-    const fetchDashboardData = useCallback(async () => {
-        try {
-            setLoading(true);
-            const summaryRes = await api.get('/v1/Dashboard/summary');
-            setData(summaryRes.data);
-
-            const ratesRes = await api.get('/InvestmentRate/rates');
-            setRates(ratesRes.data || []);
-        } catch (error) {
-            if (error.response?.status === 401) navigate('/login');
-            message.error("Veriler güncellenemedi.");
-        } finally {
-            setLoading(false);
-        }
-    }, [navigate]);
-
-    const createWallet = async (values) => {
-        try {
-
-            await api.post('/Wallet/create', values);
-            Modal.success({
-                title: 'İşlem Başarılı',
-                content: 'Yeni cüzdanınız başarıyla oluşturuldu ve kullanıma hazır.',
-                centered: true,
-                okText: 'Tamam',
-                okButtonProps: { style: { backgroundColor: '#52c41a', borderColor: '#52c41a', borderRadius: '8px' } },
-                onOk: () => {
-                    setIsModalVisible(false);
-                    form.resetFields();
-                    fetchDashboardData();
-                }
-            });
-        } catch (error) {
-            const errorMsg = error.response?.data?.Message || error.response?.data?.message || "Cüzdan oluşturulamadı.";
-
-            Modal.error({
-                title: 'Cüzdan Oluşturulamadı',
-                content: errorMsg,
-                centered: true,
-                okText: 'Anladım',
-                okButtonProps: { style: { backgroundColor: '#ff4d4f', borderColor: '#ff4d4f', borderRadius: '8px' } },
-            });
-        }
-    };
-
-    const deleteWallet = async (id) => {
-        try {
-            await api.delete(`/Wallet/${id}/delete`);
-
-            message.success("Cüzdan başarıyla kapatıldı.");
-            fetchDashboardData();
-        } catch (error) {
-            const errorMsg = error.response?.data?.Message || error.response?.data?.message || "Silme işlemi başarısız.";
-
-            Modal.warning({
-                title: 'Silme İşlemi Gerçekleştirilemedi',
-                content: errorMsg,
-                centered: true,
-                okText: 'Tamam'
-            });
-        }
-    };
-
-    useEffect(() => { fetchDashboardData(); }, [fetchDashboardData]);
-
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/login');
-    };
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const { data, loading, rates, createWallet, deleteWallet } = useDashboard(form);
 
     if (loading) return (
         <div className="h-screen w-full flex items-center justify-center bg-white">
@@ -259,66 +178,13 @@ const Dashboard = () => {
                 </Row>
             </Content>
 
-            <Modal
-                title={<Title level={3} style={{ margin: 0, fontWeight: '900', color: '#1e293b' }}>Yeni Cüzdan Oluştur</Title>}
-                open={isModalVisible}
+            <CreateWalletModal
+                visible={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
-                footer={null}
-                centered
-                width={480}
-                styles={{
-                    mask: { backdropFilter: 'blur(10px)' },
-                    content: { borderRadius: '32px' }
-                }}
-            >
-                <Form form={form} layout="vertical" onFinish={createWallet} style={{ marginTop: '32px' }}>
-                    <Form.Item
-                        name="type"
-                        label={<Text style={{ fontSize: '11px', fontWeight: '900', color: '#94a3b8', letterSpacing: '1px' }}>CÜZDAN TİPİ</Text>}
-                        rules={[{ required: true, message: 'Lütfen bir tip seçin' }]}
-                    >
-                        <Select
-                            size="large"
-                            placeholder="Hesap türünü belirleyin"
-                            getPopupContainer={trigger => trigger.closest('.ant-modal-content')}
-                            className="custom-select"
-                        >
-                            <Select.Option value={1}>Vadesiz Hesap (Checking)</Select.Option>
-                            <Select.Option value={2}>Vadeli Hesap (Saving)</Select.Option>
-                            <Select.Option value={3}>Yatırım Hesabı (Investment)</Select.Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item
-                        name="currency"
-                        label={<Text style={{ fontSize: '11px', fontWeight: '900', color: '#94a3b8', letterSpacing: '1px' }}>PARA BİRİMİ</Text>}
-                        rules={[{ required: true, message: 'Lütfen bir para birimi seçin' }]}
-                    >
-                        <Select
-                            size="large"
-                            placeholder="İşlem yapılacak birimi seçin"
-                            getPopupContainer={trigger => trigger.closest('.ant-modal-content')}
-                            className="custom-select"
-                        >
-                            <Select.Option value="TRY">TRY - Türk Lirası</Select.Option>
-                            {rates.map(r => (
-                                <Select.Option key={r.currencyCode} value={r.currencyCode}>
-                                    {r.currencyCode} - Küresel Birim
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-
-                    <Button
-                        type="primary"
-                        block
-                        htmlType="submit"
-                        style={customStyles.volcanoButton}
-                    >
-                        Cüzdanı Aktifleştir
-                    </Button>
-                </Form>
-            </Modal>
+                onFinish={(values) => createWallet(values, () => setIsModalVisible(false))}
+                rates={rates}
+                customStyles={customStyles}
+            />
 
             <style dangerouslySetInnerHTML={{
                 __html: `

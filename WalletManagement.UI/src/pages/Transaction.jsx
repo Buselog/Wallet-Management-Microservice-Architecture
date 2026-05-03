@@ -1,85 +1,24 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Typography, Card, Button, Form, Input, Select, Radio, Avatar, InputNumber, Row, Col, Space, Layout, Tag, notification } from 'antd';
+import React from 'react';
+import { Typography, Card, Button, Form, Input, Select, Radio, Avatar, InputNumber, Row, Col, Space, Tag } from 'antd';
 import { WalletOutlined, UserOutlined, PlusCircleOutlined, SafetyCertificateOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import dayjs from 'dayjs';
-import { handleApiError } from '../utils/errorHandler';
+import { useTransaction } from '../hooks/useTransaction';
 
-const { Content } = Layout;
 const { Title, Text } = Typography;
-
 const walletTypeMap = { 1: 'Vadesiz Hesap', 2: 'Vadeli Hesap', 3: 'Yatırım Hesabı' };
 
 const Transaction = () => {
     const [form] = Form.useForm();
-    const navigate = useNavigate();
-    const [wallets, setWallets] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [selectedWallet, setSelectedWallet] = useState(null);
-    const [actionType, setActionType] = useState('deposit');
-    const [userData, setUserData] = useState(null);
-    const [lastTransactionDate, setLastTransactionDate] = useState('İşlem yok');
-
-    const fetchLastTransaction = async (walletId) => {
-        try {
-            const res = await api.get(`/WalletTransaction/history/${walletId}`, {
-                params: { pageNumber: 1, pageSize: 1 }
-            });
-            const lastItem = res.data.items?.[0] || res.data.Items?.[0];
-            setLastTransactionDate(lastItem ? dayjs(lastItem.transactionDate || lastItem.createdDate).format('DD.MM.YYYY HH:mm') : 'İşlem yok');
-        } catch {
-            setLastTransactionDate('Hata');
-        }
-    };
-
-    const fetchInitialData = useCallback(async () => {
-        try {
-            const response = await api.get('/v1/Dashboard/summary');
-            setUserData(response.data);
-            const userWallets = response.data.wallets || [];
-            setWallets(userWallets);
-
-            const preId = localStorage.getItem('selected_wallet_id');
-            if (preId) {
-                const w = userWallets.find(x => x.id === parseInt(preId));
-                if (w) {
-                    setSelectedWallet(w);
-                    form.setFieldsValue({ walletId: w.id });
-                    fetchLastTransaction(w.id);
-                }
-            }
-        } catch (error) {
-            handleApiError(error, form, (msg) => console.error(msg));
-        }
-    }, [form]);
-
-    useEffect(() => { fetchInitialData(); }, [fetchInitialData]);
-
-    const onWalletChange = (val) => {
-        const w = wallets.find(x => x.id === val);
-        setSelectedWallet(w);
-        fetchLastTransaction(val);
-    };
-
-    const onFinish = async (values) => {
-        setLoading(true);
-        try {
-            let endpoint = `/Wallet/${actionType}`;
-            let payload = { ...values };
-            if (actionType === 'transfer') payload.fromWalletId = values.walletId;
-
-            await api.post(endpoint, payload);
-            localStorage.removeItem('selected_wallet_id');
-            setTimeout(() => navigate('/dashboard'), 1500);
-        } catch (error) {
-            handleApiError(error, form, (msg) => {
-                notification.error({ message: 'İşlem Hatası', description: msg });
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+    const {
+        wallets,
+        loading,
+        selectedWallet,
+        actionType,
+        setActionType,
+        userData,
+        lastTransactionDate,
+        handleWalletChange,
+        executeTransaction
+    } = useTransaction(form);
 
     return (
         <>
@@ -125,7 +64,7 @@ const Transaction = () => {
                 </Col>
 
                 <Col xs={24} lg={14} style={{ display: 'flex', flexDirection: 'column' }}>
-                    <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false} className="flex-1 flex flex-col h-full min-h-0">
+                    <Form form={form} layout="vertical" onFinish={executeTransaction} requiredMark={false} className="flex-1 flex flex-col h-full min-h-0">
                         <Card
                             className="rounded-[32px] shadow-sm border-none flex-1 overflow-hidden min-h-0"
                             styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column', padding: '24px', overflow: 'hidden', minHeight: 0 } }}
@@ -134,13 +73,12 @@ const Transaction = () => {
                                 <div className="mb-6">
                                     <Text className="text-slate-400 block uppercase tracking-widest text-[10px] font-black mb-4">İŞLEM AYARLARI</Text>
                                     <Form.Item name="walletId" label={<span className="text-[11px] font-black uppercase text-slate-500">Kaynak Cüzdan</span>} rules={[{ required: true, message: 'Lütfen cüzdan seçin' }]}>
-                                        <Select size="large" className="custom-select-large" placeholder="Seçim yapın" onChange={onWalletChange}>
+                                        <Select size="large" className="custom-select-large" placeholder="Seçim yapın" onChange={handleWalletChange}>
                                             {wallets.map(w => <Select.Option key={w.id} value={w.id}>{w.currency} - {walletTypeMap[w.type]}</Select.Option>)}
                                         </Select>
                                     </Form.Item>
                                     <Form.Item label={<span className="text-[11px] font-black uppercase text-slate-500">İşlem Türü</span>}>
-                                        <Radio.Group value={actionType} onChange={(e) => setActionType(e.target.value)} className="w-full flex p-1 bg-slate-50 rounded-2xl border border-slate-100"
-                                            style={{ display: 'flex' }}>
+                                        <Radio.Group value={actionType} onChange={(e) => setActionType(e.target.value)} className="w-full flex p-1 bg-slate-50 rounded-2xl border border-slate-100" style={{ display: 'flex' }}>
                                             <Radio.Button value="deposit" className="flex-1 flex justify-center items-center rounded-xl h-11 font-black text-xs custom-radio">Para Yatır</Radio.Button>
                                             <Radio.Button value="withdraw" className="flex-1 flex justify-center items-center rounded-xl h-11 font-black text-xs custom-radio">Para Çek</Radio.Button>
                                             <Radio.Button value="transfer" className="flex-1 flex justify-center items-center rounded-xl h-11 font-black text-xs custom-radio">Transfer</Radio.Button>

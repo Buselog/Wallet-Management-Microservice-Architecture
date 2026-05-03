@@ -141,7 +141,6 @@ const Register = () => {
                         <Text className="text-slate-500 text-base">Tüm varlıklarını tek bir güvenli noktadan takip et, verimliliğini artır.</Text>
                     </div>
                 </div>
-
             </div>
         </div>
     );
