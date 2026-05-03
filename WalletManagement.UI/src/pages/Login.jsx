@@ -5,6 +5,7 @@ import { MailOutlined, LockOutlined, WalletOutlined, ArrowRightOutlined } from '
 import loginImg from '../assets/login-page.jpg'
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { handleApiError } from '../utils/errorHandler';
 
 const { Title, Text } = Typography;
 
@@ -24,32 +25,7 @@ const Login = () => {
             message.success('Hesabınıza erişim sağlandı. Yönlendiriliyorsunuz..');
             navigate('/dashboard');
         } catch (error) {
-            const status = error.response?.status;
-            const responseData = error.response?.data;
-            const errorMsg = responseData?.Message || responseData?.message;
-
-            if (errorMsg) {
-                if (status === 400) {
-                    const parts = errorMsg.split(' | ');
-                    const fields = [];
-
-                    parts.forEach(part => {
-                        if (part.includes(':')) {
-                            const [property, msg] = part.split(':');
-                            const fieldName = property.toLowerCase().includes('EMAIL') ? 'email' : 'password';
-                            fields.push({ name: fieldName, errors: [msg] });
-                        } else {
-                            setGeneralError(part);
-                        }
-                    });
-                    if (fields.length > 0) form.setFields(fields);
-                }
-                else {
-                    setGeneralError(errorMsg);
-                }
-            } else {
-                setGeneralError("Giriş yapılırken bir sorun oluştu.");
-            }
+            handleApiError(error, form, setGeneralError);
         } finally {
             setLoading(false);
         }

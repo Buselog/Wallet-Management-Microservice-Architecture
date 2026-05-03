@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-    Layout, Menu, Typography, Table, Card, Button, Modal, Col,
+    Typography, Table, Card, Button, Modal, Col,
     Form, InputNumber, Select, Space, Tag, Avatar, notification, Divider, Row
 } from 'antd';
 import {
@@ -12,7 +12,6 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import dayjs from 'dayjs';
 
-const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
 
 const Investment = () => {
@@ -123,66 +122,43 @@ const Investment = () => {
     ];
 
     return (
-        <Layout style={{ minHeight: '100vh', background: '#f8fafc', overflow: 'hidden' }}>
-            <Sider width={260} theme="light" style={{ position: 'fixed', height: '100vh', borderRight: '1px solid #e2e8f0', zIndex: 1000 }}>
-                <div className="p-8 flex items-center gap-3">
-                    <div style={{ background: 'linear-gradient(135deg, #fb6365 0%, #c2494f 100%)', borderRadius: '14px' }} className="w-10 h-10 flex items-center justify-center">
-                        <WalletOutlined style={{ color: '#fff', fontSize: '20px' }} />
-                    </div>
-                    <div className="flex flex-col">
-                        <span style={{ fontSize: '22px', fontWeight: '900', color: '#ff4d4f', lineHeight: 1 }}>WalletApp</span>
-                        <span style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase' }}>Management</span>
-                    </div>
+        <>
+            <div className="my-6 mx-8 flex justify-between items-end">
+                <div>
+                    <Title level={3} style={{ margin: 0, fontWeight: 900, color: '#1e293b' }}>Yatırım Merkezi</Title>
+                    <Text type="secondary" className="text-xs">Merkez Bankası verileriyle anlık ve güvenli döviz ticareti.</Text>
                 </div>
-                <Menu mode="inline" defaultSelectedKeys={['4']} className="border-none px-4"
-                    items={[
-                        { key: '1', icon: <AppstoreOutlined />, label: 'Ana Sayfa', onClick: () => navigate('/dashboard') },
-                        { key: '2', icon: <SwapOutlined />, label: 'İşlem Yap', onClick: () => navigate('/transaction') },
-                        { key: '3', icon: <HistoryOutlined />, label: 'İşlem Geçmişi', onClick: () => navigate('/history') },
-                        { key: '4', icon: <LineChartOutlined />, label: 'Döviz Kurları' },
-                        { type: 'divider' },
-                        { key: 'logout', icon: <LogoutOutlined />, label: 'Çıkış Yap', danger: true, onClick: () => { localStorage.clear(); navigate('/login'); } }
-                    ]}
-                />
-            </Sider>
+                <div className="text-right">
+                    <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading} className="btn-refresh-custom">Verileri Yenile</Button>
+                    <div className="mt-1"><Text className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Son Güncelleme: {lastUpdate}</Text></div>
+                </div>
+            </div>
 
-            <Layout style={{ marginLeft: 260, background: 'transparent', height: '100vh', overflow: 'hidden' }}>
-                <Content className="px-10 py-6 flex flex-col h-full overflow-hidden">
-                    <div className="mb-6 flex justify-between items-end">
-                        <div>
-                            <Title level={2} style={{ margin: 0, fontWeight: 900 }}>Yatırım Merkezi</Title>
-                            <Text type="secondary">Merkez Bankası verileriyle anlık ve güvenli döviz ticareti.</Text>
-                        </div>
-                        <div className="text-right">
-                            <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading} className="rounded-xl font-black border-slate-200 shadow-sm">Verileri Yenile</Button>
-                            <div className="mt-1"><Text className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Son Güncelleme: {lastUpdate}</Text></div>
-                        </div>
-                    </div>
+            <div className="px-8 flex-1 flex flex-col min-h-0">
 
-                    <Card className="rounded-[32px] border-none shadow-sm flex-1 overflow-hidden"
-                        styles={{ body: { height: '100%', padding: 0 } }}>
-                        <Table
-                            columns={columns}
-                            dataSource={rates}
-                            pagination={false}
-                            loading={loading}
-                            rowKey="currencyCode"
-                            className="custom-investment-table"
-                            scroll={{ y: 'calc(100vh - 280px)' }}
-                        />
-                    </Card>
+                <Card className="rounded-[32px] border-none shadow-sm flex-1 overflow-hidden"
+                    styles={{ body: { height: '100%', padding: 0 } }}>
+                    <Table
+                        columns={columns}
+                        dataSource={rates}
+                        pagination={false}
+                        loading={loading}
+                        rowKey="currencyCode"
+                        className="custom-investment-table"
+                        scroll={{ y: 'calc(100vh - 280px)' }}
+                    />
+                </Card>
 
-                    <div className="mt-4 flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                        <Space className="text-slate-500 font-bold text-xs">
-                            <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: '#fff2f0', color: '#ff4d4f' }} />
-                            {userData?.fullName} | Finansal Yönetici
-                        </Space>
-                        <Space className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                            <SafetyCertificateOutlined className="text-green-500" /> 256-bit SSL Güvenlik Aktif
-                        </Space>
-                    </div>
-                </Content>
-            </Layout>
+                <div className="mt-4 flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <Space className="text-slate-500 font-bold text-xs">
+                        <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: '#fff2f0', color: '#ff4d4f' }} />
+                        {userData?.fullName} | Finansal Yönetici
+                    </Space>
+                    <Space className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                        <SafetyCertificateOutlined className="text-green-500" /> 256-bit SSL Güvenlik Aktif
+                    </Space>
+                </div>
+            </div>
 
             <Modal
                 title={null}
@@ -303,9 +279,38 @@ const Investment = () => {
                 .btn-execute-sell { background: #ff4d4f !important; box-shadow: 0 8px 20px rgba(255, 77, 79, 0.2) !important; }
                 
                 .ant-modal-mask { backdrop-filter: blur(4px); }
+
+                .btn-refresh-custom {
+                background-color: #fff2f0 !important;
+                color: #ff4d4f !important;
+                border-color: #ffccc7 !important;
+                font-weight: 700 !important;
+                border-radius: 12px !important;
+                transition: all 0.3s ease !important;
+                }
+
+               .btn-refresh-custom:hover {
+                background-color: #ff4d4f !important;
+                color: white !important;
+                border-color: #ff4d4f !important;
+                box-shadow: 0 4px 12px rgba(255, 77, 79, 0.2) !important;
+                }
+
+                .custom-investment-table .ant-table-measure-row {
+                visibility: collapse !important;
+                line-height: 0 !important;
+                height: 0 !important;
+                }
+
+               .custom-investment-table .ant-table-measure-row td {
+               padding: 0 !important;
+               border: 0 !important;
+               height: 0 !important;
+               }
             `}} />
-        </Layout>
+        </>
     );
 };
 
 export default Investment;
+

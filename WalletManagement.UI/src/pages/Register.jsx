@@ -6,6 +6,7 @@ import loginImg from '../assets/login-page.jpg'
 import registerImg from '../assets/register-page.jpg'
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { handleApiError } from '../utils/errorHandler';
 
 const { Title, Text } = Typography;
 
@@ -23,35 +24,7 @@ const Register = () => {
             message.success('Kayıt başarıyla tamamlandı!');
             navigate('/login');
         } catch (error) {
-            const status = error.response?.status;
-            const responseData = error.response?.data;
-            const errorMsg = responseData?.Message || responseData?.message;
-
-            if (errorMsg) {
-                if (status === 400) {
-                    const parts = errorMsg.split(' | ');
-                    const fields = [];
-
-                    parts.forEach(part => {
-                        if (part.includes(':') && !part.includes('Detay')) {
-                            const [property, msg] = part.split(':').map(s => s.trim());
-                            const propertyMap = {
-                                'FirstName': 'firstName', 'LastName': 'lastName',
-                                'Email': 'email', 'PhoneNumber': 'phoneNumber', 'Password': 'password'
-                            };
-                            const fieldName = propertyMap[property];
-                            if (fieldName) fields.push({ name: fieldName, errors: [msg] });
-                            else setGeneralError(msg);
-                        }
-                        else {
-                            setGeneralError(part);
-                        }
-                    });
-                    if (fields.length > 0) form.setFields(fields);
-                } else {
-                    setGeneralError(errorMsg);
-                }
-            }
+            handleApiError(error, form, setGeneralError);
         } finally {
             setLoading(false);
         }
@@ -193,5 +166,3 @@ const Register = () => {
 };
 
 export default Register;
-
-
