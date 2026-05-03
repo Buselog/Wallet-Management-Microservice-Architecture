@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Menu, Typography } from 'antd';
 import { AppstoreOutlined, SwapOutlined, HistoryOutlined, LineChartOutlined, LogoutOutlined, WalletOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const { Sider, Content } = Layout;
@@ -18,6 +19,7 @@ const brandLogoStyle = {
 };
 
 const MainLayout = ({ children }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -57,7 +59,7 @@ const MainLayout = ({ children }) => {
                     </div>
                     <div className="flex flex-col">
                         <span style={{ fontSize: '22px', fontWeight: '900', color: '#ff4d4f', lineHeight: '1' }}>WalletApp</span>
-                        <span className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Management</span>
+                        <span className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">{t('brand_subtitle')}</span>
                     </div>
                 </div>
 
@@ -66,12 +68,12 @@ const MainLayout = ({ children }) => {
                     selectedKeys={[getSelectedKey()]}
                     className="border-none px-4 custom-menu"
                     items={[
-                        { key: '1', icon: <AppstoreOutlined />, label: 'Ana Sayfa', onClick: () => navigate('/dashboard') },
-                        { key: '2', icon: <SwapOutlined />, label: 'İşlem Yap', onClick: () => navigate('/transaction') },
-                        { key: '3', icon: <HistoryOutlined />, label: 'İşlem Geçmişi', onClick: () => navigate('/history') },
-                        { key: '4', icon: <LineChartOutlined />, label: 'Döviz Kurları', onClick: () => navigate('/investment') },
+                        { key: '1', icon: <AppstoreOutlined />, label: t('menu_dashboard'), onClick: () => navigate('/dashboard') },
+                        { key: '2', icon: <SwapOutlined />, label: t('menu_transaction'), onClick: () => navigate('/transaction') },
+                        { key: '3', icon: <HistoryOutlined />, label: t('menu_history'), onClick: () => navigate('/history') },
+                        { key: '4', icon: <LineChartOutlined />, label: t('menu_rates'), onClick: () => navigate('/investment') },
                         { type: 'divider' },
-                        { key: 'logout', icon: <LogoutOutlined />, label: 'Çıkış Yap', danger: true, onClick: handleLogout }
+                        { key: 'logout', icon: <LogoutOutlined />, label: t('menu_logout'), danger: true, onClick: handleLogout }
                     ]}
                 />
             </Sider>

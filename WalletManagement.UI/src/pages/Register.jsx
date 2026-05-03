@@ -4,10 +4,12 @@ import { MailOutlined, LockOutlined, WalletOutlined, ArrowRightOutlined } from '
 import registerImg from '../assets/register-page.jpg';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
 const Register = () => {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
@@ -28,8 +30,8 @@ const Register = () => {
                             </div>
                             <span className="font-bold text-lg tracking-tight text-slate-800">WalletManagement</span>
                         </div>
-                        <Title level={2} className="!mb-0 !text-slate-900">Hesap Oluştur</Title>
-                        <Text className="text-slate-500 text-xs">Cüzdanınızı yönetmek için hemen kayıt olun.</Text>
+                        <Title level={2} className="!mb-0 !text-slate-900">{t('register_title')}</Title>
+                        <Text className="text-slate-500 text-xs">{t('register_subtitle')}</Text>
 
                         {generalError && (
                             <div className="mt-4">
@@ -48,47 +50,47 @@ const Register = () => {
                         <Row gutter={12}>
                             <Col span={12}>
                                 <Form.Item
-                                    label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">AD</span>}
+                                    label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('first_name_label')}</span>}
                                     name="firstName"
                                     className="!mb-3"
-                                    rules={[{ required: true, message: 'Ad alanı boş bırakılamaz.' }]}
+                                    rules={[{ required: true, message: t('first_name_required') }]}
                                 >
-                                    <Input placeholder="Ali" size="middle" className="rounded-lg h-10 border-slate-200" />
+                                    <Input placeholder={t('first_name_placeholder')} size="middle" className="rounded-lg h-10 border-slate-200" />
                                 </Form.Item>
                             </Col>
                             <Col span={12}>
                                 <Form.Item
-                                    label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SOYAD</span>}
+                                    label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('last_name_label')}</span>}
                                     name="lastName"
                                     className="!mb-3"
-                                    rules={[{ required: true, message: 'Soyad alanı boş bırakılamaz.' }]}
+                                    rules={[{ required: true, message: t('last_name_required') }]}
                                 >
-                                    <Input placeholder="Yılmaz" size="middle" className="rounded-lg h-10 border-slate-200" />
+                                    <Input placeholder={t('last_name_placeholder')} size="middle" className="rounded-lg h-10 border-slate-200" />
                                 </Form.Item>
                             </Col>
                         </Row>
 
                         <Form.Item
-                            label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">E-POSTA</span>}
+                            label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('email_label')}</span>}
                             name="email"
                             className="!mb-3"
                             rules={[
-                                { required: true, message: 'E-posta alanı boş bırakılamaz.' },
-                                { type: 'email', message: 'Geçersiz e-posta.' }
+                                { required: true, message: t('email_required') },
+                                { type: 'email', message: t('email_invalid') }
                             ]}
                         >
                             <Input
                                 prefix={<MailOutlined className="text-slate-400" />}
-                                placeholder="example@gmail.com"
+                                placeholder={t('email_placeholder')}
                                 className="rounded-lg h-10 border-slate-200"
                             />
                         </Form.Item>
 
                         <Form.Item
-                            label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TELEFON</span>}
+                            label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('phone_label')}</span>}
                             name="phoneNumber"
                             className="!mb-3"
-                            rules={[{ required: true, message: 'Telefon alanı boş bırakılamaz.' }]}
+                            rules={[{ required: true, message: t('phone_required') }]}
                         >
                             <Input
                                 placeholder="5xx xxx xx xx"
@@ -97,12 +99,12 @@ const Register = () => {
                         </Form.Item>
 
                         <Form.Item
-                            label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ŞİFRE</span>}
+                            label={<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('password_label')}</span>}
                             name="password"
                             className="!mb-4"
                             rules={[
-                                { required: true, message: 'Şifre alanı boş bırakılamaz.' },
-                                { min: 8, message: 'Şifre en az 8 karakter olmalı.' }
+                                { required: true, message: t('password_required') },
+                                { min: 8, message: t('password_min') }
                             ]}
                         >
                             <Input.Password
@@ -120,12 +122,12 @@ const Register = () => {
                                 loading={loading}
                                 className="h-10 !bg-volcano-400 !hover:bg-volcano-600 rounded-lg font-bold text-sm flex items-center justify-center gap-2"
                             >
-                                Kayıt Ol <ArrowRightOutlined />
+                                {t('register_button')} <ArrowRightOutlined />
                             </Button>
                         </Form.Item>
 
                         <div className="text-center text-slate-500 text-xs">
-                            Zaten hesabın var mı? <Button type="link" className="p-0 text-xs font-bold !text-volcano-600" onClick={() => navigate('/login')}>Giriş Yap</Button>
+                            {t('already_have_account')} <Button type="link" className="p-0 text-xs font-bold !text-volcano-600" onClick={() => navigate('/login')}>{t('login_link')}</Button>
                         </div>
                     </Form>
                 </div>
@@ -140,8 +142,8 @@ const Register = () => {
                         />
                     </div>
                     <div className="text-center relative z-10">
-                        <Title level={3} className="!text-slate-800 !mb-2">Finansal Geleceğini Yönet</Title>
-                        <Text className="text-slate-500 text-base">Tüm varlıklarını tek bir güvenli noktadan takip et, verimliliğini artır.</Text>
+                        <Title level={3} className="!text-slate-800 !mb-2">{t('hero_title')}</Title>
+                        <Text className="text-slate-500 text-base">{t('hero_subtitle')}</Text>
                     </div>
                 </div>
             </div>
