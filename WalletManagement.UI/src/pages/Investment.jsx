@@ -1,8 +1,8 @@
 import React from 'react';
 import { Typography, Table, Card, Button, Space, Tag, Avatar } from 'antd';
 import { UserOutlined, ReloadOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { useInvestment } from '../../hooks/useInvestment';
-import TradeModal from './components/TradeModal';
+import { useInvestment } from '../hooks/useInvestment';
+import TradeModal from '../components/TradeModal';
 import { Form } from 'antd';
 
 const { Title, Text } = Typography;

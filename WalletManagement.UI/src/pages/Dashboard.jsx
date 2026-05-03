@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Typography, Card, Row, Col, Button, Statistic, Avatar, Space, Tag, Form, Spin, Popconfirm, Layout } from 'antd';
 import { PlusOutlined, WalletOutlined, UserOutlined, DeleteOutlined, ArrowRightOutlined, LoadingOutlined } from '@ant-design/icons';
-import { useDashboard } from '../../hooks/useDashboard';
-import CreateWalletModal from './components/CreateWalletModal';
+import { useDashboard } from '../hooks/useDashboard';
+import CreateWalletModal from '../components/CreateWalletModal';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
