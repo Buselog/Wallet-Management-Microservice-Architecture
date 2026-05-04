@@ -27,7 +27,7 @@ const TradeModal = ({ visible, onCancel, tradeType, selectedRate, wallets, onFin
             onCancel={onCancel}
             footer={null}
             centered
-            width={520}
+            width={650}
             className="trade-modal"
             styles={{ body: { padding: '20px 24px' } }}
         >

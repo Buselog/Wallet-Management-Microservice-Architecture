@@ -48,7 +48,6 @@ const Investment = () => {
         },
         {
             title: t('inv_col_actions'),
-            align: 'right',
             render: (_, record) => (
                 <Space>
                     <Button className="btn-buy-custom" onClick={() => openTrade(record, 'BUY')}>{t('inv_buy_btn')}</Button>

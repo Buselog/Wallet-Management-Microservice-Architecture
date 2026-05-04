@@ -1,7 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import api from '../services/api';
+import { notification } from 'antd';
+import { handleApiError } from '../utils/errorHandler';
+import { useTranslation } from 'react-i18next';
 
 export const useTransactionHistory = () => {
+    const { t } = useTranslation();
     const [wallets, setWallets] = useState([]);
     const [selectedWalletId, setSelectedWalletId] = useState(null);
     const [transactions, setTransactions] = useState([]);
@@ -21,9 +25,14 @@ export const useTransactionHistory = () => {
             setWallets(userWallets);
             if (userWallets.length > 0) setSelectedWalletId(userWallets[0].id);
         } catch (error) {
-            console.error("Veri yüklenemedi");
+            handleApiError(error, null, (msg) => {
+                notification.error({
+                    message: t('trans_error_msg'),
+                    description: msg
+                });
+            });
         }
-    }, []);
+    }, [t]);
 
     const fetchHistory = useCallback(async () => {
         if (!selectedWalletId) return;
@@ -37,7 +46,12 @@ export const useTransactionHistory = () => {
             setTransactions(response.data.items || response.data.Items || []);
             setTotalCount(response.data.totalCount || response.data.TotalCount || 0);
         } catch (error) {
-            console.error("Geçmiş yüklenemedi");
+            handleApiError(error, null, (msg) => {
+                notification.error({
+                    message: t('trans_history_error_msg'),
+                    description: msg
+                });
+            });
         } finally {
             setLoading(false);
         }

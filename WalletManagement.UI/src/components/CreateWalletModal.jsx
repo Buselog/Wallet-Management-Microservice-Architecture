@@ -21,7 +21,7 @@ const CreateWalletModal = ({ visible, onCancel, onFinish, rates, customStyles })
         >
             <Form layout="vertical" onFinish={onFinish} style={{ marginTop: '32px' }}>
                 <Form.Item name="type" label={<Text style={{ fontSize: '11px', fontWeight: '900', color: '#94a3b8' }}>{t('modal_wallet_type_label')}</Text>} rules={[{ required: true }]}>
-                    <Select size="large" placeholder="Hesap türünü belirleyin">
+                    <Select size="large" placeholder={t('modal_wallet_type_placeholder')}>
                         <Select.Option value={1}>{t('wallet_type_1')}</Select.Option>
                         <Select.Option value={2}>{t('wallet_type_2')}</Select.Option>
                         <Select.Option value={3}>{t('wallet_type_3')}</Select.Option>

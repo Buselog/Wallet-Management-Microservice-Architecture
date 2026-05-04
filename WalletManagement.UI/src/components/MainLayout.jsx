@@ -62,7 +62,6 @@ const MainLayout = ({ children }) => {
                         <span className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">{t('brand_subtitle')}</span>
                     </div>
                 </div>
-
                 <Menu
                     mode="inline"
                     selectedKeys={[getSelectedKey()]}
@@ -76,11 +75,23 @@ const MainLayout = ({ children }) => {
                         { key: 'logout', icon: <LogoutOutlined />, label: t('menu_logout'), danger: true, onClick: handleLogout }
                     ]}
                 />
+
+                <div className="px-6 mt-4">
+                    <div
+                        className="flex items-center justify-between p-3 rounded-2xl"
+                        style={{
+                            background: 'linear-gradient(135deg, #fff2f0 0%, #fff7f6 100%)',
+                            border: '1,5px solid #ffccc7'
+                        }}
+                    >
+                        <span style={{ fontSize: '10px', fontWeight: '900', color: '#ff4d4f', letterSpacing: '1px' }}>
+                            {t('lang_label') || 'LANGUAGE'}
+                        </span>
+                        <LanguageSwitcher />
+                    </div>
+                </div>
             </Sider>
             <Layout style={{ marginLeft: 260, backgroundColor: 'transparent' }}>
-                <div style={{ position: 'absolute', top: 20, right: 32, zIndex: 1100 }}>
-                    <LanguageSwitcher />
-                </div>
                 <Content>{children}</Content>
             </Layout>
 

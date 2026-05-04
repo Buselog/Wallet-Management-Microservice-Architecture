@@ -3,8 +3,10 @@ import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { handleApiError } from '../utils/errorHandler';
+import { useTranslation } from 'react-i18next';
 
 export const useAuth = (form) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [generalError, setGeneralError] = useState(null);
     const navigate = useNavigate();
@@ -16,7 +18,7 @@ export const useAuth = (form) => {
             const response = await api.post('/Auth/login', values);
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('customerNo', response.data.customerNo);
-            message.success('Hesabınıza erişim sağlandı. Yönlendiriliyorsunuz..');
+            message.success(t('auth_login_success'));
             navigate('/dashboard');
         } catch (error) {
             handleApiError(error, form, setGeneralError);
@@ -30,7 +32,7 @@ export const useAuth = (form) => {
         setGeneralError(null);
         try {
             await api.post('/Auth/register', values);
-            message.success('Kayıt başarıyla tamamlandı!');
+            message.success(t('auth_register_success'));
             navigate('/login');
         } catch (error) {
             handleApiError(error, form, setGeneralError);

@@ -64,7 +64,7 @@ const Transaction = () => {
                             </div>
                             <div className="flex-1">
                                 <Text className="text-slate-400 block text-[9px] font-black uppercase tracking-tighter">{t('trans_last_trans')}</Text>
-                                <Text className="text-slate-700 font-bold text-xs"><ClockCircleOutlined className="mr-1" /> {lastTransactionDate}</Text>
+                                <Text className="text-slate-700 font-bold text-xs"><ClockCircleOutlined className="mr-1" />{!lastTransactionDate ? t('trans_no_history') : lastTransactionDate}</Text>
                             </div>
                         </div>
                     </Card>
