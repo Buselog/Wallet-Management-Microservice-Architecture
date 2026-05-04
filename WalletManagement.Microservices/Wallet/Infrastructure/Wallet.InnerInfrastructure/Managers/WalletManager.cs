@@ -81,9 +81,23 @@ namespace Wallet.InnerInfrastructure.Managers
             var fromWalletId = dto.FromWalletId ?? 0;
             var amount = dto.Amount ?? 0;
 
+            var sourceWallet = await _walletRepository.GetByIdNoTrackingAsync(fromWalletId);
             await ValidateWalletOwnershipAsync(fromWalletId, customerNo);
+
+            if (!dto.Target.Trim().StartsWith("TR", StringComparison.OrdinalIgnoreCase) &&
+                sourceWallet.Currency != "TRY")
+            {
+                throw new WalletCurrencyMismatchException("ERR_TRANSFER_CURRENCY_MISMATCH");
+            }
+
             var resolvedTarget = await ResolveTargetAddress(dto.Target);
-            await  ProcessTransactionAsync(fromWalletId, amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
+
+            if (resolvedTarget == customerNo || resolvedTarget == sourceWallet.IBAN)
+            {
+                throw new BaseBusinessException("ERR_SAME_ACCOUNT_TRANSFER");
+            }
+
+            await ProcessTransactionAsync(fromWalletId, amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
         }
 
         public async Task SoftDeleteWalletAsync(int walletId, string customerNo)
@@ -203,6 +217,7 @@ namespace Wallet.InnerInfrastructure.Managers
                 -1 => new CustomerNotFoundException(),
                 -2 => new BaseBusinessException("ERR_DB_ROLLBACK"),
                 -3 => new WalletNotFoundException(),
+                -4 => new WalletCurrencyMismatchException("ERR_TRANSFER_CURRENCY_MISMATCH"),
                 _ => new Exception($"ERR_SYSTEM_TRANSACTION_FAILED | SP_Result: {result}")
 
             };
