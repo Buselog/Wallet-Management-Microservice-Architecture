@@ -127,10 +127,9 @@ namespace WM.Gateway.Handlers
                         }
                     }
 
-                    translatedParts.Add(trimmedPart);
                 }
 
-                return string.Join(" | ", translatedParts);
+                return translatedParts.Any() ? string.Join(" | ", translatedParts) : key;
             }
             catch (Exception)
             {
