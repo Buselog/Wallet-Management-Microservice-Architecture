@@ -3,6 +3,8 @@ import { Typography, Card, Row, Col, Button, Statistic, Avatar, Space, Tag, Form
 import { PlusOutlined, WalletOutlined, UserOutlined, DeleteOutlined, ArrowRightOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useDashboard } from '../hooks/useDashboard';
 import CreateWalletModal from '../components/CreateWalletModal';
+import { useTranslation } from 'react-i18next';
+import { getCurrencySymbol, formatNumber } from '../utils/formatters';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -30,7 +32,7 @@ const customStyles = {
 };
 
 const Dashboard = () => {
-
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const { data, loading, rates, createWallet, deleteWallet } = useDashboard(form);
@@ -57,9 +59,9 @@ const Dashboard = () => {
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <Title level={4} style={{ margin: 0, color: '#1e293b', fontWeight: '800' }}>
-                        Hoş Geldiniz, {data?.fullName}
+                        {t('dash_welcome', { name: data?.fullName })}
                     </Title>
-                    <Text style={{ color: '#94a3b8', fontSize: '12px' }}>Varlıklarınızın güncel durumu aşağıdadır.</Text>
+                    <Text style={{ color: '#94a3b8', fontSize: '12px' }}>{t('dash_subtitle')}</Text>
                 </div>
                 <Space size="large">
                     <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#fff2f0', color: '#ff4d4f', border: '1px solid #ffccc7' }} />
@@ -69,14 +71,14 @@ const Dashboard = () => {
                         icon={<PlusOutlined />}
                         onClick={() => setIsModalVisible(true)}
                     >
-                        Yeni Cüzdan
+                        {t('dash_new_wallet')}
                     </Button>
                 </Space>
             </Header>
 
             <Content className="p-10 max-w-[1600px]">
                 <div className="mb-12">
-                    <Text className="text-slate-400 font-bold text-[10px] tracking-[0.2em] uppercase">Varlık Dağılımı</Text>
+                    <Text className="text-slate-400 font-bold text-[10px] tracking-[0.2em] uppercase">{t('dash_asset_dist')}</Text>
                     <Row gutter={[24, 24]} className="mt-4" justify="start">
                         {data?.currencySummaries?.map(summary => (
                             <Col
@@ -95,10 +97,10 @@ const Dashboard = () => {
                                 >
                                     <div className="absolute top-0 left-0 w-1.5 h-full bg-volcano-500" />
                                     <Statistic
-                                        title={<span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">TOPLAM {summary.currency}</span>}
+                                        title={<span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('dash_total_currency', { currency: summary.currency })}</span>}
                                         value={summary.totalBalance}
                                         precision={2}
-                                        prefix={<span className="text-volcano-500 mr-1">{summary.currency === 'TRY' ? '₺' : (summary.currency === 'USD' ? '$' : '€')}</span>}
+                                        prefix={<span className="text-volcano-500 mr-1">{getCurrencySymbol(summary.currency)}</span>}
                                         valueStyle={{ fontWeight: 900, color: '#1e293b', fontSize: '28px' }}
                                     />
                                 </Card>
@@ -108,7 +110,7 @@ const Dashboard = () => {
                 </div>
 
                 <Text className="text-slate-400 font-bold text-[10px] tracking-[0.2em] uppercase mb-6 block">
-                    Cüzdanlarım
+                    {t('dash_my_wallets')}
                 </Text>
                 <Row gutter={[24, 24]}>
                     {data?.wallets?.map(wallet => (
@@ -117,7 +119,7 @@ const Dashboard = () => {
                                 className="wallet-card-premium transition-all duration-300"
                                 styles={{ body: { padding: '28px' } }}
                                 actions={[
-                                    <Popconfirm title="Cüzdanı silmek istediğinize emin misiniz?" onConfirm={() => deleteWallet(wallet.id)} okText="Evet" cancelText="Hayır">
+                                    <Popconfirm title={t('dash_delete_confirm_title')} onConfirm={() => deleteWallet(wallet.id)} okText={t('dash_delete_yes')} cancelText={t('dash_delete_no')}>
                                         <DeleteOutlined key="delete" style={{ color: '#ff4d4f', fontSize: '18px' }} />
                                     </Popconfirm>,
                                     <ArrowRightOutlined key="go" style={{ color: '#f0484b', fontSize: '18px' }} />
@@ -161,14 +163,14 @@ const Dashboard = () => {
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                     <Text style={{ color: '#94a3b8', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                        Kullanılabilir Bakiye
+                                        {t('dash_available_balance')}
                                     </Text>
                                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                                         <span style={{ fontSize: '20px', fontWeight: '300', color: '#ff4d4f' }}>
-                                            {wallet.currency === 'TRY' ? '₺' : (wallet.currency === 'USD' ? '$' : '€')}
+                                            {getCurrencySymbol(wallet.currency)}
                                         </span>
                                         <span style={{ fontSize: '32px', fontWeight: '900', color: '#0f172a', letterSpacing: '-1px' }}>
-                                            {wallet.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                            {formatNumber(wallet.balance)}
                                         </span>
                                     </div>
                                 </div>
