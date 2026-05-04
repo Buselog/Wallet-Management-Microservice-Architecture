@@ -1,14 +1,15 @@
 import React from 'react';
-import { Typography, Table, Card, Button, Space, Tag, Avatar } from 'antd';
+import { Typography, Table, Card, Button, Space, Tag, Avatar, Form } from 'antd';
 import { UserOutlined, ReloadOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { useInvestment } from '../hooks/useInvestment';
 import TradeModal from '../components/TradeModal';
-import { Form } from 'antd';
-import { getCurrencyName } from '../utils/formatters';
+import { getCurrencyName, formatNumber } from '../utils/formatters';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
 const Investment = () => {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const {
         rates, wallets, loading, modalVisible, setModalVisible,
@@ -18,12 +19,12 @@ const Investment = () => {
 
     const columns = [
         {
-            title: 'DÖVİZ KODU',
+            title: t('inv_col_code'),
             dataIndex: 'currencyCode',
             render: (code) => <Tag color="volcano" className="font-black px-3 py-1 rounded-lg border-none">{code}</Tag>
         },
         {
-            title: 'BİRİM ADI',
+            title: t('inv_col_name'),
             dataIndex: 'currencyName',
             render: (_, record) => (
                 <Text className="font-bold text-slate-600">
@@ -32,22 +33,26 @@ const Investment = () => {
             )
         },
         {
-            title: 'ALIŞ (BUY)',
+            title: t('inv_col_buy'),
             dataIndex: 'buyingRate',
-            render: (val) => <Text className="rate-font text-green-600">₺{val.toLocaleString('tr-TR', { minimumFractionDigits: 4 })}</Text>
+            render: (val) => <Text className="rate-font text-green-600">
+                ₺{val.toLocaleString(t('lang_code') === 'en-US' ? 'en-US' : 'tr-TR', { minimumFractionDigits: 4 })}
+            </Text>
         },
         {
-            title: 'SATIŞ (SELL)',
+            title: t('inv_col_sell'),
             dataIndex: 'sellingRate',
-            render: (val) => <Text className="rate-font text-red-500">₺{val.toLocaleString('tr-TR', { minimumFractionDigits: 4 })}</Text>
+            render: (val) => <Text className="rate-font text-red-500">
+                ₺{val.toLocaleString(t('lang_code') === 'en-US' ? 'en-US' : 'tr-TR', { minimumFractionDigits: 4 })}
+            </Text>
         },
         {
-            title: 'İŞLEMLER',
+            title: t('inv_col_actions'),
             align: 'right',
             render: (_, record) => (
                 <Space>
-                    <Button className="btn-buy-custom" onClick={() => openTrade(record, 'BUY')}>AL</Button>
-                    <Button className="btn-sell-custom" onClick={() => openTrade(record, 'SELL')}>SAT</Button>
+                    <Button className="btn-buy-custom" onClick={() => openTrade(record, 'BUY')}>{t('inv_buy_btn')}</Button>
+                    <Button className="btn-sell-custom" onClick={() => openTrade(record, 'SELL')}>{t('inv_sell_btn')}</Button>
                 </Space>
             )
         }
@@ -57,12 +62,12 @@ const Investment = () => {
         <>
             <div className="my-6 mx-8 flex justify-between items-end">
                 <div>
-                    <Title level={3} style={{ margin: 0, fontWeight: 900, color: '#1e293b' }}>Yatırım Merkezi</Title>
-                    <Text type="secondary" className="text-xs">Merkez Bankası verileriyle anlık ve güvenli döviz ticareti.</Text>
+                    <Title level={3} style={{ margin: 0, fontWeight: 900, color: '#1e293b' }}>{t('inv_title')}</Title>
+                    <Text type="secondary" className="text-xs">{t('inv_subtitle')}</Text>
                 </div>
                 <div className="text-right">
-                    <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading} className="btn-refresh-custom">Verileri Yenile</Button>
-                    <div className="mt-1"><Text className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Son Güncelleme: {lastUpdate}</Text></div>
+                    <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading} className="btn-refresh-custom">{t('inv_refresh_btn')}</Button>
+                    <div className="mt-1"><Text className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{t('inv_last_update', { date: lastUpdate })}</Text></div>
                 </div>
             </div>
 
@@ -82,10 +87,10 @@ const Investment = () => {
                 <div className="mt-4 flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                     <Space className="text-slate-500 font-bold text-xs">
                         <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: '#fff2f0', color: '#ff4d4f' }} />
-                        {userData?.fullName} | Finansal Yönetici
+                        {userData?.fullName} | {t('inv_manager_title')}
                     </Space>
                     <Space className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                        <SafetyCertificateOutlined className="text-green-500" /> 256-bit SSL Güvenlik Aktif
+                        <SafetyCertificateOutlined className="text-green-500" /> {t('inv_security_text')}
                     </Space>
                 </div>
             </div>
