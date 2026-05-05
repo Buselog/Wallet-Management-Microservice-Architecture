@@ -106,7 +106,7 @@ namespace Wallet.InnerInfrastructure.Managers
 
             var wallet = await _walletRepository.GetByIdAsync(walletId);
 
-            if(wallet.Balance != 0 || wallet.Balance != null)
+            if(wallet.Balance > 0)
             {
                 throw new WalletBalanceIsNotEmptyExcepiton();
             }
