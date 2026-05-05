@@ -12,23 +12,22 @@ export const getCurrencyName = (currencyCode) => {
 
 export const getCurrencySymbol = (currencyCode) => {
     try {
-        const currentLang = i18n.language === 'tr' ? 'tr-TR' : 'en-US';
-        return (0).toLocaleString(currentLang, {
+        const checkLang = currencyCode === 'TRY' ? 'tr-TR' : (i18n.language === 'tr' ? 'tr-TR' : 'en-US');
+        return (0).toLocaleString(checkLang, {
             style: 'currency',
             currency: currencyCode,
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).replace(/\d/g, '').trim();
     } catch (e) {
-        return currencyCode; 
+        return currencyCode;
     }
 };
 
-export const formatCurrency = (amount, currencyCode) => {
+export const formatNumber = (amount) => {
     const currentLang = i18n.language === 'tr' ? 'tr-TR' : 'en-US';
     return new Intl.NumberFormat(currentLang, {
-        style: 'currency',
-        currency: currencyCode,
-        minimumFractionDigits: 2
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
     }).format(amount);
 };

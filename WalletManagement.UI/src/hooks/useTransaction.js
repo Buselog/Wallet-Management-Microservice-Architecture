@@ -4,15 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import dayjs from 'dayjs';
 import { handleApiError } from '../utils/errorHandler';
+import { useTranslation } from 'react-i18next';
 
 export const useTransaction = (form) => {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [wallets, setWallets] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedWallet, setSelectedWallet] = useState(null);
     const [actionType, setActionType] = useState('deposit');
     const [userData, setUserData] = useState(null);
-    const [lastTransactionDate, setLastTransactionDate] = useState('İşlem yok');
+    const [lastTransactionDate, setLastTransactionDate] = useState(null);
 
     const fetchLastTransaction = async (walletId) => {
         try {
@@ -20,9 +22,18 @@ export const useTransaction = (form) => {
                 params: { pageNumber: 1, pageSize: 1 }
             });
             const lastItem = res.data.items?.[0] || res.data.Items?.[0];
-            setLastTransactionDate(lastItem ? dayjs(lastItem.transactionDate || lastItem.createdDate).format('DD.MM.YYYY HH:mm') : 'İşlem yok');
+
+            if (lastItem) {
+                const dateFormat = i18n.language === 'tr' ? 'DD.MM.YYYY HH:mm' : 'MM/DD/YYYY HH:mm';
+
+                setLastTransactionDate(
+                    dayjs(lastItem.transactionDate || lastItem.createdDate).format(dateFormat)
+                );
+            } else {
+                setLastTransactionDate(t('trans_no_history'));
+            }
         } catch {
-            setLastTransactionDate('Hata');
+            setLastTransactionDate(t('trans_error'));
         }
     };
 
@@ -64,11 +75,11 @@ export const useTransaction = (form) => {
 
             await api.post(endpoint, payload);
             localStorage.removeItem('selected_wallet_id');
-            notification.success({ message: 'İşlem Başarılı', description: 'İşleminiz güvenle tamamlandı.' });
+            notification.success({ message: t('trans_success_msg'), description: t('trans_success_desc') });
             setTimeout(() => navigate('/dashboard'), 1500);
         } catch (error) {
             handleApiError(error, form, (msg) => {
-                notification.error({ message: 'İşlem Hatası', description: msg });
+                notification.error({ message: t('trans_error_msg'), description: msg });
             });
         } finally {
             setLoading(false);

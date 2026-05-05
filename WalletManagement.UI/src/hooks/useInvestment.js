@@ -2,8 +2,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { notification } from 'antd';
 import api from '../services/api';
 import dayjs from 'dayjs';
+import { handleApiError } from '../utils/errorHandler';
+import { useTranslation } from 'react-i18next';
 
 export const useInvestment = (form) => {
+    const { t } = useTranslation();
     const [rates, setRates] = useState([]);
     const [wallets, setWallets] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -28,15 +31,17 @@ export const useInvestment = (form) => {
             const apiDate = ratesRes.data?.[0]?.lastUpdatedDate;
             setLastUpdate(apiDate ? dayjs(apiDate).format('HH:mm:ss') : dayjs().format('HH:mm:ss'));
         } catch (error) {
-            notification.error({
-                message: 'Veri Hatası',
-                description: 'Piyasa verileri şu an ulaşılamıyor.',
-                placement: 'topRight'
+            handleApiError(error, null, (msg) => {
+                notification.error({
+                    message: t('inv_error_msg'),
+                    description: msg,
+                    placement: 'topRight'
+                });
             });
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -59,16 +64,17 @@ export const useInvestment = (form) => {
 
             await api.post(endpoint, payload);
             notification.success({
-                message: 'İşlem Başarılı',
-                description: `${values.amount} ${selectedRate.currencyCode} işlemi başarıyla tamamlandı.`
+                message: t('inv_success_msg'),
+                description: t('inv_success_desc', { amount: values.amount, code: selectedRate.currencyCode })
             });
             setModalVisible(false);
             fetchData();
         } catch (error) {
-            const errorData = error.response?.data;
-            notification.error({
-                message: 'İşlem Başarısız',
-                description: errorData?.Message || errorData?.message || 'İşlem gerçekleştirilemedi.'
+            handleApiError(error, null, (msg) => {
+                notification.error({
+                    message: t('inv_error_msg'),
+                    description: msg
+                });
             });
         } finally {
             setLoading(false);

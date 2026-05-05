@@ -27,6 +27,6 @@ export const handleApiError = (error, form, setGeneralError) => {
             setGeneralError(errorMsg);
         }
     } else {
-        setGeneralError("Beklenmedik bir sorun oluştu.");
+        setGeneralError(t('unexpected_error_msg'));
     }
 };
