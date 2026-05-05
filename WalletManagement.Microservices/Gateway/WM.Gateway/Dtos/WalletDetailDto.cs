@@ -6,5 +6,6 @@
         public string Currency { get; set; }
         public decimal Balance { get; set; }
         public int Type { get; set; }
+        public bool IsActive { get; set; }
     }
 }

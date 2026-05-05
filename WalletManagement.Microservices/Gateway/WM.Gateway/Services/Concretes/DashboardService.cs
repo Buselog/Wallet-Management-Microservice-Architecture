@@ -39,7 +39,9 @@ namespace WM.Gateway.Services.Concretes
             List<WalletDetailDto> wallets = new();
             if (walletTask.Result.IsSuccessStatusCode)
             {
-                wallets = await walletTask.Result.Content.ReadFromJsonAsync<List<WalletDetailDto>>() ?? new();
+                var allWallets = await walletTask.Result.Content.ReadFromJsonAsync<List<WalletDetailDto>>() ?? new();
+
+                wallets = allWallets.Where(x => x.IsActive).ToList();
             }
 
             var currencySummaries = wallets
