@@ -11,6 +11,8 @@ namespace Wallet.Application.Dtos
         public string Currency { get; set; } = "TRY";
         public WalletType Type { get; set; }
         public DateTime CreatedDate { get; set; }
+        public bool IsActive { get; set; }
         public List<WalletTransactionDto> Transactions { get; set; } = new();
     }
 }
+
