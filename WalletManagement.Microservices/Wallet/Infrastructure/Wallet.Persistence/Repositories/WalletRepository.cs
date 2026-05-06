@@ -61,7 +61,7 @@ namespace Wallet.Persistence.Repositories
             var Amount = new SqlParameter("@Amount", amount);
             var Type = new SqlParameter("@Type", type);
             var Target = new SqlParameter("@Target", target ?? (object)DBNull.Value);
-            var Description = new SqlParameter("@Description", description);
+            var Description = new SqlParameter("@Description", description ?? (object)DBNull.Value);
             var ReferenceId = new SqlParameter("@ReferenceId", referenceId);
             var SenderInfo = new SqlParameter("@SenderInfo", senderInfo ?? (object)DBNull.Value);
 
