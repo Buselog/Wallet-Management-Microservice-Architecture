@@ -84,17 +84,34 @@ namespace Wallet.InnerInfrastructure.Managers
             var sourceWallet = await _walletRepository.GetByIdNoTrackingAsync(fromWalletId);
             await ValidateWalletOwnershipAsync(fromWalletId, customerNo);
 
-            if (!dto.Target.Trim().StartsWith("TR", StringComparison.OrdinalIgnoreCase) &&
-                sourceWallet.Currency != "TRY")
-            {
-                throw new WalletCurrencyMismatchException("ERR_TRANSFER_CURRENCY_MISMATCH");
-            }
-
             var resolvedTarget = await ResolveTargetAddress(dto.Target);
 
-            if (resolvedTarget == customerNo || resolvedTarget == sourceWallet.IBAN)
+            if (resolvedTarget == customerNo)
             {
-                throw new BaseBusinessException("ERR_SAME_ACCOUNT_TRANSFER");
+                throw new BaseBusinessException("ERR_CANNOT_TRANSFER_TO_SELF_BY_PHONE");
+            }
+
+            if (resolvedTarget == sourceWallet.IBAN)
+            {
+                throw new BaseBusinessException("ERR_SAME_IBAN_TRANSFER");
+            }
+
+            if (!dto.Target.Trim().StartsWith("TR", StringComparison.OrdinalIgnoreCase))
+            {
+                bool hasMatchingWallet = await _walletRepository.AnyActiveWalletWithCurrencyAsync(resolvedTarget, sourceWallet.Currency);
+
+                if (!hasMatchingWallet)
+                {
+                    throw new WalletCurrencyMismatchException("ERR_RECIPIENT_HAS_NO_MATCHING_CURRENCY_WALLET", sourceWallet.Currency);
+                }
+            }
+            else if (resolvedTarget.StartsWith("TR"))
+            {
+                var targetWallet = await _walletRepository.GetByIbanAsync(resolvedTarget);
+                if (targetWallet != null && targetWallet.Currency != sourceWallet.Currency)
+                {
+                    throw new WalletCurrencyMismatchException("ERR_IBAN_CURRENCY_MISMATCH");
+                }
             }
 
             await ProcessTransactionAsync(fromWalletId, amount, "Transfer", resolvedTarget, dto.Description, dto.ReferenceId);
