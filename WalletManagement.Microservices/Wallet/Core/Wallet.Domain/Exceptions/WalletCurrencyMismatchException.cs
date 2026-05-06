@@ -3,7 +3,7 @@
     public class WalletCurrencyMismatchException : BaseBusinessException
     {
 
-        public WalletCurrencyMismatchException() : base("ERR_WALLET_CURRENCY_MISMATCH")
+        public WalletCurrencyMismatchException(string message) : base(message)
         {
 
         }

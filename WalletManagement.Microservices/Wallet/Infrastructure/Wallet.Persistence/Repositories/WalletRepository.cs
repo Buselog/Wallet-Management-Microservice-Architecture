@@ -39,6 +39,11 @@ namespace Wallet.Persistence.Repositories
             return await allWallets.ToListAsync();
         }
 
+        public async Task<bool> AnyActiveWalletWithCurrencyAsync(string customerNo, string currency)
+        {
+            return await _context.Wallets.AnyAsync(w => w.CustomerNo == customerNo && w.Currency == currency && w.IsActive);
+        }
+
         public async Task<bool> SoftDeleteWalletWithSPAsync(int walletId, string userCode)
         {
             var WalletId = new SqlParameter("@WalletId", walletId);
