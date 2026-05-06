@@ -36,6 +36,13 @@ namespace Wallet.WebAPI.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateWallet([FromBody] CreateWalletRequestDto request)
         {
+            var serviceToken = Request.Headers["X-Service-Token"].ToString();
+
+            if (serviceToken != "WalletAppManagement_Internal_Secret_Key_2026")
+            {
+                if (!User.Identity.IsAuthenticated) return Unauthorized();
+            }
+
             var result = await _walletManager.CreateNewWalletAsync(currentCustomerNo, request.Currency, request.Type);
             return Ok(result);
         }
