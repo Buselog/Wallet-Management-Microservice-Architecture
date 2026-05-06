@@ -20,17 +20,22 @@ namespace Customer.InnerInfrastructure.Services
             {
                 CustomerNo = customerNo,
                 Currency = "TRY",
-                Type = 1 
+                Type = 1
             };
 
-            var response = await _httpClient.PostAsJsonAsync("api/Wallet/create", request);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/Wallet/create");
+            httpRequest.Content = JsonContent.Create(request);
+
+            httpRequest.Headers.Add("X-Service-Token", "WalletAppManagement_Internal_Secret_Key_2026");
+
+            var response = await _httpClient.SendAsync(httpRequest);
 
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
 
-                Log.Warning("Cüzdan servisi tarafında hata oluştu: {Reason} - Detay: {Detail}",
-                             response.ReasonPhrase, errorContent);
+                Log.Warning("Cüzdan servisi tarafında hata oluştu: {Status} - Detay: {Detail}",
+                             response.StatusCode, errorContent);
             }
         }
     }
