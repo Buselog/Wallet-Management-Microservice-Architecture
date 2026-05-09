@@ -112,11 +112,6 @@ Finansal işlemlerin güvenliği için iş mantığı sadece kod seviyesinde bı
 <img src="https://github.com/user-attachments/assets/5b5324b8-4574-490f-9a25-c612bfeaf727" width:600/>
 
 
-
-
-<img src="https://github.com/user-attachments/assets/4df05416-952e-424c-afad-5720ad7b3505" width:600/>
-
-
 #### 👛 Yeni Cüzdan Oluşturma İşlemi:
 
 
