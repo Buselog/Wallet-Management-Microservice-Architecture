@@ -82,7 +82,7 @@ Finansal işlemlerin güvenliği için iş mantığı sadece kod seviyesinde bı
 
 - **Wallet Service**: Cüzdan oluşturma, bakiye yönetimi ve işlem geçmişi (Dapper + SP).
 
-- **Investment Service**: Döviz alım-satım ve portföy yönetimi (CTE & Karmaşık SQL).
+- **Investment Service**: Güncel döviz kurlarının dış API olan TCMB'den çekilmesi ve gösterimi, alım-satım ve portföy yönetimi.
 
 - **MultiLanguage Service**: Dinamik dil desteği ve Redis üzerinden hızlı çeviri sunumu.
 
@@ -94,13 +94,65 @@ Finansal işlemlerin güvenliği için iş mantığı sadece kod seviyesinde bı
 
 ## 🖼️ Proje İle İlgili Ekran Görüntüleri
 
+
 ### 🏠 Giriş: 
 
-<img src="https://github.com/user-attachments/assets/dc7deaaf-c47b-424a-9ca5-2a8385b47166" width:600>
+
+<img src="https://github.com/user-attachments/assets/a120ab55-29de-4498-96cd-22ca13c0928b" width:600 />
+
 
 ### 🪪 Kayıt: 
 
-<img src="https://github.com/user-attachments/assets/dc7deaaf-c47b-424a-9ca5-2a8385b47166" width:600>
+
+<img src="https://github.com/user-attachments/assets/50288c5f-049d-41e1-9a97-20d240c5bd6a" width:600/>
+
+
+## 📋 Ana Sayfa:
+
+
+<img src="https://github.com/user-attachments/assets/5b5324b8-4574-490f-9a25-c612bfeaf727" width:600/>
+
+
+<img src="https://github.com/user-attachments/assets/4df05416-952e-424c-afad-5720ad7b3505" width:600/>
+
+
+#### 👛 Yeni Cüzdan Oluşturma İşlemi:
+
+
+<img src="https://github.com/user-attachments/assets/4c160657-bc2b-46e9-9307-4b5a416b0704" width:600/>
+
+
+<img src="https://github.com/user-attachments/assets/c034ba17-e03a-480e-bd37-1340bd681eeb" width:600/>
+
+
+## ➡️ İşlem Sayfası
+
+
+<img src="https://github.com/user-attachments/assets/a7474d7e-695b-4d70-bdc9-5a858a78a14c" width:600/>
+
+
+<img src="https://github.com/user-attachments/assets/29266ef3-7250-49f6-972c-8d288e91d717" width:600/>
+
+
+## 📈 İşlem Geçmişi Sayfası (Tarih Filtreleme & Sayfalama)
+
+
+<img src="https://github.com/user-attachments/assets/6fabd2d5-6c3b-4aec-ae0a-87ff4607d812" width:600/>
+
+
+## 📈 Yatırım İşlemleri Sayfası (Güncel Döviz Kurlarının Çekilmesi ve Alım/Satım İşlemleri)
+
+
+<img src="https://github.com/user-attachments/assets/97d81ed6-7acd-4d16-9f4e-615ce4857f86" width:600/>
+
+
+<img src="https://github.com/user-attachments/assets/7b0c714b-4958-4372-9e0b-57d484d5d297" width:600/>
+
+
+<img src="https://github.com/user-attachments/assets/3e2482c5-d840-4662-bef4-d8c8a6ad0cdf" width:600/>
+
+
+
 
 
 
