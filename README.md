@@ -30,7 +30,6 @@ Projede kullanılan her bir araç, belirli bir mühendislik problemini çözmek 
 | `Stored Procedures (SP)` | `Veri Tutarlılığı & Performans: Para transferi ve bakiye güncellemeleri gibi kritik işlemlerin DB seviyesinde, atomik ve hızlı yönetilmesi.` |
 | `Entity Framework Core` | `Veritabanı işlemlerinin ORM (Object-Relational Mapping) ile yönetilmesi.` |
 | `MS SQL Server` | `Finansal verilerin ilişkisel ve ACID kurallarına uygun şekilde saklanması.` |
-| `Stored Procedures (SP)` | `Karmaşık bakiye güncellemeleri ve transfer işlemlerinin atomik olarak DB seviyesinde yapılması.` |
 | `Polly` | `Resilience (Dayanıklılık) stratejileri; Circuit Breaker ve Timeout yönetimi.` |
 | `JWT Bearer Auth` | `Kullanıcı kimlik doğrulama ve yetkilendirme süreçlerinin yönetimi.` |
 | `Serilog` | `Sistemdeki tüm olayların (Error, Info, Warning) merkezi olarak loglanması.` |
@@ -80,7 +79,7 @@ Finansal işlemlerin güvenliği için iş mantığı sadece kod seviyesinde bı
 
 - **Identity/Customer Service**: Kullanıcı kayıt, giriş ve profil yönetimi.
 
-- **Wallet Service**: Cüzdan oluşturma, bakiye yönetimi ve işlem geçmişi (Dapper + SP).
+- **Wallet Service**: Cüzdan oluşturma, bakiye yönetimi ve işlem geçmişi.
 
 - **Investment Service**: Güncel döviz kurlarının dış API olan TCMB'den çekilmesi ve gösterimi, alım-satım ve portföy yönetimi.
 
@@ -111,6 +110,8 @@ Finansal işlemlerin güvenliği için iş mantığı sadece kod seviyesinde bı
 
 
 <img src="https://github.com/user-attachments/assets/5b5324b8-4574-490f-9a25-c612bfeaf727" width:600/>
+
+
 
 
 <img src="https://github.com/user-attachments/assets/4df05416-952e-424c-afad-5720ad7b3505" width:600/>
