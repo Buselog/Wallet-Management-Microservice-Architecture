@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout, Menu, Typography } from 'antd';
-import { AppstoreOutlined, SwapOutlined, HistoryOutlined, LineChartOutlined, LogoutOutlined, WalletOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, SwapOutlined, HistoryOutlined, LineChartOutlined, LogoutOutlined, WalletOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -29,6 +29,7 @@ const MainLayout = ({ children }) => {
         if (path === '/transaction') return '2';
         if (path === '/history') return '3';
         if (path === '/investment') return '4';
+        if (path === '/help') return '5';
         return '1';
     };
 
@@ -71,6 +72,7 @@ const MainLayout = ({ children }) => {
                         { key: '2', icon: <SwapOutlined />, label: t('menu_transaction'), onClick: () => navigate('/transaction') },
                         { key: '3', icon: <HistoryOutlined />, label: t('menu_history'), onClick: () => navigate('/history') },
                         { key: '4', icon: <LineChartOutlined />, label: t('menu_rates'), onClick: () => navigate('/investment') },
+                        { key: '5', icon: <QuestionCircleOutlined />, label: t('menu_help'), onClick: () => navigate('/help') },
                         { type: 'divider' },
                         { key: 'logout', icon: <LogoutOutlined />, label: t('menu_logout'), danger: true, onClick: handleLogout }
                     ]}

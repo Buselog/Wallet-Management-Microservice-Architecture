@@ -152,8 +152,28 @@ i18n
                     "dash_create_error_title": "Error",
                     "dash_create_error_default": "Wallet could not be created.",
                     "dash_delete_success": "Wallet closed successfully.",
-                    "dash_delete_error": "Delete operation failed."
+                    "dash_delete_error": "Delete operation failed.",
+                    "menu_help": "User Guide",
+                    "help_title": "WalletApp Platform User Guide",
+                    "help_subtitle": "Welcome to WalletApp! This comprehensive manual details all features of our secure, multi-currency financial management ecosystem. Follow the structural flow below to fully utilize your digital wallet assistant.",
 
+                    "help_auth_title": "1. Authentication Services (Sign Up & Login)",
+                    "help_auth_desc": "Secure access control begins with the Registration phase, where your personal metrics and contact details are validated. Once verified, access the platform via the Login interface using your centralized credentials, initiating a protected session backed by encrypted local storage.",
+
+                    "help_dash_title": "2. Centralized Dashboard & Portfolio Overview",
+                    "help_dash_desc": "Your home screen acts as a complete financial command center. It aggregates total asset valuations adapted automatically to currency exchange rates. Here, you can actively inspect your active wallet list, initialize new wallets instantly, and execute seamless wallet terminations or account closing actions directly from the overview panel.",
+
+                    "help_trans_title": "3. Intelligent Transaction Center (Deposit, Withdraw & Transfer)",
+                    "help_trans_desc": "When managing funds, selecting a specific source account dynamically reveals its current available balance and timestamps your last transaction date. Within this unified portal, you can execute immediate capital deposits, make withdrawals, perform lightning-fast transfers between your internal portfolios, or send external liquidity directly to a recipient's IBAN address.",
+
+                    "help_history_title": "4. Granular Transaction History Auditing",
+                    "help_history_desc": "Maintain complete visibility over your past financial footprints. The historical ledger catalogs every single account movement second by second. Filter entries by custom date windows or isolate specific portfolios to cross-reference transactions, tracking numeric values alongside system reference codes.",
+
+                    "help_rates_title": "5. Live Exchange Rates & Dynamic Currency Trade",
+                    "help_rates_desc": "The Exchange Rates pavilion streams live data tracking 5 core global currencies simultaneously. Beyond passive observation, this interface empowers you to place dynamic BUY and SELL orders natively. Swapping value between target and payment wallets computes automated estimations instantly.",
+
+                    "help_lang_title": "6. Seamless Multi-Language Architecture",
+                    "help_lang_title_desc": "Engineered for global standards, the system incorporates real-time localization switchers. Instantly convert the entire visual interface, custom modal validation alerts, and historical data descriptions between Turkish and English with zero latency."
                 }
             },
             tr: {
@@ -302,6 +322,27 @@ i18n
                     "dash_create_error_default": "Cüzdan oluşturulamadı.",
                     "dash_delete_success": "Cüzdan başarıyla kapatıldı.",
                     "dash_delete_error": "Silme işlemi başarısız.",
+                    "menu_help": "Kullanım",
+                    "help_title": "WalletApp Platform Kullanım Kılavuzu",
+                    "help_subtitle": "WalletApp Finansal Yönetim Sistemine hoş geldiniz! Bu kapsamlı kılavuz, çoklu para birimi destekli güvenli cüzdan ekosistemimizin sunduğu tüm yetenekleri ve akışları içermektedir. Dijital asistanınızı verimli kullanmak için aşağıdaki adımları takip edebilirsiniz.",
+
+                    "help_auth_title": "1. Kimlik Doğrulama Servisleri (Kayıt Ol & Giriş Yap)",
+                    "help_auth_desc": "Güvenli platform erişimi, kişisel bilgilerinizi ve iletişim kanallarınızı doğrulayan Kayıt Ol arayüzü ile başlar. Hesap aktivasyonunun ardından, şifrelenmiş oturum yapılandırması eşliğinde Giriş Yap panelini kullanarak sisteme merkezi ve korumalı bir erişim sağlayabilirsiniz.",
+
+                    "help_dash_title": "2. Merkezi Ana Sayfa ve Portföy Yönetimi (Dashboard)",
+                    "help_dash_desc": "Ana sayfa ekranınız, tüm finansal varlıklarınızın komuta merkezidir. Anlık döviz kurlarını baz alarak toplam varlık değerinizi otomatik hesaplar ve tek bir birimde gösterir. Bu panel üzerinden mevcut cüzdanlarınızı listeleyebilir, anında yeni bir cüzdan açabilir veya dilediğiniz cüzdanı doğrudan kapatıp silme işlemini gerçekleştirebilirsiniz.",
+
+                    "help_trans_title": "3. Akıllı İşlem Merkezi (Para Yatır, Çek ve Transfer Et)",
+                    "help_trans_desc": "İşlem Yap sayfasına girdiğinizde, ilgili kaynak cüzdanı seçtiğiniz an o cüzdanın güncel bakiyesi ve son işlem tarihi dinamik olarak ekrana yansır. Bu pencere üzerinden hesabınıza anlık nakit yatırabilir, güvenle para çekebilir, kendi cüzdanlarınız arasında hızlıca virman yapabilir veya dış bir alıcının IBAN/Tel adresine varlık transferi gerçekleştirebilirsiniz.",
+
+                    "help_history_title": "4. Detaylı İşlem Geçmişi Denetimi",
+                    "help_history_desc": "Geçmişe dönük tüm finansal ayak izlerinizi saniye bazlı olarak bu ekranda izleyebilirsiniz. Gerçekleşen cüzdan hareketlerini belirli başlangıç ve bitiş tarihlerine göre filtreleyebilir, cüzdan bazlı ayrıştırma yapabilir ve işlem tutarları ile sistem referans numaralarını çapraz referanslarla denetleyebilirsiniz.",
+
+                    "help_rates_title": "5. Canlı Döviz Kurları ve Dinamik Al/Sat İşlemleri",
+                    "help_rates_desc": "Döviz Kurları sayfası, piyasadaki en popüler 5 döviz kurunun canlı verilerini anlık olarak sisteme akıtır. Sadece izlemekle kalmayıp, bu kurlar üzerinden dinamik olarak AL ve SAT emirleri verebilirsiniz. Ödeme ve yatırım cüzdanlarınızı seçerek tahmini toplam tutarları anında hesaplatıp takas işlemlerinizi tamamlayabilirsiniz.",
+
+                    "help_lang_title": "6. Kesintisiz Çoklu Dil Desteği Mimarisi",
+                    "help_lang_title_desc": "Küresel standartlara uygun olarak tasarlanan sistem, gerçek zamanlı yerelleştirme altyapısına sahiptir. Tek bir dokunuşla tüm görsel arayüzü, modal uyarı mesajlarını, veri tablolarını ve sistem menülerini Türkçe ve İngilizce dilleri arasında sıfır gecikmeyle dönüştürebilirsiniz."
                 }
             }
         },
