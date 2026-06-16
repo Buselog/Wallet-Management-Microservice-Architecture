@@ -132,7 +132,7 @@ const Transaction = () => {
                             {actionType !== 'transfer' && (
                                 <div className="mt-auto pt-4 bg-white border-t border-slate-50">
                                     <Button type="primary" htmlType="submit" block loading={loading} className="h-14 rounded-2xl font-black text-sm tracking-widest shadow-xl" style={{ background: '#ff4d4f', border: 'none' }}>
-                                        İ{t('trans_confirm_action')}
+                                        {t('trans_confirm_action')}
                                     </Button>
                                     <div className="mt-4 text-center">
                                         <Space className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">

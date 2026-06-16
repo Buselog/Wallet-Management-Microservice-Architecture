@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Transaction from './pages/Transaction';
 import Investment from './pages/Investment';
 import TransactionHistory from './pages/TransactionHistory';
+import Help from './pages/Help';
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
         <Route path="/transaction" element={<MainLayout><Transaction /></MainLayout>} />
         <Route path="/investment" element={<MainLayout><Investment /></MainLayout>} />
         <Route path="/history" element={<MainLayout><TransactionHistory /></MainLayout>} />
-
+        <Route path="/help" element={<MainLayout><Help /></MainLayout>} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
