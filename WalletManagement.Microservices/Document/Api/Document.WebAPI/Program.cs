@@ -1,6 +1,6 @@
+using Document.Api.Middlewares;
 using Document.Application.Services;
 using Document.InnerInfrastructure.Services;
-using Document.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +14,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IDocumentParserService, DocumentParserService>();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

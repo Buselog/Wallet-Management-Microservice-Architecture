@@ -1,30 +1,33 @@
 ﻿using Document.Application.Dtos;
 using Document.Application.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Document.WebAPI.Controllers
+namespace Document.WebAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class DocumentController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class DocumentController : ControllerBase
+    private readonly IDocumentParserService _documentParserService;
+
+    public DocumentController(IDocumentParserService documentParserService)
     {
-        private readonly IDocumentParserService _documentParserService;
+        _documentParserService = documentParserService;
+    }
 
-        public DocumentController(IDocumentParserService documentParserService)
+    [HttpPost("process")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> ProcessInvoice([FromForm] InvoiceRequestDto request)
+    {
+        if (request.File == null)
         {
-            _documentParserService = documentParserService;
+            var result = await _documentParserService.ParseInvoiceAsync(null!, string.Empty, request.WalletId);
+            return Ok(result);
         }
 
+        await using var stream = request.File.OpenReadStream();
+        var parseResult = await _documentParserService.ParseInvoiceAsync(stream, request.File.FileName, request.WalletId);
 
-        [HttpPost("process")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> ProcessInvoice([FromForm] InvoiceRequestDto request)
-        {
-
-            var parseResult = await _documentParserService.ParseInvoiceAsync(request.File, request.WalletId);
-
-            return Ok(parseResult);
-        }
+        return Ok(parseResult);
     }
 }
