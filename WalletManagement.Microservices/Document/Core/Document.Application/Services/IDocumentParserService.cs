@@ -1,11 +1,9 @@
-﻿
-using Document.Application.Dtos;
-using Microsoft.AspNetCore.Http;
+﻿using Document.Application.Dtos;
 
 namespace Document.Application.Services
 {
     public interface IDocumentParserService
     {
-        Task<InvoiceExtractionResultDto> ParseInvoiceAsync(IFormFile file, int walletId);
+        Task<InvoiceExtractionResultDto> ParseInvoiceAsync(Stream fileStream, string fileName, int walletId);
     }
 }
