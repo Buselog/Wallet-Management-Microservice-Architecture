@@ -1,5 +1,6 @@
 using Document.Api.Middlewares;
 using Document.Application.Services;
+using Document.Application.Settings;
 using Document.InnerInfrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,24 +12,39 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IDocumentParserService, DocumentParserService>();
+var datalabConfig = builder.Configuration.GetSection("DatalabSettings").Get<DatalabSettings>();
 
-var app = builder.Build();
-
-app.UseMiddleware<ExceptionMiddleware>();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+builder.Services.AddHttpClient<IDocumentOcrClient, DatalabOcrClient>(client =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    client.BaseAddress = new Uri(datalabConfig?.BaseUrl ?? "https://api.datalab.to/");
+    client.Timeout = TimeSpan.FromSeconds(datalabConfig?.TimeoutSeconds ?? 30);
+
+    if (!string.IsNullOrEmpty(datalabConfig?.ApiKey))
+    {
+        client.DefaultRequestHeaders.Add("Api-Key", datalabConfig.ApiKey);
+    }
+
+});
+    builder.Services.AddScoped<IDocumentParserService, DocumentParserService>();
+
+    var app = builder.Build();
+
+    app.UseMiddleware<ExceptionMiddleware>();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
 
-app.UseHttpsRedirection();
+    app.UseHttpsRedirection();
 
-app.UseAuthorization();
+    app.UseAuthorization();
 
-app.MapControllers();
+    app.MapControllers();
 
-app.Run();
+    app.Run();
+
+

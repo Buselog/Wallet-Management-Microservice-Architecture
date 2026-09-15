@@ -7,6 +7,12 @@ namespace Document.InnerInfrastructure.Services
 {
     public class DocumentParserService : IDocumentParserService
     {
+        private readonly IDocumentOcrClient _ocrClient;
+
+        public DocumentParserService(IDocumentOcrClient ocrClient)
+        {
+            _ocrClient = ocrClient;
+        }
         public async Task<InvoiceExtractionResultDto> ParseInvoiceAsync(Stream fileStream, string fileName, int walletId)
         {
             if (fileStream == null || fileStream.Length == 0)
@@ -28,17 +34,9 @@ namespace Document.InnerInfrastructure.Services
                 throw new InvalidFileExtensionException();
             }
 
-            await Task.Delay(150);
+            var extractionResult = await _ocrClient.ExtractInvoiceDataAsync(fileStream, fileName);
 
-            return new InvoiceExtractionResultDto
-            {
-                IsReceiptOrInvoice = true,
-                BillerName = "İSKİ",
-                InvoiceNumber = "FAT-2026-001",
-                TotalAmount = 350.75m,
-                DueDate = DateTime.UtcNow.AddDays(7),
-                ExtractedBy = "MockEngine"
-            };
+            return extractionResult;
         }
     }
 }
