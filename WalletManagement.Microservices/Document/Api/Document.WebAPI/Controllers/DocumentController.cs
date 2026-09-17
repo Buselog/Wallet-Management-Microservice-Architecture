@@ -1,4 +1,4 @@
-﻿using Document.Application.Dtos;
+﻿using Document.WebAPI.Dtos;
 using Document.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 

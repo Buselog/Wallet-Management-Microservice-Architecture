@@ -1,4 +1,4 @@
-﻿namespace Document.Application.Dtos
+﻿namespace Document.WebAPI.Dtos
 {
     public class InvoiceRequestDto
     {

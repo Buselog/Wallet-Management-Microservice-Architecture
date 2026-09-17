@@ -14,6 +14,7 @@ builder.Services.AddSwaggerGen();
 
 var datalabConfig = builder.Configuration.GetSection("DatalabSettings").Get<DatalabSettings>();
 
+
 builder.Services.AddHttpClient<IDocumentOcrClient, DatalabOcrClient>(client =>
 {
     client.BaseAddress = new Uri(datalabConfig?.BaseUrl ?? "https://api.datalab.to/");
@@ -25,26 +26,34 @@ builder.Services.AddHttpClient<IDocumentOcrClient, DatalabOcrClient>(client =>
     }
 
 });
-    builder.Services.AddScoped<IDocumentParserService, DocumentParserService>();
 
-    var app = builder.Build();
+builder.Services.AddScoped<IDocumentParserService, DocumentParserService>();
 
-    app.UseMiddleware<ExceptionMiddleware>();
+builder.Services.AddHttpClient<IWalletClient, WalletClient>(client =>
+{
+    var walletUrl = builder.Configuration["WalletSettings:BaseUrl"] ?? "http://localhost:5176/";
+    client.BaseAddress = new Uri(walletUrl);
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
 
-    // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 
-    app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
-    app.UseAuthorization();
+app.UseAuthorization();
 
-    app.MapControllers();
+app.MapControllers();
 
-    app.Run();
+app.Run();
 
 
