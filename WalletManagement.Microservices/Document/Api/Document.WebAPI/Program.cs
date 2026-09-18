@@ -15,16 +15,9 @@ builder.Services.AddSwaggerGen();
 var datalabConfig = builder.Configuration.GetSection("DatalabSettings").Get<DatalabSettings>();
 
 
-builder.Services.AddHttpClient<IDocumentOcrClient, DatalabOcrClient>(client =>
+builder.Services.AddHttpClient<IDocumentOcrClient, GeminiOcrClient>(client =>
 {
-    client.BaseAddress = new Uri(datalabConfig?.BaseUrl ?? "https://api.datalab.to/");
-    client.Timeout = TimeSpan.FromSeconds(datalabConfig?.TimeoutSeconds ?? 30);
-
-    if (!string.IsNullOrEmpty(datalabConfig?.ApiKey))
-    {
-        client.DefaultRequestHeaders.Add("Api-Key", datalabConfig.ApiKey);
-    }
-
+    client.Timeout = TimeSpan.FromSeconds(40);
 });
 
 builder.Services.AddScoped<IDocumentParserService, DocumentParserService>();

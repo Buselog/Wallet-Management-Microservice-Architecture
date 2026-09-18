@@ -5,11 +5,11 @@ using Document.Application.Services;
 
 namespace Document.InnerInfrastructure.Services;
 
-public class DatalabOcrClient : IDocumentOcrClient
+public class GeminiOcrClient : IDocumentOcrClient
 {
     private readonly HttpClient _httpClient;
 
-    public DatalabOcrClient(HttpClient httpClient)
+    public GeminiOcrClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }
