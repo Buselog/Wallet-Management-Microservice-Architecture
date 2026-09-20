@@ -38,14 +38,14 @@ namespace Document.InnerInfrastructure.Services
 
             var extractionResult = await _ocrClient.ExtractInvoiceDataAsync(fileStream, fileName);
 
-            var withdrawRequest = new WalletTransactionRequestDto
-            {
-                WalletId = walletId,
-                Amount = extractionResult.TotalAmount,
-                ReferenceId = extractionResult.InvoiceNumber ?? Guid.NewGuid().ToString()
-            };
+            //var withdrawRequest = new WalletTransactionRequestDto
+            //{
+            //    WalletId = walletId,
+            //    Amount = extractionResult.TotalAmount,
+            //    ReferenceId = extractionResult.InvoiceNumber ?? Guid.NewGuid().ToString()
+            //};
 
-            await _walletClient.DeductBalanceAsync(withdrawRequest);
+            //await _walletClient.DeductBalanceAsync(withdrawRequest);
 
             return extractionResult;
         }

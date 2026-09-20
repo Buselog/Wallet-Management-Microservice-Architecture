@@ -12,7 +12,7 @@ namespace Document.Application.Dtos
 
         public decimal TotalAmount { get; set; }
 
-        public DateTime DueDate { get; set; }
+        public DateTime IssueDate { get; set; }
 
         public string ExtractedBy { get; set; }
     }
