@@ -10,13 +10,15 @@ public class GeminiOcrClient : IDocumentOcrClient
 {
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
-    private readonly string _model;
+    private readonly string _primaryModel;
+    private readonly string _fallbackModel;
 
     public GeminiOcrClient(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _apiKey = configuration["GeminiSettings:ApiKey"] ?? string.Empty;
-        _model = configuration["GeminiSettings:Model"] ?? "gemini-3.6-flash";
+        _primaryModel = configuration["GeminiSettings:Model"] ?? "gemini-3.6-flash";
+        _fallbackModel = configuration["GeminiSettings:FallbackModel"] ?? "gemini-2.5-flash";
     }
 
     public async Task<InvoiceExtractionResultDto> ExtractInvoiceDataAsync(Stream fileStream, string fileName)
@@ -39,34 +41,72 @@ public class GeminiOcrClient : IDocumentOcrClient
             _ => "application/octet-stream"
         };
 
-        var requestPayload = new
+        var requestPayload = CreateGeminiPayload(base64Data, mimeType);
+
+        var response = await ExecuteWithModelFallbackAsync(requestPayload);
+
+        return await ParseResponseAsync(response);
+
+    }
+
+    private async Task<HttpResponseMessage> ExecuteWithModelFallbackAsync(object payload)
+    {
+       
+        var primaryUrl = BuildEndpointUrl(_primaryModel);
+        var response = await _httpClient.PostAsJsonAsync(primaryUrl, payload);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
+            response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            var fallbackUrl = BuildEndpointUrl(_fallbackModel);
+            response = await _httpClient.PostAsJsonAsync(fallbackUrl, payload);
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Gemini API error ({response.StatusCode}): {errorBody}");
+        }
+
+        return response;
+    }
+
+    private string BuildEndpointUrl(string model) =>
+        $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={_apiKey}";
+
+    private static object CreateGeminiPayload(string base64Data, string mimeType)
+    {
+        return new
         {
             contents = new[]
-     {
-        new
-        {
-            parts = new object[]
             {
                 new
                 {
-                    text = @"Analyze this document carefully as a financial receipt/invoice parser:
-                           1. isReceiptOrInvoice: Set to true if the document is a valid bill, commercial invoice, utility bill, or payment receipt. Otherwise false.
-                           2. billerName: Official vendor, merchant, utility, or company name issuing the document (clean of legal abbreviations if possible, e.g., 'Turkcell' instead of 'Turkcell İletişim Hizmetleri A.Ş.').
-                           3. invoiceNumber: The unique invoice ID, receipt number, or serial/fiscal number. If absent, provide an empty string.
-                           4. totalAmount: The FINAL grand total payable amount (including all taxes/VAT and discounts). Handle Turkish currency formatting correctly (e.g., '1.450,50' means 1450.50). Return strictly as a numeric decimal/float.
-                           5. issueDate: The invoice issue/transaction date in ISO 'YYYY-MM-DD' format (the date the bill or receipt was generated). If absent, use today's date."
-                },
-                new
-                {
-                    inline_data = new
+                    parts = new object[]
                     {
-                        mime_type = mimeType,
-                        data = base64Data
+                        new
+                        {
+                            text = @"Analyze this document carefully as a financial receipt/invoice parser:
+                             1. isReceiptOrInvoice: Set to true if the document is a valid bill, commercial invoice, utility bill, or payment receipt. Otherwise false.
+                             2. billerName: Official vendor, merchant, utility, or company name issuing the document.
+                             3. invoiceNumber: The PRIMARY legal identifier of this document. Follow this strict priority order:
+                                a) Official GİB 16-character e-Invoice/e-Archive number (e.g. labeled as 'Belge No' or 'Fatura No' starting with 3 letters like GIB, DM0 followed by year and digits).
+                                b) If not present, the explicit 'Fatura No' or 'Receipt No / Fiş No'.
+                                c) Do NOT use Order Number, Tax ID, or ETTN.
+                             4. totalAmount: The FINAL grand total payable amount including all taxes. Return strictly as a numeric decimal/float.
+                             5. issueDate: The invoice issue/transaction date in ISO 'YYYY-MM-DD' format. If absent, use today's date."
+                        },
+                        new
+                        {
+                            inline_data = new
+                            {
+                                mime_type = mimeType,
+                                data = base64Data
+                            }
+                        }
                     }
                 }
-            }
-        }
-    },
+            },
             generationConfig = new
             {
                 response_mime_type = "application/json",
@@ -85,16 +125,10 @@ public class GeminiOcrClient : IDocumentOcrClient
                 }
             }
         };
+    }
 
-        var endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
-        var response = await _httpClient.PostAsJsonAsync(endpoint, requestPayload);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorBody = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Gemini API error ({response.StatusCode}): {errorBody}");
-        }
-
+    private static async Task<InvoiceExtractionResultDto> ParseResponseAsync(HttpResponseMessage response)
+    {
         var responseJson = await response.Content.ReadAsStringAsync();
 
         using var doc = JsonDocument.Parse(responseJson);
@@ -119,6 +153,5 @@ public class GeminiOcrClient : IDocumentOcrClient
             IsReceiptOrInvoice = false,
             ExtractedBy = "Gemini-Flash-Vision"
         };
-
     }
 }
