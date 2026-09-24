@@ -17,8 +17,8 @@ public class GeminiOcrClient : IDocumentOcrClient
     {
         _httpClient = httpClient;
         _apiKey = configuration["GeminiSettings:ApiKey"] ?? string.Empty;
-        _primaryModel = configuration["GeminiSettings:Model"] ?? "gemini-3.6-flash";
-        _fallbackModel = configuration["GeminiSettings:FallbackModel"] ?? "gemini-2.5-flash";
+        _primaryModel = configuration["GeminiSettings:Model"] ?? "gemini-3.8-flash";
+        _fallbackModel = configuration["GeminiSettings:FallbackModel"] ?? "gemini-3.6-flash";
     }
 
     public async Task<InvoiceExtractionResultDto> ExtractInvoiceDataAsync(Stream fileStream, string fileName)
@@ -55,8 +55,7 @@ public class GeminiOcrClient : IDocumentOcrClient
         var primaryUrl = BuildEndpointUrl(_primaryModel);
         var response = await _httpClient.PostAsJsonAsync(primaryUrl, payload);
 
-        if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
-            response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        if (!response.IsSuccessStatusCode)
         {
             var fallbackUrl = BuildEndpointUrl(_fallbackModel);
             response = await _httpClient.PostAsJsonAsync(fallbackUrl, payload);
