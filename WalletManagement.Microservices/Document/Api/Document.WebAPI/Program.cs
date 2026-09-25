@@ -14,9 +14,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var datalabConfig = builder.Configuration.GetSection("DatalabSettings").Get<DatalabSettings>();
 
-var retryCount = builder.Configuration.GetValue<int>("GeminiSettings:MaxRetryCount", 3);
+var retryCount = builder.Configuration.GetValue<int>("OpenRouterSettings:MaxRetryCount", 2);
 
 IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 {
@@ -29,13 +28,15 @@ IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         );
 }
 
-builder.Services.AddHttpClient<IDocumentOcrClient, GeminiOcrClient>(client =>
+builder.Services.AddHttpClient<IDocumentOcrClient, OpenRouterOcrClient>(client =>
 {
-    var timeout = builder.Configuration.GetValue<int>("GeminiSettings:TimeoutSeconds", 40);
+    var timeout = builder.Configuration.GetValue<int>("OpenRouterSettings:TimeoutSeconds", 40);
     client.Timeout = TimeSpan.FromSeconds(timeout);
 }).AddPolicyHandler(GetRetryPolicy());
 
+builder.Services.AddScoped<IDocumentNormalizer, DocumentNormalizer>();
 builder.Services.AddScoped<IDocumentParserService, DocumentParserService>();
+
 
 builder.Services.AddHttpClient<IWalletClient, WalletClient>(client =>
 {
