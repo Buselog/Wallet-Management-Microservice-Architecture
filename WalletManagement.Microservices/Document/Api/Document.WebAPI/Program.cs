@@ -1,11 +1,19 @@
 using Document.Api.Middlewares;
 using Document.Application.Services;
-using Document.Application.Settings;
 using Document.InnerInfrastructure.Services;
 using Polly;
 using Polly.Extensions.Http;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 
@@ -45,6 +53,16 @@ builder.Services.AddHttpClient<IWalletClient, WalletClient>(client =>
 
     var timeout = builder.Configuration.GetValue<int>("WalletSettings:TimeoutSeconds", 25);
     client.Timeout = TimeSpan.FromSeconds(timeout);
+});
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient<IWalletClient, WalletClient>((sp, client) =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var walletUrl = configuration["ExternalServices:WalletApiUrl"] ?? "https://localhost:7012/";
+    client.BaseAddress = new Uri(walletUrl);
+    client.Timeout = TimeSpan.FromSeconds(15);
 });
 
 var app = builder.Build();

@@ -75,7 +75,7 @@ public class ExceptionMiddleware
             Status = context.Response.StatusCode,
             Message = errorCode,
             Parameters = parameters,
-            Detail = exception.GetType().Name,
+            Detail = statusCode == HttpStatusCode.InternalServerError ? exception.GetType().Name : exception.Message,
             Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
         };
 

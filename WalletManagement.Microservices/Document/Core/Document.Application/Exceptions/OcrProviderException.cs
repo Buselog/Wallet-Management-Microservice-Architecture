@@ -7,5 +7,10 @@ namespace Document.Application.Exceptions
         {
 
         }
+
+        public OcrProviderException(string errorDetails) : base("ERR_OCR_PROVIDER_UNAVAILABLE", errorDetails)
+        {
+
+        }
     }
 }

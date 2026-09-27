@@ -1,9 +1,12 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
-using Document.Application.Dtos;
+﻿using Document.Application.Dtos;
+using Document.Application.Exceptions;
 using Document.Application.Services;
 using Microsoft.Extensions.Configuration;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using UglyToad.PdfPig;
 
 namespace Document.InnerInfrastructure.Services;
 
@@ -11,7 +14,8 @@ public class OpenRouterOcrClient : IDocumentOcrClient
 {
     private readonly HttpClient _httpClient;
     private readonly IDocumentNormalizer _normalizer;
-    private readonly string[] _models;
+    private readonly string[] _textModels;
+    private readonly string[] _visionModels;
     private readonly int _perModelTimeout;
 
     public OpenRouterOcrClient(
@@ -26,17 +30,22 @@ public class OpenRouterOcrClient : IDocumentOcrClient
         var baseUrl = configuration["OpenRouterSettings:BaseUrl"] ?? "https://openrouter.ai/api/v1/";
 
         var timeoutStr = configuration["OpenRouterSettings:PerModelTimeoutSeconds"];
-        _perModelTimeout = int.TryParse(timeoutStr, out var t) ? t : 15;
+        _perModelTimeout = int.TryParse(timeoutStr, out var t) ? t : 18;
 
-        var modelSection = configuration.GetSection("OpenRouterSettings:Models");
-        _models = modelSection.GetChildren()
-            .Select(c => c.Value!)
-            .Where(v => !string.IsNullOrEmpty(v))
-            .ToArray();
+        _textModels = configuration.GetSection("OpenRouterSettings:TextModels")
+            .GetChildren().Select(c => c.Value!).Where(v => !string.IsNullOrEmpty(v)).ToArray();
 
-        if (_models.Length == 0)
+        _visionModels = configuration.GetSection("OpenRouterSettings:VisionModels")
+            .GetChildren().Select(c => c.Value!).Where(v => !string.IsNullOrEmpty(v)).ToArray();
+
+        if (_textModels.Length == 0)
         {
-            _models = new[] { "google/gemma-4-26b-a4b-it:free" };
+            _textModels = new[] { "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free" };
+        }
+
+        if (_visionModels.Length == 0)
+        {
+            _visionModels = new[] { "dots-studio/dots-3-note-preview:free" };
         }
 
         _httpClient.BaseAddress = new Uri(baseUrl);
@@ -47,17 +56,59 @@ public class OpenRouterOcrClient : IDocumentOcrClient
 
     public async Task<InvoiceExtractionResultDto> ExtractInvoiceDataAsync(Stream fileStream, string fileName)
     {
+        if (fileStream.CanSeek) fileStream.Position = 0;
+
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+        if (extension == ".pdf")
+        {
+            var extractedText = ExtractTextFromPdf(fileStream);
+
+            if (!string.IsNullOrWhiteSpace(extractedText))
+            {
+                return await ProcessWithFallbackAsync(_textModels, model => CreateTextPayload(model, extractedText));
+            }
+        }
+
         var (imageBytes, mimeType) = await _normalizer.NormalizeToImageAsync(fileStream, fileName);
         var base64Data = Convert.ToBase64String(imageBytes);
 
+        return await ProcessWithFallbackAsync(_visionModels, model => CreateVisionPayload(model, base64Data, mimeType));
+    }
+
+    private static string ExtractTextFromPdf(Stream fileStream)
+    {
+        try
+        {
+            using var document = PdfDocument.Open(fileStream);
+            var sb = new StringBuilder();
+
+            foreach (var page in document.GetPages())
+            {
+                sb.AppendLine(page.Text);
+            }
+
+            return sb.ToString().Trim();
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    private async Task<InvoiceExtractionResultDto> ProcessWithFallbackAsync(string[] models, Func<string, object> payloadFactory)
+    {
         var attemptErrors = new List<string>();
 
-        foreach (var model in _models)
+        for (int i = 0; i < models.Length; i++)
         {
+            var model = models[i];
+            var isFallback = i > 0; 
+
             try
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_perModelTimeout));
-                var payload = CreatePayloadForSingleModel(model, base64Data, mimeType);
+                var payload = payloadFactory(model);
 
                 var response = await _httpClient.PostAsJsonAsync("chat/completions", payload, cts.Token);
 
@@ -69,12 +120,21 @@ public class OpenRouterOcrClient : IDocumentOcrClient
                 }
 
                 var responseJson = await response.Content.ReadAsStringAsync(cts.Token);
-                var parsedResult = ParseModelResponse(responseJson, model);
+                var parsedResult = ParseModelResponse(responseJson, model, isFallback);
 
-                if (parsedResult != null && parsedResult.IsReceiptOrInvoice)
+                if (parsedResult != null)
                 {
+                    if (!parsedResult.IsReceiptOrInvoice)
+                    {
+                        throw new DocumentNotRecognizedException();
+                    }
+
                     return parsedResult;
                 }
+            }
+            catch (DocumentNotRecognizedException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -82,29 +142,28 @@ public class OpenRouterOcrClient : IDocumentOcrClient
             }
         }
 
-        throw new HttpRequestException($"OCR modelleri başarısız oldu: {string.Join(" || ", attemptErrors)}");
+        throw new OcrProviderException(string.Join(" || ", attemptErrors));
     }
 
-    private static object CreatePayloadForSingleModel(string modelName, string base64Data, string mimeType)
+    private static object CreateTextPayload(string modelName, string documentText)
     {
-        var prompt = @"Analyze this document carefully as a financial receipt/invoice parser:
-1. isReceiptOrInvoice: Set to true if the document is a valid bill, commercial invoice, utility bill, or payment receipt. Otherwise false.
-2. billerName: Official legal registered business name issuing the document (e.g., 'Ticaret Unvanı', ending with A.Ş., Ltd. Şti., etc.). Only if completely absent, use the visible commercial brand name.
-3. invoiceNumber: The PRIMARY legal identifier of this document. Follow this strict priority order:
-   a) Official GİB 16-character e-Invoice/e-Archive number (e.g. labeled as 'Belge No' or 'Fatura No' starting with 3 letters like GIB, DM0 followed by year and digits).
-   b) If not present, the explicit 'Fatura No' or 'Receipt No / Fiş No'.
-   c) Do NOT use Order Number, Tax ID, or ETTN.
-4. totalAmount: The FINAL grand total payable amount including all taxes. Return strictly as a numeric decimal/float.
-5. issueDate: The invoice issue/transaction date in ISO 'YYYY-MM-DD' format. If absent, use today's date.
+        var prompt = GetPrompt();
+        var fullMessage = $"{prompt}\n\nRAW INVOICE TEXT CONTENT:\n{documentText}";
 
-Return ONLY a single valid raw JSON object matching this schema, without any markdown formatting or ```json code blocks:
-{
-  ""isReceiptOrInvoice"": true,
-  ""billerName"": ""Company Name"",
-  ""invoiceNumber"": ""DM02018003244118"",
-  ""totalAmount"": 1869.90,
-  ""issueDate"": ""YYYY-MM-DD""
-}";
+        return new
+        {
+            model = modelName,
+            messages = new[]
+            {
+                new { role = "user", content = fullMessage }
+            },
+            temperature = 0.1
+        };
+    }
+
+    private static object CreateVisionPayload(string modelName, string base64Data, string mimeType)
+    {
+        var prompt = GetPrompt();
 
         return new
         {
@@ -129,7 +188,42 @@ Return ONLY a single valid raw JSON object matching this schema, without any mar
         };
     }
 
-    private static InvoiceExtractionResultDto? ParseModelResponse(string jsonResponse, string modelName)
+    private static string GetPrompt()
+    {
+        return @"Analyze this document carefully as a financial receipt/invoice parser:
+1. isReceiptOrInvoice: Set to true if the document is a valid bill, commercial invoice, utility bill, or payment receipt. Otherwise false.
+- If the document is NOT a valid receipt or invoice:
+  Set 'isReceiptOrInvoice' to false, 'totalAmount' to null, and leave other fields as null.
+2. billerName: The legal or commercial entity ISSUING/SELLING on this document.
+   - Priority 1 (Corporations): Legal registered business name of the issuer/seller (typically ending with A.Ş., Ltd. Şti., San. ve Tic., Anonim Şirketi, Kollektif Şirketi, etc.).
+   - Priority 2 (Sole Proprietorships / Şahıs Şirketi): Full personal legal name of the merchant/seller appearing at the very top issuer section, directly tied to the seller's VKN/TCKN and registered tax office.
+   - Priority 3 (Retail Receipts): Visible prominent brand/store trade name if and only if a formal legal title is entirely absent.
+   - STRICT NEGATIVE RULES:
+     * NEVER extract the recipient/buyer. Completely ignore sections labeled 'SAYIN', 'Sayın', 'Sn.', 'ALICI', 'MÜŞTERİ', 'CUSTOMER', 'BILLED TO', or 'DELIVERY TO'.
+     * NEVER use placeholder header words like 'SAYIN', 'ALICI', 'Fatura', or 'e-Arşiv'.
+     * NEVER extract third-party platforms, marketplaces, or payment providers (e.g. Trendyol, Hepsiburada, İyzico, PayTR, Yurtiçi Kargo).
+     * NEVER extract e-invoice integrators, software providers, or campaign sponsors (e.g. EDM Bilişim, Logo, Foriba, Sovos, TEMA).
+3. invoiceNumber: The PRIMARY legal identifier of this document. Follow this strict priority order:
+   a) Official GİB 16-character e-Invoice/e-Archive number (e.g. labeled as 'Belge No' or 'Fatura No' starting with 3 letters like GIB, DM0 followed by year and digits).
+   b) If not present, the explicit 'Fatura No' or 'Receipt No / Fiş No'.
+   c) Do NOT use Order Number, Tax ID, or ETTN.
+4. totalAmount: The FINAL NET PAYABLE total amount after all discounts and including all taxes.
+   - Look specifically for labels like 'Ödenecek Tutar',  'Amount to be Paid', 'Genel Toplam', 'Vergiler Dahil Toplam Tutar', 'Total Amount Including Taxes', or 'Grand Total'.
+   - NEVER use the undiscounted subtotal ('Mal Hizmet Toplam Tutarı') if discounts/iskonto exist.
+   - Always pick the final net amount to be actually paid by the customer. Return strictly as a numeric decimal/float.
+5. issueDate: The invoice issue/transaction date in ISO 'YYYY-MM-DD' format. If absent, use today's date.
+
+Return ONLY a single valid raw JSON object matching this schema, without any markdown formatting or ```json code blocks:
+{
+  ""isReceiptOrInvoice"": true,
+  ""billerName"": ""D-MARKET ELEKTRONİK HİZMETLER VE TİCARET A.Ş."",
+  ""invoiceNumber"": ""DM02018003244118"",
+  ""totalAmount"": 1869.90,
+  ""issueDate"": ""2024-05-15""
+}";
+    }
+
+    private static InvoiceExtractionResultDto? ParseModelResponse(string jsonResponse, string modelName, bool isFallback)
     {
         using var doc = JsonDocument.Parse(jsonResponse);
         var contentText = doc.RootElement
@@ -151,7 +245,9 @@ Return ONLY a single valid raw JSON object matching this schema, without any mar
 
         if (result != null)
         {
-            result.ExtractedBy = $"OpenRouter Fallback ({modelName})";
+            result.ExtractedBy = isFallback
+                ? $"OpenRouter Fallback ({modelName})"
+                : $"OpenRouter Primary ({modelName})";
         }
 
         return result;

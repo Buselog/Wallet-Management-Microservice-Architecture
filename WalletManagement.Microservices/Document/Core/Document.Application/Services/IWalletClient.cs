@@ -4,6 +4,8 @@ namespace Document.Application.Services
 {
     public interface IWalletClient
     {
-        Task<bool> DeductBalanceAsync(WalletTransactionRequestDto request);
+        Task<List<WalletDto>> GetUserWalletsAsync();
+
+        Task<bool> PayInvoiceAsync(PayInvoiceRequestDto payRequest);
     }
 }
