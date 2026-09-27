@@ -1,9 +1,11 @@
 ﻿using Document.WebAPI.Dtos;
 using Document.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Document.WebAPI.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class DocumentController : ControllerBase
