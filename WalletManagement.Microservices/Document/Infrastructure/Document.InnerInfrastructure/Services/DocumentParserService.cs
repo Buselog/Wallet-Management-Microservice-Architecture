@@ -44,6 +44,7 @@ namespace Document.InnerInfrastructure.Services
                 {
                     WalletId = walletId,
                     Amount = extractionResult.TotalAmount.Value,
+                    Currency = extractionResult.Currency ?? "TRY",
                     ReferenceId = extractionResult.InvoiceNumber ?? Guid.NewGuid().ToString()
                 };
 

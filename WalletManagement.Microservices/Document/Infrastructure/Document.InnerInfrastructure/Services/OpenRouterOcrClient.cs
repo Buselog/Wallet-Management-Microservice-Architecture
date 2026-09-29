@@ -103,7 +103,7 @@ public class OpenRouterOcrClient : IDocumentOcrClient
         for (int i = 0; i < models.Length; i++)
         {
             var model = models[i];
-            var isFallback = i > 0; 
+            var isFallback = i > 0;
 
             try
             {
@@ -211,7 +211,10 @@ public class OpenRouterOcrClient : IDocumentOcrClient
    - Look specifically for labels like 'Ödenecek Tutar',  'Amount to be Paid', 'Genel Toplam', 'Vergiler Dahil Toplam Tutar', 'Total Amount Including Taxes', or 'Grand Total'.
    - NEVER use the undiscounted subtotal ('Mal Hizmet Toplam Tutarı') if discounts/iskonto exist.
    - Always pick the final net amount to be actually paid by the customer. Return strictly as a numeric decimal/float.
-5. issueDate: The invoice issue/transaction date in ISO 'YYYY-MM-DD' format. If absent, use today's date.
+5. currency: The 3-letter ISO 4217 currency code of the invoice (e.g. 'TRY', 'EUR', 'USD', 'GBP').
+   - If the symbol is '₺', 'TL' or not explicitly specified, return 'TRY'.
+   - If '$', return 'USD'. If '€', return 'EUR'. If '£', return 'GBP'.
+6. issueDate: The invoice issue/transaction date in ISO 'YYYY-MM-DD' format. If absent, use today's date.
 
 Return ONLY a single valid raw JSON object matching this schema, without any markdown formatting or ```json code blocks:
 {
@@ -219,6 +222,7 @@ Return ONLY a single valid raw JSON object matching this schema, without any mar
   ""billerName"": ""D-MARKET ELEKTRONİK HİZMETLER VE TİCARET A.Ş."",
   ""invoiceNumber"": ""DM02018003244118"",
   ""totalAmount"": 1869.90,
+  ""currency"": ""TRY"",
   ""issueDate"": ""2024-05-15""
 }";
     }
