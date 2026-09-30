@@ -14,6 +14,6 @@ namespace Wallet.Application.Managers
         Task TransferAsync(TransferRequestDto dto, string customerNo);
         Task SoftDeleteWalletAsync(int walletId, string customerNo);
         Task ExecuteTradeAsync(CurrencyTradeRequestDto dto);
-       // Task PayInvoiceAsync(PayInvoiceRequestDto dto, string customerNo);
+        Task PayInvoiceAsync(PayInvoiceRequestDto dto, string customerNo);
     }
 }

@@ -195,6 +195,44 @@ namespace Wallet.InnerInfrastructure.Managers
             HandleSPResult(result);
         }
 
+        public async Task PayInvoiceAsync(PayInvoiceRequestDto dto, string customerNo)
+        {
+            var walletId = dto.WalletId ?? 0;
+            var amount = dto.Amount ?? 0;
+
+            if (amount <= 0)
+                throw new BaseBusinessException("ERR_INVALID_INVOICE_AMOUNT");
+
+            await ValidateWalletOwnershipAsync(walletId, customerNo);
+
+            var exists = await _transactionRepository.ReferenceIdExistsAsync(dto.ReferenceId);
+            if (exists)
+                throw new ReferenceAlreadyExistsException();
+
+            var wallet = await _walletRepository.GetByIdNoTrackingAsync(walletId);
+            if (!string.IsNullOrEmpty(dto.Currency) &&
+                !string.Equals(wallet!.Currency, dto.Currency.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                throw new WalletCurrencyMismatchException("ERR_INVOICE_CURRENCY_MISMATCH", dto.Currency);
+            }
+
+            if (wallet.Balance < amount)
+                throw new InsufficientBalanceException();
+
+            var biller = !string.IsNullOrWhiteSpace(dto.BillerName)
+                ? dto.BillerName.Trim()
+                : "Fatura Ödemesi";
+
+            var result = await _walletRepository.ExecuteInvoicePaymentWithSPAsync(
+                walletId: walletId,
+                amount: amount,
+                billerName: biller,
+                referenceId: dto.ReferenceId
+            );
+
+            HandleSPResult(result);
+        }
+
         private async Task ValidateWalletOwnershipAsync(int walletId, string customerNo)
         {
             var wallet = await _walletRepository.GetByIdNoTrackingAsync(walletId);

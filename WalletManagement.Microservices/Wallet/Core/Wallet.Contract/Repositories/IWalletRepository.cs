@@ -13,6 +13,7 @@ namespace Wallet.Contract.Repositories
             string type, string targetAddress, string description, string referenceId, string senderInfo);
         Task<int> ExecuteCurrencyTradeWithSPAsync(string customerNo, int sourceWalletId, 
             int targetWalletId, decimal amount, decimal targetRate, string tradeType, string referenceId);
+        Task<int> ExecuteInvoicePaymentWithSPAsync(int walletId, decimal amount, string billerName, string referenceId);
 
     }
 }

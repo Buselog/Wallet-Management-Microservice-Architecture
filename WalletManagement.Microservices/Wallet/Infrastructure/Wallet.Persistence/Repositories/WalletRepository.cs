@@ -92,6 +92,23 @@ namespace Wallet.Persistence.Repositories
 
             return result.FirstOrDefault();
         }
+
+        public async Task<int> ExecuteInvoicePaymentWithSPAsync(int walletId, decimal amount, string billerName, string referenceId)
+        {
+            var WalletId = new SqlParameter("@WalletId", walletId);
+            var Amount = new SqlParameter("@Amount", amount);
+            var BillerName = new SqlParameter("@BillerName", (object?)billerName ?? DBNull.Value);
+            var ReferenceId = new SqlParameter("@ReferenceId", referenceId);
+
+            var result = await _context.Database
+                .SqlQueryRaw<int>(
+                    "EXEC SP_PayInvoice @WalletId, @Amount, @BillerName, @ReferenceId",
+                    WalletId, Amount, BillerName, ReferenceId)
+                .ToListAsync();
+
+            return result.FirstOrDefault();
+        }
+
     }
 }
 
