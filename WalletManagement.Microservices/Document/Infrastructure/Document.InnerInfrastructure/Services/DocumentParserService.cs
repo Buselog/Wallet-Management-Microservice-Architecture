@@ -45,7 +45,8 @@ namespace Document.InnerInfrastructure.Services
                     WalletId = walletId,
                     Amount = extractionResult.TotalAmount.Value,
                     Currency = extractionResult.Currency ?? "TRY",
-                    ReferenceId = extractionResult.InvoiceNumber ?? Guid.NewGuid().ToString()
+                    ReferenceId = extractionResult.InvoiceNumber ?? Guid.NewGuid().ToString(),
+                    BillerName = extractionResult.BillerName
                 };
 
                 await _walletClient.PayInvoiceAsync(payRequest);
