@@ -49,7 +49,7 @@ namespace Document.InnerInfrastructure.Services
         {
             AttachBearerToken();
 
-            var response = await _httpClient.PostAsJsonAsync("api/Wallet/withdraw", payRequest);
+            var response = await _httpClient.PostAsJsonAsync("api/Wallet/pay-invoice", payRequest);
 
             if (!response.IsSuccessStatusCode)
             {
