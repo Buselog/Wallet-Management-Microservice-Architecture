@@ -233,6 +233,43 @@ namespace Wallet.InnerInfrastructure.Managers
             HandleSPResult(result);
         }
 
+        public async Task<InvoicePreCheckResponseDto> PreCheckInvoiceAsync(InvoicePreCheckRequestDto dto, string customerNo)
+        {
+            var response = new InvoicePreCheckResponseDto();
+
+            var exists = await _transactionRepository.ReferenceIdExistsAsync(dto.ReferenceId);
+            if (exists)
+            {
+                response.IsAlreadyPaid = true;
+                response.FailureReason = new ReferenceAlreadyExistsException().Message;
+                return response;
+            }
+
+            var wallet = await _walletRepository.GetByIdNoTrackingAsync(dto.WalletId);
+            if (wallet == null || !wallet.IsActive || wallet.CustomerNo != customerNo)
+            {
+                response.FailureReason = WalletNotFoundException.code;
+                return response;
+            }
+
+            response.IsCurrencyMatched = string.Equals(wallet.Currency, dto.Currency?.Trim(), StringComparison.OrdinalIgnoreCase);
+            if (!response.IsCurrencyMatched)
+            {
+                response.FailureReason = "ERR_INVOICE_CURRENCY_MISMATCH";
+                return response;
+            }
+
+            response.HasSufficientBalance = wallet.Balance >= dto.Amount;
+            if (!response.HasSufficientBalance)
+            {
+                response.FailureReason = InsufficientBalanceException.code;
+                return response;
+            }
+
+            response.CanBePaid = true;
+            return response;
+        }
+
         private async Task ValidateWalletOwnershipAsync(int walletId, string customerNo)
         {
             var wallet = await _walletRepository.GetByIdNoTrackingAsync(walletId);

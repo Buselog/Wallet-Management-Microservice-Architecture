@@ -89,12 +89,20 @@ namespace Wallet.WebAPI.Controllers
             return Ok();
         }
 
+        [HttpPost("precheck-invoice")]
+        public async Task<IActionResult> PreCheckInvoice([FromBody] InvoicePreCheckRequestDto dto)
+        {
+            var result = await _walletManager.PreCheckInvoiceAsync(dto, currentCustomerNo);
+            return Ok(result);
+        }
+
         [HttpPost("pay-invoice")]
         public async Task<IActionResult> PayInvoice([FromBody] PayInvoiceRequestDto dto)
         {
             await _walletManager.PayInvoiceAsync(dto, currentCustomerNo);
             return Ok();
         }
+
     }
 
 }

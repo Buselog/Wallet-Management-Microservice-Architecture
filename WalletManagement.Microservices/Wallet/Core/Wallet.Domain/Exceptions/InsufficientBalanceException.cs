@@ -3,7 +3,8 @@ namespace Wallet.Domain.Exceptions
 {
     public class InsufficientBalanceException : BaseBusinessException
     {
-        public InsufficientBalanceException() : base("ERR_LOW_BALANCE")
+        public const string code = "ERR_LOW_BALANCE";
+        public InsufficientBalanceException() : base(code)
         {
 
         }
