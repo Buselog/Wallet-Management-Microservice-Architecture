@@ -22,7 +22,6 @@ public class DocumentNormalizer : IDocumentNormalizer
             await fileStream.CopyToAsync(memoryStream);
             var pdfBytes = memoryStream.ToArray();
 
-            // İlk sayfayı yüksek çözünürlükte render ediyoruz
             using var docReader = DocLib.Instance.GetDocReader(pdfBytes, new PageDimensions(1400, 2000));
             using var pageReader = docReader.GetPageReader(0);
 
@@ -30,7 +29,6 @@ public class DocumentNormalizer : IDocumentNormalizer
             var width = pageReader.GetPageWidth();
             var height = pageReader.GetPageHeight();
 
-            // SkiaSharp ile platform bağımsız (cross-platform) PNG üretimi
             var imageInfo = new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
             using var bitmap = new SKBitmap();
 
@@ -46,7 +44,6 @@ public class DocumentNormalizer : IDocumentNormalizer
             }
         }
 
-        // Zaten resim ise (PNG/JPG) doğrudan oku
         using var imgStream = new MemoryStream();
         await fileStream.CopyToAsync(imgStream);
 

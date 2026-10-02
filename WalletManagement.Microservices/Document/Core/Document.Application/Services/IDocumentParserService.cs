@@ -4,6 +4,14 @@ namespace Document.Application.Services
 {
     public interface IDocumentParserService
     {
-        Task<InvoiceExtractionResultDto> ParseInvoiceAsync(Stream fileStream, string fileName, int walletId);
+        Task<InvoicePreviewResponseDto> ExtractAndPreviewAsync(
+            Stream fileStream,
+            string fileName,
+            int walletId,
+            CancellationToken cancellationToken = default);
+
+        Task<bool> ConfirmAndPayAsync(
+            ConfirmInvoicePaymentRequestDto request,
+            CancellationToken cancellationToken = default);
     }
 }

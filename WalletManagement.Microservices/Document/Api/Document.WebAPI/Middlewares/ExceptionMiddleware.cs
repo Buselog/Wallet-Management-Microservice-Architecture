@@ -35,31 +35,26 @@ public class ExceptionMiddleware
         {
             parameters = businessEx.Parameters;
         }
+        else if (exception is WalletServiceException walletServiceEx)
+        {
+            parameters = walletServiceEx.Parameters;
+        }
 
         var (statusCode, errorCode) = exception switch
         {
-            // 1. Dosya Validasyon Hataları (İstemci kaynaklı geçersiz istekler -> 400 Bad Request)
             FileEmptyException => (HttpStatusCode.BadRequest, exception.Message),
             InvalidFileExtensionException => (HttpStatusCode.BadRequest, exception.Message),
             FileSizeExceededException => (HttpStatusCode.BadRequest, exception.Message),
 
-            // 2. Belge ve Veri Çıkarım Hataları (Format doğru ama fatura okunamadı -> 422 Unprocessable Entity)
             DocumentNotRecognizedException => (HttpStatusCode.UnprocessableEntity, exception.Message),
             InvoiceAmountNotFoundException => (HttpStatusCode.UnprocessableEntity, exception.Message),
 
-            // 3. Harici Servis / Sağlayıcı Hataları (OCR servisi çöktüyse -> 502 Bad Gateway)
             OcrProviderException => (HttpStatusCode.BadGateway, exception.Message),
 
-            // 4. Mükerrer Kayıt (Aynı fatura daha önce ödenmişse -> 409 Conflict)
-            InvoiceAlreadyProcessedException => (HttpStatusCode.Conflict, exception.Message),
-
-            // 5. Cüzdan Servisinden Dönen Hatalar (Dış servisin HTTP kodu ve mesajı aynen korunur)
             WalletServiceException walletEx => ((HttpStatusCode)walletEx.StatusCode, walletEx.Message),
 
-            // 6. Tanımlanmış Diğer Temel İş Kuralı Hataları
             BaseBusinessException => (HttpStatusCode.BadRequest, exception.Message),
 
-            // 7. Öngörülemeyen Sistem Hataları
             _ => (HttpStatusCode.InternalServerError, "ERR_INTERNAL_SERVER_ERROR")
         };
 

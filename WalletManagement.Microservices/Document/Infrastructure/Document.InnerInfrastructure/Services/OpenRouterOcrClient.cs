@@ -203,9 +203,13 @@ public class OpenRouterOcrClient : IDocumentOcrClient
      * NEVER use placeholder header words like 'SAYIN', 'ALICI', 'Fatura', or 'e-Arşiv'.
      * NEVER extract third-party platforms, marketplaces, or payment providers (e.g. Trendyol, Hepsiburada, İyzico, PayTR, Yurtiçi Kargo).
      * NEVER extract e-invoice integrators, software providers, or campaign sponsors (e.g. EDM Bilişim, Logo, Foriba, Sovos, TEMA).
-3. invoiceNumber: The PRIMARY legal identifier of this document. Follow this strict priority order:
-   a) Official GİB 16-character e-Invoice/e-Archive number (e.g. labeled as 'Belge No' or 'Fatura No' starting with 3 letters like GIB, DM0 followed by year and digits).
-   b) If not present, the explicit 'Fatura No' or 'Receipt No / Fiş No'.
+3. invoiceNumber: The PRIMARY legal identifier of this document. Follow this strict priority order and disambiguation rules:
+   a) Official GİB 16-character e-Invoice/e-Archive number (labeled as 'Belge No' or 'Fatura No').
+      - Structure: A 3-character alphanumeric series prefix (letters or digits, e.g. 'GIB', 'DM0', 'E01', 'MNK'), followed immediately by a 4-digit year (e.g. 2024, 2025, 2026), followed by a 9-digit sequence number.
+      - STRICT CHARACTER DISAMBIGUATION:
+        * Differentiate strictly between digit '0' (zero) and uppercase letter 'O'. Do NOT convert digit '0' to letter 'O' in the series prefix (e.g., transcribe 'E01' accurately as 'E-Zero-One', never as 'EO1').
+        * The 4-digit year (positions 4 to 7) and the 9-digit sequence number (positions 8 to 16) consist EXCLUSIVELY of numeric digits. Never output letter 'O' inside these numeric positions.
+   b) If not a 16-character e-document, extract the explicit 'Fatura No' or 'Receipt No / Fiş No' (e.g. '0089'). Do not convert leading numeric zeros to the letter 'O'.
    c) Do NOT use Order Number, Tax ID, or ETTN.
 4. totalAmount: The FINAL NET PAYABLE total amount after all discounts and including all taxes.
    - Look specifically for labels like 'Ödenecek Tutar',  'Amount to be Paid', 'Genel Toplam', 'Vergiler Dahil Toplam Tutar', 'Total Amount Including Taxes', or 'Grand Total'.

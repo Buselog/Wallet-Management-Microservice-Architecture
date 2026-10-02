@@ -1,7 +1,8 @@
-﻿using Document.WebAPI.Dtos;
+﻿using Document.Application.Dtos;
 using Document.Application.Services;
-using Microsoft.AspNetCore.Mvc;
+using Document.WebAPI.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Document.WebAPI.Controllers;
 
@@ -17,19 +18,19 @@ public class DocumentController : ControllerBase
         _documentParserService = documentParserService;
     }
 
-    [HttpPost("process")]
+    [HttpPost("preview")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> ProcessInvoice([FromForm] InvoiceRequestDto request)
+    public async Task<IActionResult> Preview(IFormFile file, int walletId, CancellationToken cancellationToken)
     {
-        if (request.File == null)
-        {
-            var result = await _documentParserService.ParseInvoiceAsync(null!, string.Empty, request.WalletId);
-            return Ok(result);
-        }
+        using var stream = file.OpenReadStream();
+        var result = await _documentParserService.ExtractAndPreviewAsync(stream, file.FileName, walletId, cancellationToken);
+        return Ok(result);
+    }
 
-        await using var stream = request.File.OpenReadStream();
-        var parseResult = await _documentParserService.ParseInvoiceAsync(stream, request.File.FileName, request.WalletId);
-
-        return Ok(parseResult);
+    [HttpPost("confirm")]
+    public async Task<IActionResult> Confirm([FromBody] ConfirmInvoicePaymentRequestDto request)
+    {
+        var result = await _documentParserService.ConfirmAndPayAsync(request);
+        return Ok(result);
     }
 }

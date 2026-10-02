@@ -7,7 +7,7 @@
         public string? InvoiceNumber { get; set; }
         public decimal? TotalAmount { get; set; }
         public string? Currency { get; set; }
-        public DateOnly? IssueDate { get; set; }
+        public DateOnly IssueDate { get; set; }
         public string? ExtractedBy { get; set; }
     }
 }

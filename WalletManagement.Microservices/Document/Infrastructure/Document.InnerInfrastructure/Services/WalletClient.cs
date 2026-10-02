@@ -45,6 +45,14 @@ namespace Document.InnerInfrastructure.Services
             return wallets ?? new List<WalletDto>();
         }
 
+        public async Task<InvoicePreCheckResponseDto> PreCheckInvoiceAsync(InvoicePreCheckRequestDto request)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/wallet/precheck-invoice", request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<InvoicePreCheckResponseDto>()
+                   ?? new InvoicePreCheckResponseDto();
+        }
+
         public async Task<bool> PayInvoiceAsync(PayInvoiceRequestDto payRequest)
         {
             AttachBearerToken();
