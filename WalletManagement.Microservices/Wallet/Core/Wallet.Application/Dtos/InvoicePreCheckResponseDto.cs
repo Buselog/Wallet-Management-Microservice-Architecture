@@ -7,5 +7,6 @@
         public bool IsCurrencyMatched { get; set; }
         public bool HasSufficientBalance { get; set; }
         public string? FailureReason { get; set; }
+        public object[]? Parameters { get; set; }
     }
 }

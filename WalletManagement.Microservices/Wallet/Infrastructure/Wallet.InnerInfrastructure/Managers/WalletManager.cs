@@ -256,6 +256,7 @@ namespace Wallet.InnerInfrastructure.Managers
             if (!response.IsCurrencyMatched)
             {
                 response.FailureReason = "ERR_INVOICE_CURRENCY_MISMATCH";
+                response.Parameters = new object[] { dto.Currency  ?? ""};
                 return response;
             }
 
