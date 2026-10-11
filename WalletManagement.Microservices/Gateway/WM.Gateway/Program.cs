@@ -26,7 +26,12 @@ builder.Services.AddHttpClient("WalletAPI", c =>
 {
     c.BaseAddress = new Uri("https://localhost:7012/");
 });
- 
+
+builder.Services.AddHttpClient("DocumentAPI", c =>
+{
+    c.BaseAddress = new Uri("https://localhost:7175/");
+});
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();

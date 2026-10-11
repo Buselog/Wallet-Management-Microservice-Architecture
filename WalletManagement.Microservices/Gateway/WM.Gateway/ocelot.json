@@ -1,5 +1,44 @@
 ﻿{
   "Routes": [
+
+    {
+      "DownstreamPathTemplate": "/swagger/v1/swagger.json",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7175
+        }
+      ],
+      "UpstreamPathTemplate": "/swagger/docs/v1/document",
+      "UpstreamHttpMethod": [ "Get" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Document/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7175
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Document/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "SwaggerKey": "document",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "DelegatingHandlers": [
+        "LocalizationHandler",
+        "ResilienceHandler"
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 3,
+        "DurationOfBreak": 10000,
+        "TimeoutValue": 30000
+      }
+    },
+
     {
       "DownstreamPathTemplate": "/swagger/v1/swagger.json",
       "DownstreamScheme": "https",
@@ -230,6 +269,24 @@
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
       }
+    },
+
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7175
+        }
+      ],
+      "UpstreamPathTemplate": "/document/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "SwaggerKey": "document",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     }
   ],
 
@@ -274,6 +331,17 @@
           "Name": "Investment API",
           "Version": "v1",
           "Url": "https://localhost:7110/swagger/v1/swagger.json"
+        }
+      ],
+      "TakeUpstreamPath": true
+    },
+    {
+      "Key": "document",
+      "Config": [
+        {
+          "Name": "Document API",
+          "Version": "v1",
+          "Url": "https://localhost:7175/swagger/v1/swagger.json"
         }
       ],
       "TakeUpstreamPath": true
