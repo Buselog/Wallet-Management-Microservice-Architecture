@@ -1,6 +1,7 @@
 ﻿using Document.Application.Dtos;
 using Document.Application.Exceptions;
 using Document.Application.Services;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Document.InnerInfrastructure.Services
 {
@@ -8,11 +9,13 @@ namespace Document.InnerInfrastructure.Services
     {
         private readonly IDocumentOcrClient _ocrClient;
         private readonly IWalletClient _walletClient;
+        private readonly IMemoryCache _memoryCache;
 
-        public DocumentParserService(IDocumentOcrClient ocrClient, IWalletClient walletClient)
+        public DocumentParserService(IDocumentOcrClient ocrClient, IWalletClient walletClient, IMemoryCache memoryCache)
         {
             _ocrClient = ocrClient;
             _walletClient = walletClient;
+            _memoryCache = memoryCache;
         }
 
         public async Task<InvoicePreviewResponseDto> ExtractAndPreviewAsync(
@@ -51,11 +54,36 @@ namespace Document.InnerInfrastructure.Services
 
                 var preCheckResult = await _walletClient.PreCheckInvoiceAsync(preCheckRequest);
 
+                string? draftToken = null;
+                if (preCheckResult.CanBePaid)
+                {
+                    draftToken = Guid.NewGuid().ToString("N");
+
+                    var draftModel = new InvoiceDraftModel
+                    {
+                        WalletId = walletId,
+                        Amount = extractionResult.TotalAmount,
+                        Currency = extractionResult.Currency,
+                        ReferenceId = extractionResult.InvoiceNumber,
+                        BillerName = extractionResult.BillerName
+                    };
+
+                    _memoryCache.Set($"invoice_draft:{draftToken}", draftModel, TimeSpan.FromMinutes(5));
+
+                }
+
                 preview.CanBePaid = preCheckResult.CanBePaid;
                 preview.IsAlreadyPaid = preCheckResult.IsAlreadyPaid;
                 preview.IsCurrencyMatched = preCheckResult.IsCurrencyMatched;
                 preview.HasSufficientBalance = preCheckResult.HasSufficientBalance;
+
+                if (!preCheckResult.IsCurrencyMatched)
+                {
+                    preview.ValidationParameters = new object[] { preview.Currency };
+                }
+
                 preview.ValidationMessage = preCheckResult.FailureReason;
+                preview.DraftToken = draftToken;
             }
             catch (Exception ex)
             {
@@ -66,17 +94,24 @@ namespace Document.InnerInfrastructure.Services
             return preview;
         }
 
-        public async Task<bool> ConfirmAndPayAsync(
-            ConfirmInvoicePaymentRequestDto request,
-            CancellationToken cancellationToken = default)
+        public async Task<bool> ConfirmAndPayAsync(string draftToken, CancellationToken cancellationToken = default)
         {
+            string cacheKey = $"invoice_draft:{draftToken}";
+
+            if (!_memoryCache.TryGetValue(cacheKey, out InvoiceDraftModel? draft) || draft == null)
+            {
+                throw new BaseBusinessException("ERR_DRAFT_EXPIRED_OR_INVALID");
+            }
+
+            _memoryCache.Remove(cacheKey);
+
             var payRequest = new PayInvoiceRequestDto
             {
-                WalletId = request.WalletId,
-                Amount = request.Amount,
-                Currency = request.Currency,
-                ReferenceId = request.ReferenceId,
-                BillerName = request.BillerName
+                WalletId = draft.WalletId,
+                Amount = draft.Amount,
+                Currency = draft.Currency,
+                ReferenceId = draft.ReferenceId,
+                BillerName = draft.BillerName
             };
 
             return await _walletClient.PayInvoiceAsync(payRequest);

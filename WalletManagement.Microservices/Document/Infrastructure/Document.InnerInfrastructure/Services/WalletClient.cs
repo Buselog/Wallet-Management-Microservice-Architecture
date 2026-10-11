@@ -47,8 +47,13 @@ namespace Document.InnerInfrastructure.Services
 
         public async Task<InvoicePreCheckResponseDto> PreCheckInvoiceAsync(InvoicePreCheckRequestDto request)
         {
+            AttachBearerToken();
+
             var response = await _httpClient.PostAsJsonAsync("api/wallet/precheck-invoice", request);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                await HandleErrorAsync(response, "ERR_INVOICE_PRECHECK_FAILED_ON_WALLET");
+            }
             return await response.Content.ReadFromJsonAsync<InvoicePreCheckResponseDto>()
                    ?? new InvoicePreCheckResponseDto();
         }

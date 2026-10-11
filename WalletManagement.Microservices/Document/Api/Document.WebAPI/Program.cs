@@ -97,6 +97,8 @@ IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         );
 }
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddHttpClient<IDocumentOcrClient, OpenRouterOcrClient>(client =>
 {
     var timeout = builder.Configuration.GetValue<int>("OpenRouterSettings:TimeoutSeconds", 40);

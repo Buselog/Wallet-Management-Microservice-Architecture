@@ -30,7 +30,7 @@ public class DocumentController : ControllerBase
     [HttpPost("confirm")]
     public async Task<IActionResult> Confirm([FromBody] ConfirmInvoicePaymentRequestDto request)
     {
-        var result = await _documentParserService.ConfirmAndPayAsync(request);
+        var result = await _documentParserService.ConfirmAndPayAsync(request.DraftToken);
         return Ok(result);
     }
 }

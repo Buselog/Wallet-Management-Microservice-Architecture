@@ -12,5 +12,7 @@
         public bool IsCurrencyMatched { get; set; }
         public bool HasSufficientBalance { get; set; }
         public string? ValidationMessage { get; set; }
+        public object[]? ValidationParameters { get; set; }
+        public string? DraftToken { get; set; }
     }
 }
