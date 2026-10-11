@@ -3,7 +3,8 @@ namespace Wallet.Domain.Exceptions
 {
     public class WalletNotFoundException : BaseBusinessException
     {
-        public WalletNotFoundException() : base("ERR_WALLET_NOT_FOUND")
+        public const string code = "ERR_WALLET_NOT_FOUND";
+        public WalletNotFoundException() : base(code)
         {
 
         }

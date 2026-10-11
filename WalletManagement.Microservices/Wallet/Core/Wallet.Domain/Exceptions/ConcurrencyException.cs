@@ -3,7 +3,8 @@ namespace Wallet.Domain.Exceptions
 {
     public class ConcurrencyException : BaseBusinessException
     {
-        public ConcurrencyException() : base("ERR_CONCURRENCY_CONFLICT")
+        public const string code = "ERR_CONCURRENCY_CONFLICT";
+        public ConcurrencyException() : base(code)
         {
 
         }
