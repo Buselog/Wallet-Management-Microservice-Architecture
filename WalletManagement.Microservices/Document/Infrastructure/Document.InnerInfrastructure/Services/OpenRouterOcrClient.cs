@@ -253,6 +253,11 @@ Return ONLY a single valid raw JSON object matching this schema, without any mar
 
         if (result != null)
         {
+            if (!result.IsReceiptOrInvoice)
+            {
+                throw new DocumentNotRecognizedException();
+            }
+
             result.ExtractedBy = isFallback
                 ? $"OpenRouter Fallback ({modelName})"
                 : $"OpenRouter Primary ({modelName})";
