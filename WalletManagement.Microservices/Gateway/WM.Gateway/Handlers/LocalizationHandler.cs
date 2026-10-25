@@ -34,7 +34,9 @@ namespace WM.Gateway.Handlers
                 if (errorData == null) return response;
 
                 object[] parameters = null;
-                var parametersProperty = errorData.Keys.FirstOrDefault(k => k.Equals("parameters", StringComparison.OrdinalIgnoreCase));
+                var parametersProperty = errorData.Keys.FirstOrDefault(k =>
+                    k.Equals("parameters", StringComparison.OrdinalIgnoreCase) ||
+                    k.Equals("validationparameters", StringComparison.OrdinalIgnoreCase));
 
                 if (parametersProperty != null)
                 {
@@ -80,6 +82,8 @@ namespace WM.Gateway.Handlers
 
                         errorData.Remove("parameters");
                         errorData.Remove("Parameters");
+                        errorData.Remove("validationParameters");
+                        errorData.Remove("ValidationParameters");
 
                         var newContent = JsonSerializer.Serialize(errorData);
                         response.Content = new StringContent(newContent, System.Text.Encoding.UTF8, "application/json");
