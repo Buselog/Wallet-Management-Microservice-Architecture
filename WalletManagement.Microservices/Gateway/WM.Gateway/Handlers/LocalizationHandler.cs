@@ -17,30 +17,43 @@ namespace WM.Gateway.Handlers
         {
             var response = await base.SendAsync(request, cancellationToken);
 
-            if (!response.IsSuccessStatusCode && response.Content.Headers.ContentType?.MediaType == "application/json")
+            bool isPreviewRoute = request.RequestUri.AbsolutePath.Contains("preview", StringComparison.OrdinalIgnoreCase);
+
+            if (response.IsSuccessStatusCode && !isPreviewRoute)
+            {
+                return response;
+            }
+
+            if (response.Content.Headers.ContentType?.MediaType == "application/json")
             {
                 var content = await response.Content.ReadAsStringAsync();
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var errorData = JsonSerializer.Deserialize<Dictionary<string, object>>(content, options);
 
-                object[] parameters = null;
+                if (errorData == null) return response;
 
+                object[] parameters = null;
                 var parametersProperty = errorData.Keys.FirstOrDefault(k => k.Equals("parameters", StringComparison.OrdinalIgnoreCase));
 
                 if (parametersProperty != null)
                 {
                     var rawParams = errorData[parametersProperty];
-
-                    Console.WriteLine($"Parametre bulundu: {rawParams}");
-
                     if (rawParams is JsonElement element && element.ValueKind == JsonValueKind.Array)
                     {
                         parameters = JsonSerializer.Deserialize<object[]>(element.GetRawText());
                     }
                 }
 
-                string targetKey = errorData.ContainsKey("Message") ? "Message" : (errorData.ContainsKey("message") ? "message" : null);
+                string targetKey = null;
+                if (errorData.ContainsKey("ValidationMessage") || errorData.ContainsKey("validationMessage"))
+                {
+                    targetKey = errorData.Keys.First(k => k.Equals("validationMessage", StringComparison.OrdinalIgnoreCase));
+                }
+                else if (errorData.ContainsKey("Message") || errorData.ContainsKey("message"))
+                {
+                    targetKey = errorData.Keys.First(k => k.Equals("message", StringComparison.OrdinalIgnoreCase));
+                }
 
                 if (targetKey != null)
                 {
@@ -73,6 +86,7 @@ namespace WM.Gateway.Handlers
                     }
                 }
             }
+
             return response;
         }
 
