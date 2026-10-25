@@ -73,7 +73,7 @@ namespace Wallet.InnerInfrastructure.Managers
             var amount = dto.Amount ?? 0;
 
             await ValidateWalletOwnershipAsync(walletId, customerNo);
-            await  ProcessTransactionAsync(walletId, amount, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
+            await ProcessTransactionAsync(walletId, amount, "Withdraw", string.Empty, string.Empty, dto.ReferenceId);
         }
 
         public async Task TransferAsync(TransferRequestDto dto, string customerNo)
@@ -123,11 +123,11 @@ namespace Wallet.InnerInfrastructure.Managers
 
             var wallet = await _walletRepository.GetByIdAsync(walletId);
 
-            if(wallet.Balance > 0)
+            if (wallet.Balance > 0)
             {
                 throw new WalletBalanceIsNotEmptyExcepiton();
             }
-                await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_" + customerNo);
+            await _walletRepository.SoftDeleteWalletWithSPAsync(walletId, "USER_" + customerNo);
         }
 
         public async Task ExecuteTradeAsync(CurrencyTradeRequestDto dto)
@@ -246,9 +246,14 @@ namespace Wallet.InnerInfrastructure.Managers
             }
 
             var wallet = await _walletRepository.GetByIdNoTrackingAsync(dto.WalletId);
-            if (wallet == null || !wallet.IsActive || wallet.CustomerNo != customerNo)
+            if (wallet == null || !wallet.IsActive)
             {
                 response.FailureReason = WalletNotFoundException.code;
+                return response;
+            }
+            else if (wallet.CustomerNo != customerNo)
+            {
+                response.FailureReason = "ERR_NO_PERMISSION_ON_WALLET";
                 return response;
             }
 
@@ -256,7 +261,7 @@ namespace Wallet.InnerInfrastructure.Managers
             if (!response.IsCurrencyMatched)
             {
                 response.FailureReason = "ERR_INVOICE_CURRENCY_MISMATCH";
-                response.Parameters = new object[] { dto.Currency  ?? ""};
+                response.Parameters = new object[] { dto.Currency ?? "" };
                 return response;
             }
 
