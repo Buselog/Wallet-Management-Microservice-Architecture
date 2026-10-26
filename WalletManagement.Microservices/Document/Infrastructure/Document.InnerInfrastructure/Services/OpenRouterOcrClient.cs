@@ -240,7 +240,7 @@ Return ONLY a single valid raw JSON object matching this schema, without any mar
             .GetProperty("content")
             .GetString();
 
-        if (string.IsNullOrWhiteSpace(contentText)) return null;
+        if (string.IsNullOrWhiteSpace(contentText)) throw new DocumentNotRecognizedException();
 
         var cleanJson = contentText.Trim();
         if (cleanJson.StartsWith("```json")) cleanJson = cleanJson.Substring(7);
@@ -249,19 +249,25 @@ Return ONLY a single valid raw JSON object matching this schema, without any mar
         cleanJson = cleanJson.Trim();
 
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var result = JsonSerializer.Deserialize<InvoiceExtractionResultDto>(cleanJson, options);
+        InvoiceExtractionResultDto? result;
 
-        if (result != null)
+        try
         {
-            if (!result.IsReceiptOrInvoice)
-            {
-                throw new DocumentNotRecognizedException();
-            }
-
-            result.ExtractedBy = isFallback
-                ? $"OpenRouter Fallback ({modelName})"
-                : $"OpenRouter Primary ({modelName})";
+            result = JsonSerializer.Deserialize<InvoiceExtractionResultDto>(cleanJson, options);
         }
+        catch (JsonException)
+        {
+            throw new DocumentNotRecognizedException();
+        }
+
+        if (result == null || !result.IsReceiptOrInvoice)
+        {
+            throw new DocumentNotRecognizedException();
+        }
+
+        result.ExtractedBy = isFallback
+            ? $"OpenRouter Fallback ({modelName})"
+            : $"OpenRouter Primary ({modelName})";
 
         return result;
     }
