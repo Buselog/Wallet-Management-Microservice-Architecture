@@ -1,3 +1,5 @@
+import i18n from 'i18next';
+
 export const handleApiError = (error, form, setGeneralError) => {
     const responseData = error.response?.data;
     const errorMsg = responseData?.Message || responseData?.message;
@@ -27,6 +29,6 @@ export const handleApiError = (error, form, setGeneralError) => {
             setGeneralError(errorMsg);
         }
     } else {
-        setGeneralError(t('unexpected_error_msg'));
+        setGeneralError(i18n.t('unexpected_error_msg'));
     }
 };
