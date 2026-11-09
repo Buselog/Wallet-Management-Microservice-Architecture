@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal, Form, Select, Button, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { getCurrencyName, getCurrencySymbol } from '../utils/formatters';

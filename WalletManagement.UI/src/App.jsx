@@ -7,6 +7,7 @@ import Transaction from './pages/Transaction';
 import Investment from './pages/Investment';
 import TransactionHistory from './pages/TransactionHistory';
 import Help from './pages/Help';
+import ReceiptOcr from './pages/ReceiptOcr';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/investment" element={<MainLayout><Investment /></MainLayout>} />
         <Route path="/history" element={<MainLayout><TransactionHistory /></MainLayout>} />
         <Route path="/help" element={<MainLayout><Help /></MainLayout>} />
+<Route path="/receipt-ocr" element={<MainLayout><ReceiptOcr /></MainLayout>} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>

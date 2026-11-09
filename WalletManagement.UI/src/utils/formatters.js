@@ -5,7 +5,7 @@ export const getCurrencyName = (currencyCode) => {
         const currentLang = i18n.language || 'tr';
         const displayNames = new Intl.DisplayNames([currentLang], { type: 'currency' });
         return displayNames.of(currencyCode);
-    } catch (e) {
+    } catch {
         return currencyCode;
     }
 };
@@ -19,7 +19,7 @@ export const getCurrencySymbol = (currencyCode) => {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).replace(/\d/g, '').trim();
-    } catch (e) {
+    } catch {
         return currencyCode;
     }
 };

@@ -1,6 +1,5 @@
-import React from 'react';
 import { Button, Dropdown, Space } from 'antd';
-import { GlobalOutlined } from '@ant-design/icons';
+import { Globe } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 
 const LanguageSwitcher = () => {
@@ -32,7 +31,7 @@ const LanguageSwitcher = () => {
             <Button
                 type="text"
                 className="flex items-center gap-2 font-bold text-slate-600 hover:text-volcano-500"
-                icon={<GlobalOutlined className="text-lg" />}
+                icon={<Globe size={18} weight="regular" aria-hidden="true" />}
             >
                 {i18n.language?.toUpperCase().substring(0, 2)}
             </Button>
